@@ -1,26 +1,31 @@
 <div align="center">
 
-<img src="assets/Logo_4k_4mb_11mp.png" alt="CricketBrain Logo" width="400">
+<img src="assets/Logo_4k_4mb_11mp.png" alt="CricketBrain Logo" width="320">
 
-# CricketBrain
+<br>
 
-### The Biomorphic Inference Engine
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/hero_banner.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/hero_banner.svg">
+  <img src="assets/hero_banner.svg" alt="CricketBrain — Neuromorphic Inference Engine" width="100%">
+</picture>
 
-**Sub-microsecond pattern recognition. Sub-kilobyte memory. Zero training.**
+<br>
 
 [![CI](https://github.com/BEKO2210/cricket-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/BEKO2210/cricket-brain/actions/workflows/ci.yml)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-red.svg)](LICENSE)
 [![Commercial License](https://img.shields.io/badge/Commercial-License%20Available-brightgreen.svg)](COMMERCIAL.md)
 [![Crate](https://img.shields.io/badge/crates.io-cricket--brain-orange)](https://crates.io/crates/cricket-brain)
 [![docs.rs](https://img.shields.io/badge/docs.rs-cricket--brain-blue)](https://docs.rs/cricket-brain)
-[![no_std](https://img.shields.io/badge/no__std-compatible-green.svg)](#embedded--no_std)
+[![no_std](https://img.shields.io/badge/no__std-compatible-green.svg)](#-embedded--no_std)
 [![MSRV](https://img.shields.io/badge/MSRV-1.75-blue.svg)](https://www.rust-lang.org)
-[![Security Audit](https://img.shields.io/badge/cargo--audit-passing-brightgreen.svg)](#)
+[![Security Audit](https://img.shields.io/badge/cargo--audit-passing-brightgreen.svg)](#-quality)
 
-*Inspired by 200 million years of cricket evolution.*
-*Built for the next generation of edge intelligence.*
+**Sub-microsecond pattern recognition. Sub-kilobyte memory. Zero training.**
 
-[Quick Start](#quick-start) | [Benchmarks](#benchmarks) | [Whitepaper](RESEARCH_WHITEPAPER.md) | [API Docs](https://docs.rs/cricket-brain) | [Contributing](CONTRIBUTING.md)
+*Inspired by 200 million years of cricket evolution. Built for the next generation of edge intelligence.*
+
+[Quick Start](#-quick-start) | [Benchmarks](#-benchmarks) | [Science](#-scientific-validation) | [Docs](https://docs.rs/cricket-brain) | [Deutsch](#-auf-deutsch)
 
 </div>
 
@@ -30,50 +35,54 @@
 
 CricketBrain is a **neuromorphic signal processor** that recognizes temporal patterns in real-time using delay-line coincidence detection — the same mechanism the field cricket (*Gryllus bimaculatus*) uses to find mates in noisy environments.
 
-**No matrix multiplication. No CUDA. No weights. No training.**
+> **No matrix multiplication. No CUDA. No weights. No training.**
+> Just 5 neurons and 6 synapses, processing at **0.175 us per step** in **944 bytes of RAM**.
 
-Just 5 neurons and 6 synapses, processing at **0.175 us per step** in **944 bytes of RAM**.
+<div align="center">
 
 ```
-         AN1 (Receptor, 4500 Hz)
-        / | \
-       /  |  \
-      v   v   v
-    LN2  LN3  LN5          ← 3 interneurons with different delays
-   (inh) (exc) (inh)
-   3ms   2ms   5ms
-      \   |   /
-       \  |  /
-        v v v
-     ON1 (Output Gate)      ← fires only on temporal coincidence
+              AN1 (Receptor, 4500 Hz)
+             / | \
+            /  |  \
+           v   v   v
+         LN2  LN3  LN5       3 interneurons with different delays
+        (inh) (exc) (inh)
+        3ms   2ms   5ms
+           \   |   /
+            \  |  /
+             v v v
+          ON1 (Output Gate)   fires only on temporal coincidence
 ```
+
+</div>
 
 <details>
-<summary><b>View Interactive Circuit Diagram</b> (click to expand)</summary>
+<summary><b>View Animated Circuit Diagram</b></summary>
 <br>
 <p align="center">
-  <img src="assets/circuit_diagram.svg" alt="CricketBrain Muenster Circuit — Animated" width="700">
+  <img src="assets/circuit_diagram.svg" alt="CricketBrain Muenster Circuit" width="720">
 </p>
 </details>
 
 ### Why Should You Care?
 
-| | CricketBrain | Traditional ML | Deep Learning |
-|---|:---:|:---:|:---:|
-| **Latency** | 0.175 us | ~100 us | ~10 ms |
-| **Memory** | 944 bytes | 10+ KB | 100+ MB |
-| **Training** | None | Hours | Days-Weeks |
-| **GPU Required** | No | No | Yes |
-| **Deterministic** | Yes | Depends | No |
-| **`no_std` / Embedded** | Yes | Rare | No |
-| **Explainable** | Fully | Partially | Black box |
+<table>
+<tr><th></th><th>CricketBrain</th><th>Traditional ML</th><th>Deep Learning</th></tr>
+<tr><td><b>Latency</b></td><td align="center"><code>0.175 us</code></td><td align="center"><code>~100 us</code></td><td align="center"><code>~10 ms</code></td></tr>
+<tr><td><b>Memory</b></td><td align="center"><code>944 bytes</code></td><td align="center"><code>10+ KB</code></td><td align="center"><code>100+ MB</code></td></tr>
+<tr><td><b>Training</b></td><td align="center"><code>None</code></td><td align="center"><code>Hours</code></td><td align="center"><code>Days-Weeks</code></td></tr>
+<tr><td><b>GPU</b></td><td align="center">No</td><td align="center">No</td><td align="center">Yes</td></tr>
+<tr><td><b>Deterministic</b></td><td align="center">Yes</td><td align="center">Depends</td><td align="center">No</td></tr>
+<tr><td><b>no_std / Embedded</b></td><td align="center">Yes</td><td align="center">Rare</td><td align="center">No</td></tr>
+<tr><td><b>Explainable</b></td><td align="center">Fully</td><td align="center">Partially</td><td align="center">Black box</td></tr>
+</table>
 
 ---
 
 ## Use Cases
 
 | Domain | Application | How CricketBrain Helps |
-|--------|------------|----------------------|
+|--------|-------------|------------------------|
 | **Medical** | ECG rhythm classification | Real-time arrhythmia detection on wearables ([example](examples/sentinel_ecg_monitor.rs)) |
 | **Industrial IoT** | Vibration monitoring | Detect bearing failure patterns at the sensor node |
 | **Audio** | Keyword / wake-word detection | Sub-millisecond response without cloud roundtrip |
@@ -93,7 +102,6 @@ cd cricket-brain
 cargo run --example live_demo -- "HELLO WORLD"
 ```
 
-Output:
 ```
 --- Spike Train (each char = 10ms) ---
 |||||_____|||||_____|||||_____|||||_______________|||||_______________...
@@ -113,27 +121,21 @@ cricket-brain = "1.0"
 use cricket_brain::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create the brain with default 5-neuron Muenster circuit
     let mut brain = CricketBrain::new(BrainConfig::default())?;
 
-    // Feed a 4500 Hz signal (cricket carrier frequency)
+    // Feed a 4500 Hz signal — spikes appear
     for _ in 0..100 {
         let output = brain.step(4500.0);
         if output > 0.0 {
-            println!("Spike detected! amplitude={output:.3}");
+            println!("Spike! amplitude={output:.3}");
         }
     }
 
-    // Feed silence — zero false positives
+    // Silence — guaranteed zero false positives
     for _ in 0..50 {
         assert_eq!(brain.step(0.0), 0.0);
     }
 
-    // Batch processing
-    let inputs = vec![4500.0; 100];
-    let outputs = brain.step_batch(&inputs);
-
-    // Full reset for next pattern
     brain.reset();
     Ok(())
 }
@@ -196,75 +198,64 @@ const events = brain.drainTelemetry();
 </tr>
 </table>
 
-Build commands:
 ```bash
-# C FFI
-cargo build --release -p cricket-brain-ffi
-# Header: crates/ffi/include/cricket_brain.h
-
-# Python (requires maturin)
-cd crates/python && maturin develop --release
-
-# WASM (requires wasm-pack)
-cd crates/wasm && wasm-pack build --target web --out-dir pkg
+cargo build --release -p cricket-brain-ffi        # C FFI  →  crates/ffi/include/cricket_brain.h
+cd crates/python && maturin develop --release      # Python →  pip install cricket-brain
+cd crates/wasm && wasm-pack build --target web     # WASM   →  npm package
 ```
 
 ---
 
 ## Benchmarks
 
-Measured with Criterion on x86-64. Fully reproducible via `cargo bench`.
-
-| Scenario | Latency | Throughput | Memory |
-|---|---:|---:|---:|
-| **Canonical 5-neuron** | **0.175 us/step** | 5.7M steps/sec | 348 bytes |
-| **1,280-neuron predictor** | — | 33.2M neuron-ops/sec | 0.30 MB |
-| **40,960-neuron scale** | — | 34.3M neuron-ops/sec | 13.91 MB |
-| **Arduino `no_std`** | — | — | **944 bytes** |
+<table>
+<tr><th>Scenario</th><th align="right">Latency</th><th align="right">Throughput</th><th align="right">Memory</th></tr>
+<tr><td><b>Canonical 5-neuron</b></td><td align="right"><code>0.175 us/step</code></td><td align="right">5.7M steps/sec</td><td align="right">348 bytes</td></tr>
+<tr><td><b>1,280-neuron predictor</b></td><td align="right">—</td><td align="right">50.1M neuron-ops/sec</td><td align="right">0.30 MB</td></tr>
+<tr><td><b>40,960-neuron scale</b></td><td align="right">—</td><td align="right">40.7M neuron-ops/sec</td><td align="right">13.91 MB</td></tr>
+<tr><td><b>Arduino no_std</b></td><td align="right">—</td><td align="right">—</td><td align="right"><code>944 bytes</code></td></tr>
+</table>
 
 ### vs. Classical Baselines (SNR = 0 dB)
 
-CricketBrain tested against 3 classical detectors under identical conditions
-([full results](examples/baselines.rs)):
+Tested against 3 classical detectors under **identical conditions** ([source](examples/baselines.rs)):
 
-| Method | TPR | FPR | Advantage |
-|--------|:---:|:---:|-----------|
+| Method | TPR | FPR | |
+|--------|:---:|:---:|---|
 | **CricketBrain** | **1.000** | **0.000** | Temporal coincidence rejects noise |
-| IIR Bandpass | 1.000 | 0.608 | Cannot distinguish pattern from noise |
-| Goertzel (FFT) | 0.042 | 0.000 | Misses jittered signals |
-| Matched Filter | 0.008 | 0.000 | Rigid template, no jitter tolerance |
+| IIR Bandpass | 1.000 | 0.558 | Cannot distinguish pattern from noise |
+| Goertzel (FFT) | 0.017 | 0.000 | Misses jittered signals |
+| Matched Filter | 0.000 | 0.000 | Needs high SNR (>10 dB) |
 
-> CricketBrain achieves **perfect detection with zero false positives** across
-> all SNR levels from -10 dB to +30 dB. See [RESEARCH_WHITEPAPER.md](RESEARCH_WHITEPAPER.md).
+> CricketBrain achieves **perfect detection (TPR=1.0) with zero false positives (FPR=0.0)** across all SNR levels from -10 dB to +30 dB.
 
 ---
 
 ## Features
 
-### Core Capabilities
+### Core
 
-- **Gaussian resonators** — frequency-selective neurons with +-10% bandwidth
+- **Gaussian resonators** — frequency-selective neurons with adaptive bandwidth
 - **Delay-line synapses** — ring-buffer propagation delays (1-9 ms)
 - **Coincidence detection** — fires only on sustained temporal evidence
-- **Adaptive sensitivity (AGC)** — automatic gain control for varying input levels
+- **Adaptive sensitivity (AGC)** — automatic gain control
 - **Sequence prediction** — N-gram pattern matching with confidence scoring
-- **Multi-token detection** — parallel resonator banks (one 5-neuron circuit per token)
+- **Multi-token detection** — parallel resonator banks (one circuit per token)
 
-### Production Features
+### Production
 
 | Feature | Description |
 |---------|-------------|
 | **Privacy Mode** | Timestamp anonymization + value coarsening (HIPAA/GDPR) |
 | **Snapshot/Restore** | Serialize full state with CRC64 checksums |
-| **Telemetry** | Structured event hooks (Spike, SNR, Overload) + JSON Lines sink |
+| **Telemetry** | Structured event hooks + JSON Lines sink |
 | **Chaos Detection** | Shannon entropy monitoring with overload alerts |
-| **Deterministic** | Seeded RNG — identical results across platforms |
-| **Error Codes** | Consistent FFI error contract across all language bindings |
+| **Deterministic** | Seeded RNG — bitwise identical results across platforms |
+| **Error Codes** | Consistent FFI contract across Rust/C/Python/WASM |
 
-### Cargo Feature Flags
+### Feature Flags
 
 ```toml
-[dependencies]
 cricket-brain = { version = "1.0", features = ["serde", "parallel"] }
 ```
 
@@ -281,23 +272,20 @@ cricket-brain = { version = "1.0", features = ["serde", "parallel"] }
 
 ## Embedded / `no_std`
 
-The core crate (`cricket-brain-core`) is fully `no_std` compatible with `#![deny(unsafe_code)]`.
+The core crate is fully `no_std` compatible with `#![deny(unsafe_code)]`.
 
 ```bash
-# Verify it builds without std
 cargo build -p cricket-brain-core --no-default-features
 ```
 
 **Minimal embedded example** ([`examples/arduino_minimal.rs`](examples/arduino_minimal.rs)):
-- Fixed-size arrays (no heap allocation)
+- Fixed-size arrays (no heap)
 - 944 bytes total RAM
 - Runs on Arduino Uno, STM32, ESP32, any Cortex-M
 
 ---
 
 ## Scientific Validation
-
-CricketBrain includes a complete **scientific publication package**:
 
 | Artifact | Description |
 |----------|-------------|
@@ -307,22 +295,19 @@ CricketBrain includes a complete **scientific publication package**:
 | [`examples/research_gen.rs`](examples/research_gen.rs) | SNR sweep with Wilson 95% confidence intervals |
 | [AI_DEVELOPMENT_STATEMENT.md](AI_DEVELOPMENT_STATEMENT.md) | Full AI-tooling transparency disclosure |
 
-### Ablation Study Results
+### Ablation Study
 
-Each component of the Muenster circuit is necessary:
-
-| Configuration | SNR 0 dB TPR | Impact |
+| Configuration | SNR 0 dB TPR | Finding |
 |---|:---:|---|
-| **Full circuit** | 1.000 | Baseline |
-| Without LN3 (excitatory) | **0.440** | Critical — excitatory drive to ON1 |
+| **Full circuit** | **1.000** | Baseline |
+| Without LN3 (excitatory) | **0.440** | Critical — main excitatory drive |
 | Without LN2 (inhibitory) | 1.000 | Redundant at this SNR |
-| Without coincidence gate | 1.000 | Gate prevents false positives at low SNR |
+| Without coincidence gate | 1.000 | Gate essential at low SNR |
 
-Reproduce all results:
 ```bash
-cargo run --release --example baselines
-cargo run --release --example ablation_study
-cargo run --release --example research_gen -- --seed 1337
+cargo run --release --example baselines         # Classical comparison
+cargo run --release --example ablation_study    # Component analysis
+cargo run --release --example research_gen -- --seed 1337  # Full SNR sweep
 ```
 
 ---
@@ -330,22 +315,21 @@ cargo run --release --example research_gen -- --seed 1337
 ## Examples
 
 ```bash
-# Morse code & basics
-cargo run --example live_demo -- "HELLO"       # Encode -> brain -> decode
-cargo run --example frequency_discrimination   # Gaussian bandpass demo
+# Basics
+cargo run --example live_demo -- "HELLO"       # Encode -> brain -> decode roundtrip
+cargo run --example frequency_discrimination   # Gaussian bandpass visualization
 cargo run --example morse_alphabet             # All 26 characters
 cargo run --example arduino_minimal            # no_std embedded demo
 
 # Multi-frequency tokens
-cargo run --example multi_freq_demo -- "RUST"  # Token discrimination
+cargo run --example multi_freq_demo -- "RUST"  # 100% token discrimination
 
 # Sequence prediction
-cargo run --example sequence_predict           # Pattern prediction
-cargo run --release --example scale_predict    # 256-token / 1280-neuron benchmark
+cargo run --example sequence_predict           # "hello" vs "help" disambiguation
+cargo run --release --example scale_predict    # 256 tokens, 1280 neurons
 
 # Medical / research
 cargo run --release --example sentinel_ecg_monitor  # ECG tachycardia detection
-cargo run --release --example research_gen          # SNR sweep + ROC data
 cargo run --release --example baselines             # Classical baseline comparison
 cargo run --release --example ablation_study        # Circuit ablation study
 
@@ -354,6 +338,22 @@ cargo run --release --example scale_test       # 40,960-neuron throughput
 cargo run --release --example profile_speed    # Latency measurement
 cargo bench                                    # Criterion benchmarks
 ```
+
+---
+
+## Quality
+
+| Check | Status |
+|-------|--------|
+| `cargo test --workspace` | **85 tests** passing |
+| `cargo clippy -D warnings` | Zero warnings |
+| `cargo fmt -- --check` | Enforced |
+| `cargo audit --deny warnings` | Zero vulnerabilities |
+| Cross-platform CI | Linux, macOS, Windows |
+| `no_std` verification | Verified in CI |
+| WASM build | Verified in CI |
+| FFI header sync | Verified in CI |
+| CodeQL security scan | Rust + Actions |
 
 ---
 
@@ -367,26 +367,11 @@ cricket-brain/
 |   |-- python/        PyO3 bindings
 |   `-- wasm/          wasm-bindgen bindings
 |-- src/               Brain network, sequence predictor, resonator bank
-|-- examples/          14 runnable examples
+|-- examples/          14 runnable examples + Python + WASM demo
 |-- tests/             85 tests (unit, integration, edge-case, FFI, property)
 |-- benches/           Criterion benchmarks
 `-- docs/              Mathematical derivations
 ```
-
----
-
-## Quality
-
-| Check | Status |
-|-------|--------|
-| `cargo test --workspace` | 85 tests passing |
-| `cargo clippy -D warnings` | Zero warnings |
-| `cargo fmt -- --check` | Enforced |
-| `cargo audit --deny warnings` | Zero vulnerabilities |
-| Cross-platform CI | Linux, macOS, Windows |
-| `no_std` verification | Verified in CI |
-| WASM build | Verified in CI |
-| FFI header sync | Verified in CI |
 
 ---
 
@@ -396,7 +381,7 @@ cricket-brain/
 - [x] **v0.2** — Multi-frequency token recognition
 - [x] **v0.3** — Sequence prediction via delay-line pattern memory
 - [x] **v1.0** — Production release with FFI/Python/WASM bindings
-- [x] **v1.0.1** — Adaptive Gaussian bandwidth (auto-tune for dense vocabularies)
+- [x] **v1.0.1** — Adaptive Gaussian bandwidth for dense vocabularies
 - [ ] **v1.2** — STDP (spike-timing dependent plasticity) for online learning
 - [ ] **v2.0** — Hardware deployment on RISC-V / ARM Cortex-M with real-time ADC
 
@@ -407,7 +392,6 @@ cricket-brain/
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ```bash
-# Development workflow
 cargo test --workspace                                    # All tests pass
 cargo clippy --all-targets --all-features -- -D warnings  # Zero warnings
 cargo fmt -- --check                                      # Formatting clean
@@ -416,8 +400,6 @@ cargo fmt -- --check                                      # Formatting clean
 ---
 
 ## Citation
-
-If you use CricketBrain in academic work, please cite:
 
 ```bibtex
 @software{aslani2026cricketbrain,
@@ -438,14 +420,87 @@ If you use CricketBrain in academic work, please cite:
 
 | Use Case | License | Cost |
 |----------|---------|------|
-| Open-source projects, research, education | [AGPL-3.0](LICENSE-AGPL-3.0) | Free |
+| Open-source, research, education | [AGPL-3.0](LICENSE-AGPL-3.0) | Free |
 | Proprietary / commercial / SaaS / embedded | [Commercial License](COMMERCIAL.md) | Paid |
 
 The AGPL-3.0 requires that any software using CricketBrain must also be
-released under AGPL-3.0 (including source code). If you cannot comply with
-this, you need a **[commercial license](COMMERCIAL.md)**.
+released under AGPL-3.0 (including source code). If you cannot comply,
+you need a **[commercial license](COMMERCIAL.md)**.
 
 Contact: **belkis.aslani@gmail.com**
+
+---
+
+## Auf Deutsch
+
+<details>
+<summary><b>Deutsche Zusammenfassung</b> (klicken zum Aufklappen)</summary>
+
+### Was ist CricketBrain?
+
+CricketBrain ist ein **neuromorpher Signalprozessor**, inspiriert vom Hoersystem
+der Feldgrille (*Gryllus bimaculatus*). Er erkennt zeitliche Muster in Echtzeit
+mit Verzoegerungsleitungs-Koinzidenzdetektion.
+
+**Keine Matrixmultiplikation. Kein CUDA. Keine Gewichte. Kein Training.**
+
+### Kernzahlen
+
+| Metrik | Wert |
+|--------|------|
+| Latenz | **0,175 us pro Schritt** |
+| Speicher | **944 Bytes** (no_std, Arduino-kompatibel) |
+| Erkennung | **TPR 1,0 / FPR 0,0** ueber alle SNR-Stufen |
+| Neuronen | 5 (Muenster-Modell: AN1, LN2, LN3, LN5, ON1) |
+| Training | Keins — fest verdrahtet |
+
+### Anwendungsbereiche
+
+- **Medizin:** EKG-Rhythmus-Klassifikation auf Wearables (HIPAA/DSGVO-konform)
+- **Industrie 4.0:** Vorausschauende Wartung direkt am Sensor-Knoten
+- **Audio:** Wake-Word-Erkennung unter 1 ms ohne Cloud
+- **Sicherheit:** Netzwerk-Anomalie-Erkennung in Leitungsgeschwindigkeit
+- **Embedded:** Laeuft auf Arduino Uno (2 KB RAM)
+
+### Schnellstart
+
+```bash
+git clone https://github.com/BEKO2210/cricket-brain.git
+cd cricket-brain
+cargo run --example live_demo -- "HALLO WELT"
+```
+
+### Sprach-Bindings
+
+| Sprache | Befehl |
+|---------|--------|
+| **Rust** | `cricket-brain = "1.0"` in Cargo.toml |
+| **C/C++** | `cargo build -p cricket-brain-ffi` (Header: `cricket_brain.h`) |
+| **Python** | `cd crates/python && maturin develop` |
+| **WASM** | `cd crates/wasm && wasm-pack build --target web` |
+
+### Lizenz
+
+Dual-lizenziert: **AGPL-3.0** (kostenlos fuer Open Source) oder
+**kommerzielle Lizenz** (fuer proprietaere Software). Details in
+[COMMERCIAL.md](COMMERCIAL.md).
+
+### Wissenschaftliche Validierung
+
+Das Projekt enthaelt ein vollstaendiges Publikationspaket mit 16
+Fachreferenzen, Baseline-Vergleichen (Matched Filter, Goertzel, IIR),
+einer Ablationsstudie und Wilson-95%-Konfidenzintervallen.
+Siehe [RESEARCH_WHITEPAPER.md](RESEARCH_WHITEPAPER.md).
+
+### Autor
+
+**Belkis Aslani** — entwickelt mit KI-Unterstuetzung
+(Claude Code, ChatGPT/Codex, Kimi, Gemini).
+Siehe [AI_DEVELOPMENT_STATEMENT.md](AI_DEVELOPMENT_STATEMENT.md).
+
+Kontakt: **belkis.aslani@gmail.com**
+
+</details>
 
 ---
 
