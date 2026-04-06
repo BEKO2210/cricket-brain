@@ -7,6 +7,11 @@
 use crate::neuron::Neuron;
 use crate::synapse::DelaySynapse;
 use crate::token::TokenVocabulary;
+use alloc::vec::Vec;
+use core::cmp::Ordering;
+use core::mem;
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
 
 /// A single resonator channel — a 5-neuron cricket circuit tuned to one frequency.
 #[derive(Debug, Clone)]
@@ -177,7 +182,21 @@ impl ResonatorBank {
     /// Values > 0.0 indicate the corresponding token's frequency was detected.
     pub fn step(&mut self, input_freq: f32) -> Vec<f32> {
         self.time_step += 1;
-        self.channels.iter_mut().map(|ch| ch.step(input_freq)).collect()
+        #[cfg(feature = "parallel")]
+        {
+            self.channels
+                .par_iter_mut()
+                .map(|ch| ch.step(input_freq))
+                .collect()
+        }
+
+        #[cfg(not(feature = "parallel"))]
+        {
+            self.channels
+                .iter_mut()
+                .map(|ch| ch.step(input_freq))
+                .collect()
+        }
     }
 
     /// Processes one timestep and returns the ID of the most active token,
@@ -187,7 +206,7 @@ impl ResonatorBank {
         let (max_id, &max_val) = activations
             .iter()
             .enumerate()
-            .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())?;
+            .max_by(|a, b| a.1.partial_cmp(b.1).unwrap_or(Ordering::Equal))?;
         if max_val > 0.0 {
             Some(max_id)
         } else {
@@ -221,12 +240,12 @@ impl ResonatorBank {
                 let neuron_mem: usize = ch
                     .neurons
                     .iter()
-                    .map(|n| std::mem::size_of::<Neuron>() + n.history.len() * 4)
+                    .map(|n| mem::size_of::<Neuron>() + n.history.len() * 4)
                     .sum();
                 let synapse_mem: usize = ch
                     .synapses
                     .iter()
-                    .map(|s| std::mem::size_of::<DelaySynapse>() + s.ring_buffer.len() * 4)
+                    .map(|s| mem::size_of::<DelaySynapse>() + s.ring_buffer.len() * 4)
                     .sum();
                 neuron_mem + synapse_mem
             })
@@ -267,7 +286,10 @@ mod tests {
         }
 
         assert!(low_fired, "Low channel should fire for low frequency");
-        assert!(!high_fired, "High channel should NOT fire for low frequency");
+        assert!(
+            !high_fired,
+            "High channel should NOT fire for low frequency"
+        );
     }
 
     #[test]

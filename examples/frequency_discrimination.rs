@@ -20,7 +20,8 @@ fn main() {
     ];
 
     for &freq in &test_freqs {
-        let mut brain = CricketBrain::new();
+        let mut brain = CricketBrain::new(Default::default())
+            .expect("valid default brain config");
         let steps = 200;
         let mut spikes = 0;
 

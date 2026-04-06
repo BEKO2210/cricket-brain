@@ -8,7 +8,7 @@ fn main() {
 
     // Initialization benchmark
     let t0 = Instant::now();
-    let mut brain = CricketBrain::new_scaled(40960, 40960 * 3);
+    let mut brain = CricketBrain::new_scaled(40960, 40960 * 3).expect("valid scaled config");
     let init_time = t0.elapsed();
 
     let mem = brain.memory_usage_bytes();

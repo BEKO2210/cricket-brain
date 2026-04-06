@@ -9,7 +9,7 @@ use cricket_brain::patterns::{encode_morse, MORSE_FREQ};
 fn main() {
     println!("=== Cricket-Brain: Morse SOS Demo ===\n");
 
-    let mut brain = CricketBrain::new();
+    let mut brain = CricketBrain::new(Default::default()).expect("valid default brain config");
     let signal = encode_morse("SOS");
 
     println!(

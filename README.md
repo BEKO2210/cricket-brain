@@ -7,6 +7,8 @@
 
 Cricket-Brain uses **delay-line coincidence detection** for pattern recognition — no matrix multiplication, no CUDA, no weights. The architecture is modeled after the auditory processing circuit of the field cricket (*Gryllus bimaculatus*), where just 5 neurons can recognize species-specific song patterns in real time.
 
+> Release status: **1.0.0-rc1** (API stabilization candidate).
+
 ## Architecture
 
 ```
@@ -203,11 +205,48 @@ cargo run --example multi_freq_demo -- "XYZ" # Custom text
 # v0.3: Sequence prediction
 cargo run --example sequence_predict         # Pattern prediction demo
 cargo run --release --example scale_predict  # 256-token benchmark
+cargo run --release --example research_gen -- --headless --output target/research --seed 1337
+cargo run --release --example sentinel_ecg_monitor
 
 # Quality
-cargo test                                   # Run all 51 tests
+cargo test                                   # Run all 60 tests (incl. doctests)
 cargo bench                                  # Criterion throughput benchmarks
+cargo install mdbook && mdbook build docs    # Build the documentation site
+
+# Python bindings (RC1)
+cd crates/python && maturin develop
+python ../../examples/python_sentinel.py
+
+# WASM + TypeScript bindings (RC1)
+cd crates/wasm && wasm-pack build --target web --out-dir pkg
 ```
+
+## Quick Start for C/C++
+
+The project ships a dedicated FFI crate (`crates/ffi`) and generated header:
+
+- Header: `crates/ffi/include/cricket_brain.h`
+- Build native bridge:
+
+```bash
+cargo build -p cricket-brain-ffi
+```
+
+Minimal C lifecycle:
+
+1. `brain_new(...)` – create opaque handle
+2. `brain_step(...)` – process one sample
+3. `brain_get_status(...)` – inspect state
+4. `brain_free(...)` – release memory
+
+## Quick Start for Web (WASM)
+
+```bash
+rustup target add wasm32-unknown-unknown
+cargo build --target wasm32-unknown-unknown --no-default-features
+```
+
+See [`README_WASM.md`](README_WASM.md) for target notes and feature-gating details.
 
 ## Why Cricket Neuroscience?
 
@@ -246,6 +285,55 @@ Cricket-Brain takes this principle and applies it to arbitrary pattern recogniti
 **The real value proposition:** This is a physically-valid computational model that processes temporal patterns with near-zero resources. It proves that useful inference — including sequence prediction — is possible without gradient descent, backpropagation, or GPU clusters.
 
 ## Mathematical Foundation
+
+## Complexity & Resource Model (Whitepaper Baseline)
+
+For one simulation step:
+
+- **Time complexity:** \(O(N + S)\)
+  - \(N\): number of neurons (resonance/decay updates)
+  - \(S\): number of synapses (delay-line transmit operations)
+- **Space complexity:** \(O(N \cdot H + S \cdot D)\)
+  - \(H\): average neuron history length (`delay_taps + 1`)
+  - \(D\): average synapse delay-line length (`delay_ms`)
+
+In the canonical 5-neuron circuit, \(N=5\) and \(S=6\), so runtime per step is effectively constant on embedded targets.
+
+### Real-world Benchmarks (Run 14 refresh, 2026-04-06)
+
+Measured in this repo with release builds (`cargo run --release --example ...`):
+
+| Scenario | Metric | Result |
+|---|---:|---:|
+| `profile_speed` (5-neuron canonical) | Latency | **0.175431 μs/step** |
+| `scale_test` (40,960 neurons) | Throughput | **3.43e7 neuron-ops/sec** |
+| `scale_test` (40,960 neurons) | Memory | **13.91 MB** |
+| `scale_predict` (v0.3, 1280 neurons) | Throughput | **3.32e7 neuron-ops/sec** |
+| `scale_predict` (v0.3, 1280 neurons) | Memory | **0.30 MB** |
+
+These values replace the previous placeholder complexity estimates with measured data points suitable for whitepaper reporting and reproducibility.
+
+### Core Code Size Impact (no_std footprint)
+
+`crates/core` remains `no_std` with a single direct dependency (`libm`) and no allocator-heavy external runtime stack.
+
+Measured on 2026-04-06 with:
+
+```bash
+cargo build -p cricket-brain-core --release
+wc -c target/release/deps/libcricket_brain_core-*.rlib
+```
+
+- `libcricket_brain_core` rlib size: **91,976 bytes (~90 KB)**
+
+This keeps the core suitable for embedded/medical edge deployments where binary footprint and supply-chain simplicity are mandatory.
+
+### Hot-Path Allocation Audit (Core)
+
+For `crates/core`, the critical math/data-path methods (`Neuron::resonate`, `Neuron::decay`, `DelaySynapse::transmit`) are allocation-free and now explicitly annotated with inlining hints (`#[inline(always)]`) for compiler consistency across targets.
+
+- **No heap allocation in core hot path** during resonance/synapse updates.
+- Heap-backed buffers (`VecDeque`) are allocated during construction only; step-time operations mutate preallocated storage.
 
 ### Gaussian Frequency Tuning
 
@@ -299,7 +387,7 @@ cricket-brain/
 │   ├── multi_freq_demo.rs Multi-frequency token discrimination (v0.2)
 │   ├── sequence_predict.rs Pattern prediction demo (v0.3)
 │   └── scale_predict.rs  256-token prediction benchmark (v0.3)
-├── tests/                 Integration tests (51 tests)
+├── tests/                 Integration tests (27 tests)
 ├── benches/               Criterion benchmarks
 └── docs/                  Architecture & math docs
 ```

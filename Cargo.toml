@@ -1,11 +1,15 @@
+[workspace]
+members = ["crates/core", "crates/ffi", "crates/python", "crates/wasm"]
+
 [package]
 name = "cricket-brain"
-version = "0.3.0"
+version = "1.0.0-rc1"
 edition = "2021"
 rust-version = "1.75"
 description = "A biomorphic AI inference engine based on the Münster model of cricket hearing. Uses delay-line coincidence detection for pattern recognition — no matrix multiplication, no CUDA, no weights."
-license = "MIT"
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/BEKO2210/cricket-brain"
+documentation = "https://docs.rs/cricket-brain"
 keywords = ["neuromorphic", "biomorphic", "inference", "no-std", "delay-line"]
 categories = ["science", "algorithms", "embedded", "no-std"]
 
@@ -13,9 +17,23 @@ categories = ["science", "algorithms", "embedded", "no-std"]
 default = ["std"]
 std = []
 no_std = []
+telemetry = []
+serde = ["dep:serde"]
+parallel = ["dep:rayon"]
+cli = ["dep:clap", "dep:miette", "dep:toml", "dep:serde_json", "serde", "std"]
+
+[dependencies]
+cricket-brain-core = { version = "1.0.0-rc1", path = "crates/core" }
+serde = { version = "1", features = ["derive"], optional = true }
+rayon = { version = "1.11", optional = true }
+clap = { version = "4.6", features = ["derive"], optional = true }
+miette = { version = "7", features = ["fancy"], optional = true }
+toml = { version = "0.8", optional = true }
+serde_json = { version = "1", optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.6"
 
 [[bench]]
 name = "throughput"
@@ -48,3 +66,20 @@ path = "examples/sequence_predict.rs"
 [[example]]
 name = "scale_predict"
 path = "examples/scale_predict.rs"
+
+[[example]]
+name = "profile_speed"
+path = "examples/profile_speed.rs"
+
+[[example]]
+name = "research_gen"
+path = "examples/research_gen.rs"
+
+[[example]]
+name = "sentinel_ecg_monitor"
+path = "examples/sentinel_ecg_monitor.rs"
+
+[[example]]
+name = "cricket_cli"
+path = "examples/cricket_cli.rs"
+required-features = ["cli"]
