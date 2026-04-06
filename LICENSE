@@ -1,34 +1,63 @@
-Cricket-Brain Dual Licensing Notice
-===================================
+CricketBrain — Dual Licensing
+==============================
 
-This project is available under a dual-licensing model:
+Copyright (c) 2026 Belkis Aslani. All rights reserved.
 
-1. Open Source License: MIT (full text below)
-2. Commercial/Enterprise License: Proprietary commercial terms (placeholder)
+This software is available under TWO licensing options:
 
-For commercial licensing terms, support SLAs, indemnification, and custom
-optimization engagements, see `COMMERCIAL.md`.
 
----
+1. OPEN SOURCE — GNU Affero General Public License v3.0 (AGPL-3.0)
+=======================================================================
 
-MIT License
+You may use, modify, and distribute this software under the terms of
+the GNU Affero General Public License version 3.0, as published by the
+Free Software Foundation.
 
-Copyright (c) 2026 Belkis Aslani
+This means:
+  - You CAN use CricketBrain freely in open-source projects.
+  - You MUST release your ENTIRE source code under AGPL-3.0 if you
+    distribute or provide network access to software that uses CricketBrain.
+  - You MUST preserve this copyright notice and license.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+The full text of the AGPL-3.0 license is available at:
+  https://www.gnu.org/licenses/agpl-3.0.html
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+A copy is included in this repository as LICENSE-AGPL-3.0.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+
+2. COMMERCIAL LICENSE — Proprietary
+=======================================================================
+
+If you do NOT want to comply with the AGPL-3.0 obligations (i.e., you
+want to use CricketBrain in proprietary/closed-source software), you
+MUST obtain a commercial license from the copyright holder.
+
+The commercial license grants you:
+  - The right to use CricketBrain in proprietary products and services
+    WITHOUT disclosing your source code.
+  - Priority engineering support and maintenance.
+  - Legal indemnification options.
+  - Custom optimization and deployment assistance.
+
+See COMMERCIAL.md for licensing tiers, pricing, and contact information.
+
+
+WHICH LICENSE APPLIES TO ME?
+=======================================================================
+
+  +------------------------------------------+-------------------+
+  | Use Case                                 | License Required  |
+  +------------------------------------------+-------------------+
+  | Academic research & education            | AGPL-3.0 (free)   |
+  | Personal / hobby projects                | AGPL-3.0 (free)   |
+  | Open-source projects (AGPL-compatible)   | AGPL-3.0 (free)   |
+  | Internal company tools (not distributed) | Commercial        |
+  | SaaS / cloud service                     | Commercial        |
+  | Proprietary product / embedded device    | Commercial        |
+  | Medical device (FDA/CE regulated)        | Commercial         |
+  +------------------------------------------+-------------------+
+
+For commercial licensing inquiries:
+  Email:    cricketbrain.license@gmail.com
+  GitHub:   https://github.com/BEKO2210/cricket-brain/issues
+  Subject:  "Commercial License Inquiry — [Your Company]"

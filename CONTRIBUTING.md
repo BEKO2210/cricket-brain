@@ -71,4 +71,6 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ## License
 
 By contributing, you agree that your contributions will be licensed under
-the MIT OR Apache-2.0 dual license.
+the AGPL-3.0 license and that the copyright holder (Belkis Aslani) retains
+the right to offer your contributions under the commercial license as well
+(Contributor License Agreement).

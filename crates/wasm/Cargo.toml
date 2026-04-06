@@ -2,7 +2,7 @@
 name = "cricket-brain-wasm"
 version = "1.0.0"
 edition = "2021"
-license = "MIT OR Apache-2.0"
+license = "AGPL-3.0-only"
 description = "wasm-bindgen TypeScript-friendly bindings for cricket-brain"
 repository = "https://github.com/BEKO2210/cricket-brain"
 
