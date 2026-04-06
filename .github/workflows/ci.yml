@@ -5,6 +5,10 @@ on:
     branches: [main, master]
   pull_request:
 
+# Least-privilege: all jobs only need to read repository contents.
+permissions:
+  contents: read
+
 jobs:
   test-matrix:
     name: Test (${{ matrix.os }})
