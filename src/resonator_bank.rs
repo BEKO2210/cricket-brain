@@ -26,14 +26,20 @@ pub struct ResonatorChannel {
 
 impl ResonatorChannel {
     /// Creates a new resonator channel tuned to the given frequency.
-    fn new(token_id: usize, freq: f32, base_neuron_id: usize) -> Self {
-        let neurons = [
+    ///
+    /// `bandwidth` controls the Gaussian selectivity (default 0.1 = 10%).
+    /// For dense vocabularies, use a narrower value to avoid cross-activation.
+    fn new(token_id: usize, freq: f32, base_neuron_id: usize, bandwidth: f32) -> Self {
+        let mut neurons = [
             Neuron::new(base_neuron_id, freq, 4),     // AN1
             Neuron::new(base_neuron_id + 1, freq, 3), // LN2
             Neuron::new(base_neuron_id + 2, freq, 2), // LN3
             Neuron::new(base_neuron_id + 3, freq, 5), // LN5
             Neuron::new(base_neuron_id + 4, freq, 4), // ON1
         ];
+        for n in &mut neurons {
+            n.bandwidth = bandwidth;
+        }
 
         let synapses = [
             DelaySynapse::new(0, 1, 3, true),  // AN1 → LN2 (inh)
@@ -164,10 +170,25 @@ impl ResonatorBank {
     /// Each token in the vocabulary gets its own 5-neuron resonator channel.
     /// Total neurons = `vocab.len() * 5`, total synapses = `vocab.len() * 6`.
     pub fn new(vocab: &TokenVocabulary) -> Self {
+        // Compute adaptive bandwidth: half the minimum relative spacing between
+        // adjacent tokens, clamped to [0.01, 0.10].  This ensures that the
+        // Gaussian tuning curve of one channel does not significantly overlap
+        // with its neighbors, even for dense vocabularies.
+        let bandwidth = if vocab.tokens.len() > 1 {
+            let min_relative_spacing = vocab
+                .tokens
+                .windows(2)
+                .map(|w| (w[1].freq - w[0].freq).abs() / w[0].freq)
+                .fold(f32::MAX, f32::min);
+            (min_relative_spacing * 0.45).clamp(0.01, 0.10)
+        } else {
+            0.10
+        };
+
         let channels = vocab
             .tokens
             .iter()
-            .map(|token| ResonatorChannel::new(token.id, token.freq, token.id * 5))
+            .map(|token| ResonatorChannel::new(token.id, token.freq, token.id * 5, bandwidth))
             .collect();
 
         ResonatorBank {

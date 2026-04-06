@@ -75,6 +75,9 @@ pub struct Neuron {
     pub history: VecDeque<f32>,
     /// Minimum activation floor to suppress low-energy noise responses.
     pub min_activation_threshold: f32,
+    /// Gaussian bandwidth parameter (default: 0.1 = 10% of eigenfrequency).
+    /// Smaller values yield sharper frequency selectivity.
+    pub bandwidth: f32,
 }
 
 impl Neuron {
@@ -120,6 +123,7 @@ impl Neuron {
             delay_taps: delay_ms,
             history,
             min_activation_threshold: config.min_activation_threshold,
+            bandwidth: 0.1,
         }
     }
 
@@ -161,9 +165,8 @@ impl Neuron {
         );
         // Gaussian tuning curve: match = exp(-(Δf / f₀ / w)²)
         let delta_f = (input_freq - self.eigenfreq).abs();
-        let width = 0.1; // 10% bandwidth
-        debug_assert!(width > 0.0, "gaussian width must be non-zero");
-        let normalized = delta_f / self.eigenfreq / width;
+        debug_assert!(self.bandwidth > 0.0, "gaussian width must be non-zero");
+        let normalized = delta_f / self.eigenfreq / self.bandwidth;
         let match_strength = libm::expf(-normalized * normalized);
 
         let effective_match = if match_strength < self.min_activation_threshold {

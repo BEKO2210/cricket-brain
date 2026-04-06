@@ -703,6 +703,7 @@ impl CricketBrain {
                 delay_taps: n.delay_taps,
                 history: VecDeque::from(n.history.clone()),
                 min_activation_threshold: n.min_activation_threshold,
+                bandwidth: 0.1,
             })
             .collect();
         self.synapses = snapshot
