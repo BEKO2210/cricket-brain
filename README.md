@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/Logo_4k_4mb_11mp.png" alt="CricketBrain Logo" width="400">
+
 # CricketBrain
 
 ### The Biomorphic Inference Engine
@@ -435,7 +437,7 @@ The AGPL-3.0 requires that any software using CricketBrain must also be
 released under AGPL-3.0 (including source code). If you cannot comply with
 this, you need a **[commercial license](COMMERCIAL.md)**.
 
-Contact: **cricketbrain.license@gmail.com**
+Contact: **belkis.aslani@gmail.com**
 
 ---
 
