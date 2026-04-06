@@ -1,0 +1,30 @@
+[package]
+name = "cricket-brain"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "A biomorphic AI inference engine based on the Münster model of cricket hearing. Uses delay-line coincidence detection for pattern recognition — no matrix multiplication, no CUDA, no weights."
+license = "MIT"
+repository = "https://github.com/BEKO2210/cricket-brain"
+keywords = ["neuromorphic", "biomorphic", "inference", "no-std", "delay-line"]
+categories = ["science", "algorithms", "embedded", "no-std"]
+
+[features]
+default = ["std"]
+std = []
+no_std = []
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "throughput"
+harness = false
+
+[[example]]
+name = "morse_alphabet"
+path = "examples/morse_alphabet.rs"
+
+[[example]]
+name = "scale_test"
+path = "examples/scale_test.rs"
