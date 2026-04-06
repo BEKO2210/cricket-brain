@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 340">
+  <defs>
+    <linearGradient id="bgG" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#151b23"/>
+    </linearGradient>
+    <filter id="gl">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="gl2">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Animated dot traveling along a path -->
+    <circle id="dot-exc" r="3" fill="#3fb950"/>
+    <circle id="dot-inh" r="3" fill="#f85149"/>
+  </defs>
+
+  <!-- Background -->
+  <rect width="720" height="340" fill="url(#bgG)" rx="10"/>
+
+  <!-- Subtle grid -->
+  <g stroke="#21262d" stroke-width="0.5" opacity="0.5">
+    <line x1="0" y1="85" x2="720" y2="85"/><line x1="0" y1="170" x2="720" y2="170"/>
+    <line x1="0" y1="255" x2="720" y2="255"/>
+    <line x1="180" y1="0" x2="180" y2="340"/><line x1="360" y1="0" x2="360" y2="340"/>
+    <line x1="540" y1="0" x2="540" y2="340"/>
+  </g>
+
+  <!-- ==================== INPUT SIGNAL ==================== -->
+  <g transform="translate(28,130)">
+    <rect x="0" y="0" width="70" height="50" rx="6" fill="#161b22" stroke="#30363d"/>
+    <text x="35" y="16" font-family="'SF Mono',monospace" font-size="9" fill="#8b949e" text-anchor="middle">INPUT</text>
+    <!-- Animated sine wave -->
+    <path d="M 8,35 Q 15,20 22,35 T 36,35 T 50,35 T 64,35" stroke="#58a6ff" stroke-width="1.5" fill="none" opacity="0.9">
+      <animate attributeName="d" dur="0.8s" repeatCount="indefinite"
+        values="M 8,35 Q 15,20 22,35 T 36,35 T 50,35 T 64,35;
+                M 8,35 Q 15,50 22,35 T 36,35 T 50,35 T 64,35;
+                M 8,35 Q 15,20 22,35 T 36,35 T 50,35 T 64,35"/>
+    </path>
+    <text x="35" y="64" font-family="monospace" font-size="8.5" fill="#58a6ff" text-anchor="middle">4500 Hz</text>
+  </g>
+
+  <!-- Arrow input → AN1 -->
+  <line x1="102" y1="155" x2="138" y2="155" stroke="#58a6ff" stroke-width="1.5" stroke-dasharray="4,3">
+    <animate attributeName="stroke-dashoffset" from="7" to="0" dur="0.6s" repeatCount="indefinite"/>
+  </line>
+  <polygon points="138,150 148,155 138,160" fill="#58a6ff" opacity="0.8"/>
+
+  <!-- ==================== AN1 NEURON ==================== -->
+  <g filter="url(#gl)">
+    <circle cx="190" cy="155" r="36" fill="#0d1117" stroke="#58a6ff" stroke-width="2.5">
+      <animate attributeName="stroke-opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Inner ring pulse -->
+    <circle cx="190" cy="155" r="24" fill="none" stroke="#58a6ff" stroke-width="0.8" opacity="0.3">
+      <animate attributeName="r" values="18;28;18" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.5;0.1;0.5" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  <text x="190" y="150" font-family="'Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#58a6ff" text-anchor="middle">AN1</text>
+  <text x="190" y="166" font-family="monospace" font-size="8.5" fill="#6e7681" text-anchor="middle">Receptor</text>
+
+  <!-- ==================== SYNAPSES AN1 → LN2/LN3/LN5 ==================== -->
+
+  <!-- AN1 → LN2 (inhibitory, 3ms) -->
+  <path id="path-an1-ln2" d="M 222,140 C 290,130 310,75 380,75" fill="none" stroke="#f85149" stroke-width="1.8" stroke-dasharray="4,4" opacity="0.7">
+    <animate attributeName="stroke-dashoffset" from="8" to="0" dur="1s" repeatCount="indefinite"/>
+  </path>
+  <use href="#dot-inh"><animateMotion dur="1s" repeatCount="indefinite"><mpath href="#path-an1-ln2"/></animateMotion></use>
+  <rect x="285" y="88" width="40" height="16" rx="3" fill="#21262d"/>
+  <text x="305" y="100" font-family="monospace" font-size="8" fill="#f85149" text-anchor="middle">3ms</text>
+
+  <!-- AN1 → LN3 (excitatory, 2ms) -->
+  <path id="path-an1-ln3" d="M 226,155 C 290,155 310,155 375,155" fill="none" stroke="#3fb950" stroke-width="2" stroke-dasharray="6,3" opacity="0.8">
+    <animate attributeName="stroke-dashoffset" from="9" to="0" dur="0.7s" repeatCount="indefinite"/>
+  </path>
+  <use href="#dot-exc"><animateMotion dur="0.7s" repeatCount="indefinite"><mpath href="#path-an1-ln3"/></animateMotion></use>
+  <rect x="285" y="138" width="40" height="16" rx="3" fill="#21262d"/>
+  <text x="305" y="150" font-family="monospace" font-size="8" fill="#3fb950" text-anchor="middle">2ms</text>
+
+  <!-- AN1 → LN5 (inhibitory, 5ms) -->
+  <path id="path-an1-ln5" d="M 222,172 C 290,185 310,240 380,240" fill="none" stroke="#f85149" stroke-width="1.8" stroke-dasharray="4,4" opacity="0.7">
+    <animate attributeName="stroke-dashoffset" from="8" to="0" dur="1.4s" repeatCount="indefinite"/>
+  </path>
+  <use href="#dot-inh"><animateMotion dur="1.4s" repeatCount="indefinite"><mpath href="#path-an1-ln5"/></animateMotion></use>
+  <rect x="285" y="212" width="40" height="16" rx="3" fill="#21262d"/>
+  <text x="305" y="224" font-family="monospace" font-size="8" fill="#f85149" text-anchor="middle">5ms</text>
+
+  <!-- ==================== LN2 NEURON (inhibitory) ==================== -->
+  <circle cx="410" cy="75" r="28" fill="#0d1117" stroke="#f85149" stroke-width="2"/>
+  <circle cx="410" cy="75" r="18" fill="none" stroke="#f85149" stroke-width="0.6" opacity="0.2">
+    <animate attributeName="r" values="14;22;14" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  <text x="410" y="71" font-family="'Segoe UI',sans-serif" font-size="14" font-weight="700" fill="#f85149" text-anchor="middle">LN2</text>
+  <text x="410" y="85" font-family="monospace" font-size="8" fill="#6e7681" text-anchor="middle">inhibitory</text>
+
+  <!-- ==================== LN3 NEURON (excitatory) ==================== -->
+  <circle cx="410" cy="155" r="28" fill="#0d1117" stroke="#3fb950" stroke-width="2.5">
+    <animate attributeName="stroke-width" values="2.5;3.5;2.5" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="410" cy="155" r="18" fill="none" stroke="#3fb950" stroke-width="0.6" opacity="0.3">
+    <animate attributeName="r" values="14;22;14" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <text x="410" y="151" font-family="'Segoe UI',sans-serif" font-size="14" font-weight="700" fill="#3fb950" text-anchor="middle">LN3</text>
+  <text x="410" y="165" font-family="monospace" font-size="8" fill="#6e7681" text-anchor="middle">excitatory</text>
+
+  <!-- ==================== LN5 NEURON (inhibitory) ==================== -->
+  <circle cx="410" cy="240" r="28" fill="#0d1117" stroke="#f85149" stroke-width="2"/>
+  <circle cx="410" cy="240" r="18" fill="none" stroke="#f85149" stroke-width="0.6" opacity="0.2">
+    <animate attributeName="r" values="14;22;14" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <text x="410" y="236" font-family="'Segoe UI',sans-serif" font-size="14" font-weight="700" fill="#f85149" text-anchor="middle">LN5</text>
+  <text x="410" y="250" font-family="monospace" font-size="8" fill="#6e7681" text-anchor="middle">inhibitory</text>
+
+  <!-- ==================== SYNAPSES LN* → ON1 ==================== -->
+
+  <!-- LN2 → ON1 (inhibitory, 1ms) -->
+  <path id="path-ln2-on1" d="M 438,75 C 490,75 510,130 560,148" fill="none" stroke="#f85149" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6">
+    <animate attributeName="stroke-dashoffset" from="6" to="0" dur="0.5s" repeatCount="indefinite"/>
+  </path>
+  <use href="#dot-inh" opacity="0.7"><animateMotion dur="0.5s" repeatCount="indefinite"><mpath href="#path-ln2-on1"/></animateMotion></use>
+
+  <!-- LN3 → ON1 (excitatory, 1ms) -->
+  <path id="path-ln3-on1" d="M 438,155 C 480,155 510,155 555,155" fill="none" stroke="#3fb950" stroke-width="2" stroke-dasharray="6,3" opacity="0.8">
+    <animate attributeName="stroke-dashoffset" from="9" to="0" dur="0.5s" repeatCount="indefinite"/>
+  </path>
+  <use href="#dot-exc"><animateMotion dur="0.5s" repeatCount="indefinite"><mpath href="#path-ln3-on1"/></animateMotion></use>
+
+  <!-- LN5 → ON1 (inhibitory, 1ms) -->
+  <path id="path-ln5-on1" d="M 438,240 C 490,240 510,180 560,163" fill="none" stroke="#f85149" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6">
+    <animate attributeName="stroke-dashoffset" from="6" to="0" dur="0.5s" repeatCount="indefinite"/>
+  </path>
+  <use href="#dot-inh" opacity="0.7"><animateMotion dur="0.5s" repeatCount="indefinite"><mpath href="#path-ln5-on1"/></animateMotion></use>
+
+  <!-- 1ms labels -->
+  <text x="502" y="108" font-family="monospace" font-size="7.5" fill="#6e7681" text-anchor="middle">1ms</text>
+  <text x="502" y="148" font-family="monospace" font-size="7.5" fill="#6e7681" text-anchor="middle">1ms</text>
+  <text x="502" y="208" font-family="monospace" font-size="7.5" fill="#6e7681" text-anchor="middle">1ms</text>
+
+  <!-- ==================== ON1 OUTPUT NEURON ==================== -->
+  <g filter="url(#gl2)">
+    <circle cx="590" cy="155" r="36" fill="#0d1117" stroke="#e94560" stroke-width="2.5">
+      <animate attributeName="r" values="36;42;36" dur="3s" begin="1.8s" repeatCount="indefinite"/>
+      <animate attributeName="fill" values="#0d1117;#2a0a14;#0d1117" dur="3s" begin="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Spike flash ring -->
+    <circle cx="590" cy="155" r="36" fill="none" stroke="#e94560" stroke-width="1" opacity="0">
+      <animate attributeName="r" values="36;55" dur="0.8s" begin="2.4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0" dur="0.8s" begin="2.4s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  <text x="590" y="150" font-family="'Segoe UI',sans-serif" font-size="16" font-weight="700" fill="#e94560" text-anchor="middle">ON1</text>
+  <text x="590" y="165" font-family="monospace" font-size="8" fill="#6e7681" text-anchor="middle">Coincidence</text>
+
+  <!-- ==================== OUTPUT ==================== -->
+  <line x1="626" y1="155" x2="670" y2="155" stroke="#e94560" stroke-width="2">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="3s" begin="1.8s" repeatCount="indefinite"/>
+  </line>
+  <polygon points="668,150 678,155 668,160" fill="#e94560">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="3s" begin="1.8s" repeatCount="indefinite"/>
+  </polygon>
+
+  <!-- Output label box -->
+  <rect x="678" y="138" width="36" height="34" rx="5" fill="#2a0a14" stroke="#e94560" stroke-width="1.5">
+    <animate attributeName="fill" values="#2a0a14;#3d1020;#2a0a14" dur="3s" begin="1.8s" repeatCount="indefinite"/>
+  </rect>
+  <text x="696" y="152" font-family="'SF Mono',monospace" font-size="7" fill="#e94560" text-anchor="middle" font-weight="700">SPIKE</text>
+  <text x="696" y="164" font-family="monospace" font-size="6.5" fill="#8b6570" text-anchor="middle">A>0.7</text>
+
+  <!-- ==================== BOTTOM FORMULA BAR ==================== -->
+  <rect x="20" y="296" width="680" height="32" rx="6" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
+  <text x="360" y="316" font-family="'SF Mono','Fira Code',monospace" font-size="11" fill="#8b949e" text-anchor="middle">
+    fire(t) = [ A(t) &gt; θ ] ∧ [ A(t − τ) &gt; θ × 0.8 ]    |    R(f) = exp( −(Δf / f₀ / w)² )
+  </text>
+
+  <!-- Legend -->
+  <g transform="translate(24, 18)" font-family="monospace" font-size="8.5">
+    <line x1="0" y1="0" x2="20" y2="0" stroke="#3fb950" stroke-width="2" stroke-dasharray="6,3"/>
+    <text x="25" y="3.5" fill="#6e7681">Excitatory</text>
+    <line x1="90" y1="0" x2="110" y2="0" stroke="#f85149" stroke-width="1.8" stroke-dasharray="4,4"/>
+    <text x="115" y="3.5" fill="#6e7681">Inhibitory</text>
+    <circle cx="200" cy="0" r="3" fill="#3fb950"/><text x="208" y="3.5" fill="#6e7681">Signal dot</text>
+  </g>
+</svg>

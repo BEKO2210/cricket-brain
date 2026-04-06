@@ -38,29 +38,15 @@ CricketBrain is a **neuromorphic signal processor** that recognizes temporal pat
 > **No matrix multiplication. No CUDA. No weights. No training.**
 > Just 5 neurons and 6 synapses, processing at **0.175 us per step** in **944 bytes of RAM**.
 
-<div align="center">
-
-```
-              AN1 (Receptor, 4500 Hz)
-             / | \
-            /  |  \
-           v   v   v
-         LN2  LN3  LN5       3 interneurons with different delays
-        (inh) (exc) (inh)
-        3ms   2ms   5ms
-           \   |   /
-            \  |  /
-             v v v
-          ON1 (Output Gate)   fires only on temporal coincidence
-```
-
-</div>
+<p align="center">
+  <img src="assets/circuit_inline.svg" alt="CricketBrain Muenster Circuit" width="720">
+</p>
 
 <details>
-<summary><b>View Animated Circuit Diagram</b></summary>
+<summary><b>View Full-Size Animated Diagram</b></summary>
 <br>
 <p align="center">
-  <img src="assets/circuit_diagram.svg" alt="CricketBrain Muenster Circuit" width="720">
+  <img src="assets/circuit_diagram.svg" alt="CricketBrain Muenster Circuit — Full Detail" width="780">
 </p>
 </details>
 
