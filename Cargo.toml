@@ -28,3 +28,11 @@ path = "examples/morse_alphabet.rs"
 [[example]]
 name = "scale_test"
 path = "examples/scale_test.rs"
+
+[[example]]
+name = "live_demo"
+path = "examples/live_demo.rs"
+
+[[example]]
+name = "frequency_discrimination"
+path = "examples/frequency_discrimination.rs"

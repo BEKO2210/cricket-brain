@@ -141,13 +141,15 @@ pub fn decode_spikes(spikes: &[(usize, f32)], threshold: f32) -> String {
         };
         current_char.push(sym);
 
-        // Check gap to next burst
+        // Check gap to next burst for character/word boundaries
         if i + 1 < bursts.len() {
             let gap = bursts[i + 1].0 - (start + len);
-            if gap > CHAR_GAP_MS + ELEMENT_GAP_MS {
+            // Character boundary: gap >= inter-character gap duration
+            if gap >= CHAR_GAP_MS {
                 morse_chars.push(current_char.clone());
                 current_char.clear();
-                if gap > WORD_GAP_MS {
+                // Word boundary: gap >= word gap duration
+                if gap >= WORD_GAP_MS {
                     morse_chars.push(vec![MorseSymbol::WordGap]);
                 }
             }
