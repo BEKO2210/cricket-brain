@@ -133,7 +133,7 @@ the copyright holder the right to dual-license contributions.
 
 | Method | Details |
 |--------|---------|
-| **Email** | cricketbrain.license@gmail.com |
+| **Email** | belkis.aslani@gmail.com |
 | **GitHub** | [Open an issue](https://github.com/BEKO2210/cricket-brain/issues) with subject "Commercial License Inquiry" |
 | **Subject Line** | "Commercial License Inquiry — [Your Company Name]" |
 
