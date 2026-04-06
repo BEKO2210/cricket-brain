@@ -39,16 +39,12 @@ CricketBrain is a **neuromorphic signal processor** that recognizes temporal pat
 > Just 5 neurons and 6 synapses, processing at **0.175 us per step** in **944 bytes of RAM**.
 
 <p align="center">
-  <img src="assets/circuit_inline.svg" alt="CricketBrain Muenster Circuit" width="720">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/circuit_inline.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/circuit_inline.svg">
+    <img src="assets/circuit_inline.svg" alt="CricketBrain Muenster Circuit — 5 neurons, 6 synapses, delay-line coincidence detection" width="720">
+  </picture>
 </p>
-
-<details>
-<summary><b>View Full-Size Animated Diagram</b></summary>
-<br>
-<p align="center">
-  <img src="assets/circuit_diagram.svg" alt="CricketBrain Muenster Circuit — Full Detail" width="780">
-</p>
-</details>
 
 ### Why Should You Care?
 
