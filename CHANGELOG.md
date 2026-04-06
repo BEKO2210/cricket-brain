@@ -44,6 +44,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Documentation:** Project dossier, research whitepaper, commercial licensing
   guide, and security policy.
 
+### Changed
+- **License:** Switched from MIT/Apache-2.0 to AGPL-3.0 + Commercial dual license.
+  Commercial use in proprietary software requires a paid license.
+
 ### Security
 - Upgraded `pyo3` from 0.22 to 0.24 to patch RUSTSEC-2025-0020 (buffer overflow
   in `PyString::from_object`).

@@ -7,7 +7,8 @@
 **Sub-microsecond pattern recognition. Sub-kilobyte memory. Zero training.**
 
 [![CI](https://github.com/BEKO2210/cricket-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/BEKO2210/cricket-brain/actions/workflows/ci.yml)
-[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-red.svg)](LICENSE)
+[![Commercial License](https://img.shields.io/badge/Commercial-License%20Available-brightgreen.svg)](COMMERCIAL.md)
 [![Crate](https://img.shields.io/badge/crates.io-cricket--brain-orange)](https://crates.io/crates/cricket-brain)
 [![docs.rs](https://img.shields.io/badge/docs.rs-cricket--brain-blue)](https://docs.rs/cricket-brain)
 [![no_std](https://img.shields.io/badge/no__std-compatible-green.svg)](#embedded--no_std)
@@ -423,7 +424,18 @@ If you use CricketBrain in academic work, please cite:
 
 ## License
 
-Dual-licensed under [MIT](LICENSE) or [Apache-2.0](LICENSE) at your option.
+**Dual-licensed:**
+
+| Use Case | License | Cost |
+|----------|---------|------|
+| Open-source projects, research, education | [AGPL-3.0](LICENSE-AGPL-3.0) | Free |
+| Proprietary / commercial / SaaS / embedded | [Commercial License](COMMERCIAL.md) | Paid |
+
+The AGPL-3.0 requires that any software using CricketBrain must also be
+released under AGPL-3.0 (including source code). If you cannot comply with
+this, you need a **[commercial license](COMMERCIAL.md)**.
+
+Contact: **cricketbrain.license@gmail.com**
 
 ---
 
