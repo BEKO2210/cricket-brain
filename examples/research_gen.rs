@@ -65,8 +65,31 @@ impl SweepResult {
         self.fp as f32 / denom
     }
 
-    fn detection_rate(&self) -> f32 {
-        self.tpr()
+    /// Wilson score 95% confidence interval for a proportion.
+    /// More accurate than the normal approximation for small N or extreme p.
+    fn wilson_ci(successes: usize, total: usize) -> (f32, f32) {
+        if total == 0 {
+            return (0.0, 1.0);
+        }
+        let n = total as f64;
+        let p = successes as f64 / n;
+        let z = 1.96_f64; // 95% CI
+        let z2 = z * z;
+        let denom = 1.0 + z2 / n;
+        let center = (p + z2 / (2.0 * n)) / denom;
+        let margin = z * ((p * (1.0 - p) / n + z2 / (4.0 * n * n)).sqrt()) / denom;
+        (
+            (center - margin).max(0.0) as f32,
+            (center + margin).min(1.0) as f32,
+        )
+    }
+
+    fn tpr_ci(&self) -> (f32, f32) {
+        Self::wilson_ci(self.tp, self.tp + self.fnn)
+    }
+
+    fn fpr_ci(&self) -> (f32, f32) {
+        Self::wilson_ci(self.fp, self.fp + self.tn)
     }
 }
 
@@ -129,7 +152,7 @@ fn main() {
 
     let snr_levels: Vec<i32> = (-10..=30).step_by(5).collect();
     let sensitivity_grid: [f32; 8] = [0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90];
-    let trials_per_class = 120usize;
+    let trials_per_class = 500usize;
 
     let mut all = Vec::<SweepResult>::new();
 
@@ -179,10 +202,14 @@ fn main() {
     let csv_path = output_path.join("sentinel_sweep.csv");
     let json_path = output_path.join("sentinel_sweep.json");
 
-    let mut csv = String::from("snr_db,sensitivity,tp,fp,tn,fn,tpr,fpr,detection_rate\n");
+    let mut csv = String::from(
+        "snr_db,sensitivity,tp,fp,tn,fn,tpr,tpr_ci_lo,tpr_ci_hi,fpr,fpr_ci_lo,fpr_ci_hi\n",
+    );
     for r in &all {
+        let (tpr_lo, tpr_hi) = r.tpr_ci();
+        let (fpr_lo, fpr_hi) = r.fpr_ci();
         csv.push_str(&format!(
-            "{},{:.2},{},{},{},{},{:.6},{:.6},{:.6}\n",
+            "{},{:.2},{},{},{},{},{:.6},{:.6},{:.6},{:.6},{:.6},{:.6}\n",
             r.snr_db,
             r.sensitivity,
             r.tp,
@@ -190,8 +217,11 @@ fn main() {
             r.tn,
             r.fnn,
             r.tpr(),
+            tpr_lo,
+            tpr_hi,
             r.fpr(),
-            r.detection_rate()
+            fpr_lo,
+            fpr_hi,
         ));
     }
     fs::write(&csv_path, csv).expect("write csv");
@@ -205,16 +235,13 @@ fn main() {
     json.push_str(",\n  \"results\": [\n");
     for (idx, r) in all.iter().enumerate() {
         let comma = if idx + 1 == all.len() { "" } else { "," };
+        let (tpr_lo, tpr_hi) = r.tpr_ci();
+        let (fpr_lo, fpr_hi) = r.fpr_ci();
         json.push_str(&format!(
-            "    {{\"snr_db\":{},\"sensitivity\":{:.2},\"tp\":{},\"fp\":{},\"tn\":{},\"fn\":{},\"tpr\":{:.6},\"fpr\":{:.6}}}{}\n",
-            r.snr_db,
-            r.sensitivity,
-            r.tp,
-            r.fp,
-            r.tn,
-            r.fnn,
-            r.tpr(),
-            r.fpr(),
+            "    {{\"snr_db\":{},\"sensitivity\":{:.2},\"tp\":{},\"fp\":{},\"tn\":{},\"fn\":{},\"tpr\":{:.6},\"tpr_ci\":[{:.6},{:.6}],\"fpr\":{:.6},\"fpr_ci\":[{:.6},{:.6}]}}{}\n",
+            r.snr_db, r.sensitivity, r.tp, r.fp, r.tn, r.fnn,
+            r.tpr(), tpr_lo, tpr_hi,
+            r.fpr(), fpr_lo, fpr_hi,
             comma
         ));
     }
@@ -226,13 +253,19 @@ fn main() {
     println!("  - {}", json_path.display());
     println!("Total points: {}", all.len());
 
-    println!("\nROC sample (SNR = 0 dB):");
+    println!("\nROC sample (SNR = 0 dB) with 95% Wilson CIs:");
     for r in all.iter().filter(|r| r.snr_db == 0) {
+        let (tpr_lo, tpr_hi) = r.tpr_ci();
+        let (fpr_lo, fpr_hi) = r.fpr_ci();
         println!(
-            "  sensitivity={:.2} -> TPR={:.3}, FPR={:.3}",
+            "  sens={:.2} -> TPR={:.3} [{:.3}, {:.3}], FPR={:.3} [{:.3}, {:.3}]",
             r.sensitivity,
             r.tpr(),
-            r.fpr()
+            tpr_lo,
+            tpr_hi,
+            r.fpr(),
+            fpr_lo,
+            fpr_hi,
         );
     }
 }

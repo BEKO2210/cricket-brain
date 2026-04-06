@@ -20,7 +20,10 @@ fn sos_encodes_correctly() {
     // First 3 are dots (50ms), middle 3 are dashes (150ms), last 3 dots (50ms)
     assert_eq!(tones[0].1, 50, "First element of S should be dot (50ms)");
     assert_eq!(tones[3].1, 150, "First element of O should be dash (150ms)");
-    assert_eq!(tones[6].1, 50, "First element of last S should be dot (50ms)");
+    assert_eq!(
+        tones[6].1, 50,
+        "First element of last S should be dot (50ms)"
+    );
 }
 
 #[test]
@@ -74,7 +77,7 @@ fn morse_frequencies_correct() {
 
 #[test]
 fn char_roundtrip() {
-    use cricket_brain::patterns::{MorseSymbol::Dot, MorseSymbol::Dash};
+    use cricket_brain::patterns::{MorseSymbol::Dash, MorseSymbol::Dot};
     // Verify that the Morse table is consistent
     let s_morse = vec![Dot, Dot, Dot];
     let o_morse = vec![Dash, Dash, Dash];

@@ -24,14 +24,9 @@ fn main() {
 
     // Use a well-spaced vocabulary with only the tokens we need.
     // 8 tokens across 2000–9000 Hz = 1000 Hz spacing (clean Gaussian separation).
-    let vocab = TokenVocabulary::new(
-        &["H", "E", "L", "O", "P", "S", "W", "R"],
-        2000.0,
-        9000.0,
-    );
+    let vocab = TokenVocabulary::new(&["H", "E", "L", "O", "P", "S", "W", "R"], 2000.0, 9000.0);
 
-    let mut pred = SequencePredictor::with_params(vocab, 8, 300)
-        .expect("valid predictor config");
+    let mut pred = SequencePredictor::with_params(vocab, 8, 300).expect("valid predictor config");
 
     // Register known patterns (our "training data" — but it's topology, not weights)
     pred.register_pattern("hello", &["H", "E", "L", "L", "O"])
@@ -57,10 +52,7 @@ fn main() {
         pred.bank.channels.len(),
         pred.vocab.freq_spacing()
     );
-    println!(
-        "Total neurons: {}\n",
-        pred.total_neurons(),
-    );
+    println!("Total neurons: {}\n", pred.total_neurons(),);
 
     // === Test 1: "H, E, L" → should predict "L" (hello) or "P" (help) ===
     println!("--- Test 1: Feed H → E → L (shared prefix of 'hello' and 'help') ---");
@@ -115,7 +107,8 @@ fn print_state(pred: &SequencePredictor, context: &str) {
     }
 
     for (i, p) in all.iter().enumerate() {
-        let pattern_len = pred.patterns
+        let pattern_len = pred
+            .patterns
             .iter()
             .find(|pat| pat.name == p.pattern_name)
             .map(|pat| pat.token_ids.len())

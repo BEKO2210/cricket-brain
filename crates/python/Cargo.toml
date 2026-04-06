@@ -1,6 +1,6 @@
 [package]
 name = "cricket-brain-python"
-version = "1.0.0-rc1"
+version = "1.0.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "PyO3 bindings for cricket-brain"
@@ -11,5 +11,5 @@ name = "cricket_brain"
 crate-type = ["cdylib"]
 
 [dependencies]
-cricket-brain = { path = "../..", version = "1.0.0-rc1" }
-pyo3 = { version = "0.22", features = ["extension-module"] }
+cricket-brain = { path = "../..", version = "1.0.0" }
+pyo3 = { version = "0.24", features = ["extension-module"] }

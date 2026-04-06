@@ -136,7 +136,6 @@ struct PatternMatcher {
     /// Timestep when the last token was matched.
     last_match_step: usize,
     /// Maximum allowed gap between consecutive token matches (ms).
-    #[allow(dead_code)]
     max_gap: usize,
     /// Most recent SNR estimate when this matcher advanced.
     last_snr: f32,
@@ -389,16 +388,16 @@ impl SequencePredictor {
             let pattern = &self.patterns[m.pattern_idx];
             let expected = pattern.token_ids[m.matched_count];
             let gap = self.time_step - m.last_match_step;
-            let jitter = gap.saturating_sub(self.max_pattern_gap) as f32;
+            let jitter = gap.saturating_sub(m.max_gap) as f32;
 
-            if token_id == expected && gap <= self.max_pattern_gap + self.temporal_tolerance_ms {
+            if token_id == expected && gap <= m.max_gap + self.temporal_tolerance_ms {
                 m.matched_count += 1;
                 m.last_match_step = self.time_step;
                 m.last_snr = self.last_snr_estimate;
                 m.last_jitter = jitter;
                 // Keep the matcher if pattern isn't fully matched yet
                 m.matched_count < pattern.token_ids.len()
-            } else if gap > self.max_pattern_gap + self.temporal_tolerance_ms {
+            } else if gap > m.max_gap + self.temporal_tolerance_ms {
                 false // expired
             } else {
                 true // keep waiting
@@ -454,8 +453,9 @@ impl SequencePredictor {
 
             let next_token_id = pattern.token_ids[matcher.matched_count];
             let progress = matcher.matched_count as f32 / pattern.token_ids.len() as f32;
-            let confidence =
-                self.compute_confidence(matcher.last_snr, matcher.last_jitter) * progress * pattern.weight;
+            let confidence = self.compute_confidence(matcher.last_snr, matcher.last_jitter)
+                * progress
+                * pattern.weight;
 
             let label = self
                 .vocab
@@ -494,8 +494,9 @@ impl SequencePredictor {
 
             let next_token_id = pattern.token_ids[matcher.matched_count];
             let progress = matcher.matched_count as f32 / pattern.token_ids.len() as f32;
-            let confidence =
-                self.compute_confidence(matcher.last_snr, matcher.last_jitter) * progress * pattern.weight;
+            let confidence = self.compute_confidence(matcher.last_snr, matcher.last_jitter)
+                * progress
+                * pattern.weight;
 
             let label = self
                 .vocab

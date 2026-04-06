@@ -16,8 +16,7 @@ fn main() {
 
     let t0 = Instant::now();
     let vocab = TokenVocabulary::from_labels(&label_refs);
-    let mut pred = SequencePredictor::with_params(vocab, 8, 300)
-        .expect("valid predictor config");
+    let mut pred = SequencePredictor::with_params(vocab, 8, 300).expect("valid predictor config");
 
     // Register 1000 random-ish patterns (3-8 tokens each)
     for i in 0..1000 {
@@ -38,10 +37,7 @@ fn main() {
     println!("Patterns:         {}", pred.patterns.len());
     println!("Total neurons:    {neurons}");
     println!("Init time:        {init_time:.2?}");
-    println!(
-        "Memory:           {:.2} MB",
-        mem as f64 / 1_048_576.0
-    );
+    println!("Memory:           {:.2} MB", mem as f64 / 1_048_576.0);
 
     // Benchmark: feed 1000 steps
     let steps = 1000;
@@ -73,7 +69,10 @@ fn main() {
     }
 
     println!("\n--- Comparison ---");
-    println!("Cricket-Brain v0.3: {neurons} neurons, {:.2} MB, {neuron_ops:.2e} ops/sec", mem as f64 / 1_048_576.0);
+    println!(
+        "Cricket-Brain v0.3: {neurons} neurons, {:.2} MB, {neuron_ops:.2e} ops/sec",
+        mem as f64 / 1_048_576.0
+    );
     println!("GPT-4:              ~1.8T params, ~800 GB, ~3.1e17 FLOPS");
     println!("\nCricket-Brain does sequence prediction with:");
     println!("  - 0 training");

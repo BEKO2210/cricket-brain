@@ -38,6 +38,12 @@ fn main() {
     println!("\n--- Comparison ---");
     println!("Cricket-Brain:    {neurons_per_sec:.2e} neuron-ops/sec (single-threaded, CPU)");
     println!("GPT-4 estimate:   ~3.1e17 FLOPS (multi-GPU cluster)");
-    println!("Ratio:            Cricket runs at {:.2e}x the ops", neurons_per_sec / 3.1e17);
-    println!("\nBut Cricket-Brain needs: 0 GPU, {:.2} MB RAM, 0 training", mem as f64 / 1_048_576.0);
+    println!(
+        "Ratio:            Cricket runs at {:.2e}x the ops",
+        neurons_per_sec / 3.1e17
+    );
+    println!(
+        "\nBut Cricket-Brain needs: 0 GPU, {:.2} MB RAM, 0 training",
+        mem as f64 / 1_048_576.0
+    );
 }

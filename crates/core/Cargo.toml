@@ -1,11 +1,12 @@
 [package]
 name = "cricket-brain-core"
-version = "1.0.0-rc1"
+version = "1.0.0"
 edition = "2021"
 rust-version = "1.75"
 license = "MIT OR Apache-2.0"
 description = "no_std core primitives for cricket-brain: neuron/synapse, telemetry, and error types"
 documentation = "https://docs.rs/cricket-brain-core"
+readme = "../../README.md"
 repository = "https://github.com/BEKO2210/cricket-brain"
 keywords = ["neuromorphic", "no-std", "embedded", "signal-processing"]
 categories = ["science", "algorithms", "embedded", "no-std"]

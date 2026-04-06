@@ -1,7 +1,8 @@
 use cricket_brain::brain::{BrainConfig, CricketBrain};
 
 fn run_reference_trace() -> Vec<f32> {
-    let mut brain = CricketBrain::new(BrainConfig::default()).expect("default config must be valid");
+    let mut brain =
+        CricketBrain::new(BrainConfig::default()).expect("default config must be valid");
     let mut outputs = Vec::new();
     let input = [
         0.0, 4500.0, 4500.0, 4500.0, 0.0, 0.0, 4500.0, 4500.0, 0.0, 4500.0, 0.0, 0.0,

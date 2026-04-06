@@ -9,8 +9,7 @@ fn main() {
     println!("{}", "-".repeat(36));
 
     for ch in 'A'..='Z' {
-        let mut brain = CricketBrain::new(Default::default())
-            .expect("valid default brain config");
+        let mut brain = CricketBrain::new(Default::default()).expect("valid default brain config");
         let signal = encode_morse(&ch.to_string());
 
         let mut total_steps = 0;

@@ -56,6 +56,12 @@ pub enum TelemetryEvent {
     },
 }
 
+/// Telemetry hooks for observing simulation behavior without mutating state.
+///
+/// Implement this trait to receive structured events from `CricketBrain` or
+/// `SequencePredictor` during processing. The default method implementations
+/// delegate to [`Telemetry::on_event`], so overriding that single method is
+/// sufficient to capture all events.
 pub trait Telemetry {
     /// Structured telemetry event hook.
     fn on_event(&mut self, _event: TelemetryEvent) {}

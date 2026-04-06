@@ -57,7 +57,7 @@ impl DelaySynapse {
     ///
     /// # Example
     /// ```
-    /// use cricket_brain::synapse::DelaySynapse;
+    /// use cricket_brain_core::synapse::DelaySynapse;
     /// let syn = DelaySynapse::new(0, 1, 3, true);
     /// assert_eq!(syn.delay_ms, 3);
     /// assert!(syn.inhibitory);
