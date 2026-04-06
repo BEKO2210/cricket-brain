@@ -4,9 +4,13 @@
 //! A [`ResonatorBank`] contains parallel 5-neuron circuits, each tuned to one
 //! token's frequency — enabling simultaneous multi-token detection.
 
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
+#[cfg(feature = "std")]
 use std::collections::HashMap;
 
 /// A token maps a symbolic label to a unique carrier frequency.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Token {
     /// Human-readable label (e.g., "A", "hello", "verb").
@@ -29,11 +33,13 @@ pub struct Token {
 /// let token = vocab.get("A").unwrap();
 /// assert!(token.freq >= 2000.0 && token.freq <= 8000.0);
 /// ```
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone)]
 pub struct TokenVocabulary {
     /// All tokens, indexed by their ID.
     pub tokens: Vec<Token>,
     /// Label → token ID mapping for fast lookup.
+    #[cfg(feature = "std")]
     label_map: HashMap<String, usize>,
     /// Lower bound of the frequency band (Hz).
     pub freq_min: f32,
@@ -60,6 +66,7 @@ impl TokenVocabulary {
         };
 
         let mut tokens = Vec::with_capacity(n);
+        #[cfg(feature = "std")]
         let mut label_map = HashMap::with_capacity(n);
 
         for (i, &label) in labels.iter().enumerate() {
@@ -69,11 +76,13 @@ impl TokenVocabulary {
                 freq,
                 id: i,
             });
+            #[cfg(feature = "std")]
             label_map.insert(label.to_string(), i);
         }
 
         TokenVocabulary {
             tokens,
+            #[cfg(feature = "std")]
             label_map,
             freq_min,
             freq_max,
@@ -102,7 +111,15 @@ impl TokenVocabulary {
 
     /// Looks up a token by label.
     pub fn get(&self, label: &str) -> Option<&Token> {
-        self.label_map.get(label).map(|&id| &self.tokens[id])
+        #[cfg(feature = "std")]
+        {
+            self.label_map.get(label).map(|&id| &self.tokens[id])
+        }
+
+        #[cfg(not(feature = "std"))]
+        {
+            self.tokens.iter().find(|t| t.label == label)
+        }
     }
 
     /// Looks up a token by ID.
@@ -134,15 +151,16 @@ impl TokenVocabulary {
     /// A vector of `(frequency_hz, duration_ms)` pairs.
     pub fn encode_text(&self, text: &str, token_ms: usize, gap_ms: usize) -> Vec<(f32, usize)> {
         let upper = text.to_uppercase();
+        let chars: Vec<char> = upper.chars().collect();
         let mut result = Vec::new();
 
-        for (i, ch) in upper.chars().enumerate() {
+        for (i, ch) in chars.iter().enumerate() {
             let label = ch.to_string();
             if let Some(token) = self.get(&label) {
                 result.push((token.freq, token_ms));
             }
             // Gap between tokens (but not after the last one)
-            if i + 1 < upper.chars().count() {
+            if i + 1 < chars.len() {
                 result.push((0.0, gap_ms));
             }
         }

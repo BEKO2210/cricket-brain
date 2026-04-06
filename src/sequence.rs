@@ -19,8 +19,101 @@
 //! This is a train-free associative memory: patterns are stored as topology,
 //! not as learned weights.
 
+use crate::error::CricketError;
 use crate::resonator_bank::ResonatorBank;
 use crate::token::TokenVocabulary;
+use alloc::collections::{BTreeMap, VecDeque};
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
+use core::cmp::Ordering;
+use core::mem;
+
+/// Configuration object for [`SequencePredictor`].
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone)]
+pub struct PredictorConfig {
+    /// Minimum detections in the sliding window to confirm a token.
+    pub debounce_ms: usize,
+    /// Maximum number of token detections kept in history.
+    pub history_size: usize,
+    /// Size of the majority-vote window.
+    pub window_size: usize,
+    /// Maximum gap (ms) between consecutive tokens in a pattern.
+    pub max_pattern_gap: usize,
+    /// Extra timing margin to tolerate real-world jitter.
+    pub temporal_tolerance_ms: usize,
+}
+
+impl PredictorConfig {
+    pub fn with_debounce(mut self, debounce_ms: usize) -> Self {
+        self.debounce_ms = debounce_ms;
+        if self.window_size < self.debounce_ms {
+            self.window_size = self.debounce_ms + 4;
+        }
+        self
+    }
+
+    pub fn with_history_size(mut self, history_size: usize) -> Self {
+        self.history_size = history_size;
+        self
+    }
+
+    pub fn with_window_size(mut self, window_size: usize) -> Self {
+        self.window_size = window_size;
+        self
+    }
+
+    pub fn with_max_pattern_gap(mut self, max_pattern_gap: usize) -> Self {
+        self.max_pattern_gap = max_pattern_gap;
+        self
+    }
+
+    pub fn with_temporal_tolerance(mut self, temporal_tolerance_ms: usize) -> Self {
+        self.temporal_tolerance_ms = temporal_tolerance_ms;
+        self
+    }
+
+    pub fn validate(&self) -> Result<(), CricketError> {
+        if self.debounce_ms == 0 {
+            return Err(CricketError::InvalidConfiguration(
+                "debounce_ms must be greater than 0".to_string(),
+            ));
+        }
+        if self.history_size == 0 {
+            return Err(CricketError::InvalidConfiguration(
+                "history_size must be greater than 0".to_string(),
+            ));
+        }
+        if self.window_size < self.debounce_ms {
+            return Err(CricketError::InvalidConfiguration(
+                "window_size must be >= debounce_ms".to_string(),
+            ));
+        }
+        if self.max_pattern_gap == 0 {
+            return Err(CricketError::InvalidConfiguration(
+                "max_pattern_gap must be greater than 0".to_string(),
+            ));
+        }
+        if self.temporal_tolerance_ms > self.max_pattern_gap {
+            return Err(CricketError::InvalidConfiguration(
+                "temporal_tolerance_ms must be <= max_pattern_gap".to_string(),
+            ));
+        }
+        Ok(())
+    }
+}
+
+impl Default for PredictorConfig {
+    fn default() -> Self {
+        Self {
+            debounce_ms: 8,
+            history_size: 256,
+            window_size: 12,
+            max_pattern_gap: 200,
+            temporal_tolerance_ms: 8,
+        }
+    }
+}
 
 /// A registered pattern (N-gram) stored as a sequence of token IDs.
 #[derive(Debug, Clone)]
@@ -45,6 +138,10 @@ struct PatternMatcher {
     /// Maximum allowed gap between consecutive token matches (ms).
     #[allow(dead_code)]
     max_gap: usize,
+    /// Most recent SNR estimate when this matcher advanced.
+    last_snr: f32,
+    /// Most recent jitter estimate (ms) for this matcher.
+    last_jitter: f32,
 }
 
 /// A prediction result with the predicted next token and confidence.
@@ -60,6 +157,12 @@ pub struct Prediction {
     pub pattern_name: String,
     /// How many tokens of the pattern have been matched.
     pub matched_length: usize,
+    /// SNR used in confidence computation.
+    pub snr: f32,
+    /// Jitter (ms) used in confidence computation.
+    pub jitter: f32,
+    /// Temporal tolerance (ms) used in confidence computation.
+    pub tolerance: f32,
 }
 
 /// Sequence predictor using delay-line pattern memory.
@@ -73,10 +176,10 @@ pub struct Prediction {
 /// use cricket_brain::sequence::SequencePredictor;
 ///
 /// let vocab = TokenVocabulary::from_alphabet();
-/// let mut pred = SequencePredictor::new(vocab.clone());
+/// let mut pred = SequencePredictor::new(vocab.clone(), Default::default()).unwrap();
 ///
 /// // Register "HELLO" as a known pattern
-/// pred.register_pattern("greeting", &["H", "E", "L", "L", "O"]);
+/// pred.register_pattern("greeting", &["H", "E", "L", "L", "O"]).unwrap();
 ///
 /// // Feed "H", "E", "L" → predictor should predict "L" (4th char)
 /// let h_freq = vocab.get("H").unwrap().freq;
@@ -105,44 +208,48 @@ pub struct SequencePredictor {
     /// Active pattern matchers tracking partial matches.
     matchers: Vec<PatternMatcher>,
     /// History of detected token IDs (ring buffer).
-    pub token_history: Vec<Option<usize>>,
+    pub token_history: VecDeque<Option<usize>>,
     /// Maximum history length.
     history_capacity: usize,
     /// Current timestep.
     pub time_step: usize,
     /// Last detected token ID (debounced).
     last_detected: Option<usize>,
-    /// How long the current token has been continuously detected.
-    detection_hold: usize,
     /// Minimum hold time (ms) before a token detection is confirmed.
     min_hold: usize,
     /// Sliding window of recent detections for majority-vote debounce.
-    detection_window: Vec<Option<usize>>,
+    detection_window: VecDeque<Option<usize>>,
     /// Size of the majority-vote window.
     window_size: usize,
     /// Maximum gap (ms) between consecutive tokens in a pattern.
     max_pattern_gap: usize,
+    /// Additional margin allowed around expected gaps.
+    temporal_tolerance_ms: usize,
+    /// Last SNR estimate for token discrimination.
+    last_snr_estimate: f32,
 }
 
 impl SequencePredictor {
     /// Creates a new sequence predictor with the given vocabulary.
-    pub fn new(vocab: TokenVocabulary) -> Self {
+    pub fn new(vocab: TokenVocabulary, config: PredictorConfig) -> Result<Self, CricketError> {
+        config.validate()?;
         let bank = ResonatorBank::new(&vocab);
-        SequencePredictor {
+        Ok(SequencePredictor {
             vocab,
             bank,
             patterns: Vec::new(),
             matchers: Vec::new(),
-            token_history: Vec::new(),
-            history_capacity: 256,
+            token_history: VecDeque::new(),
+            history_capacity: config.history_size,
             time_step: 0,
             last_detected: None,
-            detection_hold: 0,
-            min_hold: 8,
-            detection_window: Vec::new(),
-            window_size: 12,
-            max_pattern_gap: 200,
-        }
+            min_hold: config.debounce_ms,
+            detection_window: VecDeque::new(),
+            window_size: config.window_size,
+            max_pattern_gap: config.max_pattern_gap,
+            temporal_tolerance_ms: config.temporal_tolerance_ms,
+            last_snr_estimate: 0.0,
+        })
     }
 
     /// Creates a predictor with custom timing parameters.
@@ -151,24 +258,15 @@ impl SequencePredictor {
     /// * `vocab` - Token vocabulary
     /// * `min_hold` - Minimum detections in the sliding window to confirm a token
     /// * `max_pattern_gap` - Maximum ms between consecutive tokens in a pattern
-    pub fn with_params(vocab: TokenVocabulary, min_hold: usize, max_pattern_gap: usize) -> Self {
-        let bank = ResonatorBank::new(&vocab);
-        let window_size = min_hold + 4; // window slightly larger than threshold
-        SequencePredictor {
-            vocab,
-            bank,
-            patterns: Vec::new(),
-            matchers: Vec::new(),
-            token_history: Vec::new(),
-            history_capacity: 256,
-            time_step: 0,
-            last_detected: None,
-            detection_hold: 0,
-            min_hold,
-            detection_window: Vec::new(),
-            window_size,
-            max_pattern_gap,
-        }
+    pub fn with_params(
+        vocab: TokenVocabulary,
+        min_hold: usize,
+        max_pattern_gap: usize,
+    ) -> Result<Self, CricketError> {
+        let config = PredictorConfig::default()
+            .with_debounce(min_hold)
+            .with_max_pattern_gap(max_pattern_gap);
+        Self::new(vocab, config)
     }
 
     /// Registers a named pattern (N-gram) for prediction.
@@ -177,32 +275,39 @@ impl SequencePredictor {
     /// * `name` - Human-readable name (e.g., "greeting")
     /// * `labels` - Token labels forming the pattern (e.g., `["H", "E", "L", "L", "O"]`)
     ///
-    /// # Panics
-    /// Panics if any label is not in the vocabulary.
-    pub fn register_pattern(&mut self, name: &str, labels: &[&str]) {
-        let token_ids: Vec<usize> = labels
+    /// # Errors
+    /// Returns [`CricketError::TokenNotFound`] if any label is not in the vocabulary.
+    pub fn register_pattern(&mut self, name: &str, labels: &[&str]) -> Result<(), CricketError> {
+        let token_ids: Result<Vec<usize>, CricketError> = labels
             .iter()
             .map(|&label| {
                 self.vocab
                     .get(label)
-                    .unwrap_or_else(|| panic!("Token '{label}' not in vocabulary"))
-                    .id
+                    .map(|t| t.id)
+                    .ok_or_else(|| CricketError::TokenNotFound(label.to_string()))
             })
             .collect();
 
         self.patterns.push(Pattern {
             name: name.to_string(),
-            token_ids,
+            token_ids: token_ids?,
             weight: 1.0,
         });
+        Ok(())
     }
 
     /// Registers a pattern with a custom weight.
-    pub fn register_weighted_pattern(&mut self, name: &str, labels: &[&str], weight: f32) {
-        self.register_pattern(name, labels);
+    pub fn register_weighted_pattern(
+        &mut self,
+        name: &str,
+        labels: &[&str],
+        weight: f32,
+    ) -> Result<(), CricketError> {
+        self.register_pattern(name, labels)?;
         if let Some(p) = self.patterns.last_mut() {
             p.weight = weight;
         }
+        Ok(())
     }
 
     /// Processes one timestep with the given input frequency.
@@ -218,20 +323,21 @@ impl SequencePredictor {
     pub fn step(&mut self, input_freq: f32) -> Vec<f32> {
         let activations = self.bank.step(input_freq);
         self.time_step += 1;
+        self.last_snr_estimate = self.estimate_snr(&activations);
 
         // Find the currently active token (if any)
         let detected = activations
             .iter()
             .enumerate()
             .filter(|(_, &v)| v > 0.0)
-            .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
+            .max_by(|a, b| a.1.partial_cmp(b.1).unwrap_or(Ordering::Equal))
             .map(|(id, _)| id);
 
         // Sliding-window majority-vote debounce:
         // Collect recent detections, confirm when a token reaches min_hold votes.
-        self.detection_window.push(detected);
+        self.detection_window.push_back(detected);
         if self.detection_window.len() > self.window_size {
-            self.detection_window.remove(0);
+            self.detection_window.pop_front();
         }
 
         // Count votes for each token in the window
@@ -258,7 +364,7 @@ impl SequencePredictor {
 
     /// Returns the token with >= min_hold votes in the detection window, if any.
     fn majority_token(&self) -> Option<usize> {
-        let mut counts = std::collections::HashMap::new();
+        let mut counts = BTreeMap::new();
         for id in self.detection_window.iter().flatten() {
             *counts.entry(*id).or_insert(0usize) += 1;
         }
@@ -273,9 +379,9 @@ impl SequencePredictor {
     fn on_token_confirmed(&mut self, token_id: usize) {
         // Add to history
         if self.token_history.len() >= self.history_capacity {
-            self.token_history.remove(0);
+            self.token_history.pop_front();
         }
-        self.token_history.push(Some(token_id));
+        self.token_history.push_back(Some(token_id));
 
         // Update existing matchers
         let mut new_matchers = Vec::new();
@@ -283,13 +389,16 @@ impl SequencePredictor {
             let pattern = &self.patterns[m.pattern_idx];
             let expected = pattern.token_ids[m.matched_count];
             let gap = self.time_step - m.last_match_step;
+            let jitter = gap.saturating_sub(self.max_pattern_gap) as f32;
 
-            if token_id == expected && gap <= self.max_pattern_gap {
+            if token_id == expected && gap <= self.max_pattern_gap + self.temporal_tolerance_ms {
                 m.matched_count += 1;
                 m.last_match_step = self.time_step;
+                m.last_snr = self.last_snr_estimate;
+                m.last_jitter = jitter;
                 // Keep the matcher if pattern isn't fully matched yet
                 m.matched_count < pattern.token_ids.len()
-            } else if gap > self.max_pattern_gap {
+            } else if gap > self.max_pattern_gap + self.temporal_tolerance_ms {
                 false // expired
             } else {
                 true // keep waiting
@@ -300,15 +409,18 @@ impl SequencePredictor {
         for (pi, pattern) in self.patterns.iter().enumerate() {
             if pattern.token_ids[0] == token_id {
                 // Don't duplicate if we already have a matcher at position 1
-                let already_exists = self.matchers.iter().any(|m| {
-                    m.pattern_idx == pi && m.matched_count == 1
-                });
+                let already_exists = self
+                    .matchers
+                    .iter()
+                    .any(|m| m.pattern_idx == pi && m.matched_count == 1);
                 if !already_exists {
                     new_matchers.push(PatternMatcher {
                         pattern_idx: pi,
                         matched_count: 1,
                         last_match_step: self.time_step,
                         max_gap: self.max_pattern_gap,
+                        last_snr: self.last_snr_estimate,
+                        last_jitter: 0.0,
                     });
                 }
             }
@@ -321,6 +433,16 @@ impl SequencePredictor {
     ///
     /// Examines all active pattern matchers and returns the prediction from
     /// the one with the highest confidence (longest match * weight).
+    ///
+    /// Confidence model (certainty layer):
+    /// \[
+    /// C = \operatorname{clip}\left(\frac{\mathrm{SNR}}{1+\mathrm{SNR}}
+    /// \cdot \left(1 - \frac{J}{T}\right), 0, 1\right)
+    /// \]
+    /// where:
+    /// - \(\mathrm{SNR}\) is the instantaneous signal-to-noise ratio estimate,
+    /// - \(J\) is temporal jitter in ms,
+    /// - \(T\) is configured temporal tolerance in ms.
     pub fn predict(&self) -> Option<Prediction> {
         let mut best: Option<Prediction> = None;
 
@@ -332,7 +454,8 @@ impl SequencePredictor {
 
             let next_token_id = pattern.token_ids[matcher.matched_count];
             let progress = matcher.matched_count as f32 / pattern.token_ids.len() as f32;
-            let confidence = progress * pattern.weight;
+            let confidence =
+                self.compute_confidence(matcher.last_snr, matcher.last_jitter) * progress * pattern.weight;
 
             let label = self
                 .vocab
@@ -346,6 +469,9 @@ impl SequencePredictor {
                 confidence,
                 pattern_name: pattern.name.clone(),
                 matched_length: matcher.matched_count,
+                snr: matcher.last_snr,
+                jitter: matcher.last_jitter,
+                tolerance: self.temporal_tolerance_ms as f32,
             };
 
             if best.as_ref().map_or(true, |b| confidence > b.confidence) {
@@ -368,7 +494,8 @@ impl SequencePredictor {
 
             let next_token_id = pattern.token_ids[matcher.matched_count];
             let progress = matcher.matched_count as f32 / pattern.token_ids.len() as f32;
-            let confidence = progress * pattern.weight;
+            let confidence =
+                self.compute_confidence(matcher.last_snr, matcher.last_jitter) * progress * pattern.weight;
 
             let label = self
                 .vocab
@@ -382,10 +509,17 @@ impl SequencePredictor {
                 confidence,
                 pattern_name: pattern.name.clone(),
                 matched_length: matcher.matched_count,
+                snr: matcher.last_snr,
+                jitter: matcher.last_jitter,
+                tolerance: self.temporal_tolerance_ms as f32,
             });
         }
 
-        predictions.sort_by(|a, b| b.confidence.partial_cmp(&a.confidence).unwrap());
+        predictions.sort_by(|a, b| {
+            b.confidence
+                .partial_cmp(&a.confidence)
+                .unwrap_or(Ordering::Equal)
+        });
         predictions
     }
 
@@ -398,9 +532,7 @@ impl SequencePredictor {
     pub fn history_labels(&self) -> Vec<String> {
         self.token_history
             .iter()
-            .filter_map(|opt| {
-                opt.and_then(|id| self.vocab.get_by_id(id).map(|t| t.label.clone()))
-            })
+            .filter_map(|opt| opt.and_then(|id| self.vocab.get_by_id(id).map(|t| t.label.clone())))
             .collect()
     }
 
@@ -411,7 +543,6 @@ impl SequencePredictor {
         self.token_history.clear();
         self.time_step = 0;
         self.last_detected = None;
-        self.detection_hold = 0;
         self.detection_window.clear();
     }
 
@@ -428,9 +559,31 @@ impl SequencePredictor {
             .iter()
             .map(|p| p.token_ids.len() * 8 + p.name.len() + 32)
             .sum();
-        let matcher_mem = self.matchers.len() * std::mem::size_of::<PatternMatcher>();
-        let history_mem = self.token_history.capacity() * std::mem::size_of::<Option<usize>>();
+        let matcher_mem = self.matchers.len() * mem::size_of::<PatternMatcher>();
+        let history_mem = self.token_history.capacity() * mem::size_of::<Option<usize>>();
         bank_mem + pattern_mem + matcher_mem + history_mem
+    }
+
+    fn estimate_snr(&self, activations: &[f32]) -> f32 {
+        if activations.is_empty() {
+            return 0.0;
+        }
+        let mut sorted = activations.to_vec();
+        sorted.sort_by(|a, b| b.partial_cmp(a).unwrap_or(Ordering::Equal));
+        let signal = sorted[0].max(0.0);
+        let noise = if sorted.len() > 1 {
+            sorted[1..].iter().copied().sum::<f32>() / (sorted.len() - 1) as f32
+        } else {
+            0.0
+        };
+        signal / (noise + 1e-6)
+    }
+
+    fn compute_confidence(&self, snr: f32, jitter: f32) -> f32 {
+        let tolerance = self.temporal_tolerance_ms.max(1) as f32;
+        let snr_term = snr.max(0.0);
+        let jitter_term = (1.0 - (jitter / tolerance)).clamp(0.0, 1.0);
+        (snr_term * jitter_term).clamp(0.0, 1.0)
     }
 }
 
@@ -457,8 +610,9 @@ mod tests {
     #[test]
     fn test_pattern_registration() {
         let vocab = test_vocab();
-        let mut pred = SequencePredictor::new(vocab);
-        pred.register_pattern("abc", &["A", "B", "C", "D", "E"]);
+        let mut pred = SequencePredictor::new(vocab, PredictorConfig::default()).unwrap();
+        pred.register_pattern("abc", &["A", "B", "C", "D", "E"])
+            .unwrap();
         assert_eq!(pred.patterns.len(), 1);
         assert_eq!(pred.patterns[0].token_ids.len(), 5);
     }
@@ -466,8 +620,8 @@ mod tests {
     #[test]
     fn test_single_token_detection() {
         let vocab = test_vocab();
-        let mut pred = SequencePredictor::new(vocab);
-        pred.register_pattern("ab", &["A", "B"]);
+        let mut pred = SequencePredictor::new(vocab, PredictorConfig::default()).unwrap();
+        pred.register_pattern("ab", &["A", "B"]).unwrap();
 
         let a_freq = pred.vocab.get("A").unwrap().freq;
         for _ in 0..50 {
@@ -483,8 +637,8 @@ mod tests {
     #[test]
     fn test_prediction_after_partial_match() {
         let vocab = test_vocab();
-        let mut pred = SequencePredictor::with_params(vocab, 8, 300);
-        pred.register_pattern("seq", &["A", "B", "C"]);
+        let mut pred = SequencePredictor::with_params(vocab, 8, 300).unwrap();
+        pred.register_pattern("seq", &["A", "B", "C"]).unwrap();
 
         feed_token(&mut pred, "A", 50, 40);
 
@@ -497,8 +651,9 @@ mod tests {
     #[test]
     fn test_prediction_confidence_increases() {
         let vocab = test_vocab();
-        let mut pred = SequencePredictor::with_params(vocab, 8, 300);
-        pred.register_pattern("seq", &["A", "B", "C", "D", "E"]);
+        let mut pred = SequencePredictor::with_params(vocab, 8, 300).unwrap();
+        pred.register_pattern("seq", &["A", "B", "C", "D", "E"])
+            .unwrap();
 
         feed_token(&mut pred, "A", 50, 40);
         let c1 = pred.predict().map(|p| p.confidence).unwrap_or(0.0);
@@ -506,16 +661,13 @@ mod tests {
         feed_token(&mut pred, "B", 50, 40);
         let c2 = pred.predict().map(|p| p.confidence).unwrap_or(0.0);
 
-        assert!(
-            c2 > c1,
-            "Confidence should increase: {c1} → {c2}"
-        );
+        assert!(c2 > c1, "Confidence should increase: {c1} → {c2}");
     }
 
     #[test]
     fn test_no_prediction_without_patterns() {
         let vocab = test_vocab();
-        let mut pred = SequencePredictor::new(vocab);
+        let mut pred = SequencePredictor::new(vocab, PredictorConfig::default()).unwrap();
 
         let a_freq = pred.vocab.get("A").unwrap().freq;
         for _ in 0..50 {

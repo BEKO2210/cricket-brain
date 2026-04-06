@@ -26,7 +26,7 @@ fn sos_encodes_correctly() {
 #[test]
 fn no_spikes_during_silence() {
     // Critical test: the brain should produce ZERO spikes during silence periods.
-    let mut brain = CricketBrain::new();
+    let mut brain = CricketBrain::new(Default::default()).unwrap();
     let signal = encode_morse("SOS");
 
     let mut silence_spikes = 0;

@@ -1,0 +1,11 @@
+[book]
+title = "Cricket-Brain Developer Book"
+authors = ["Cricket-Brain Contributors"]
+language = "en"
+multilingual = false
+src = "src"
+
+[output.html]
+default-theme = "light"
+git-repository-url = "https://github.com/BEKO2210/cricket-brain"
+edit-url-template = "https://github.com/BEKO2210/cricket-brain/edit/main/{path}"

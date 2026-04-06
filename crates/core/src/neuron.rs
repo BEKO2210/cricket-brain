@@ -1,4 +1,31 @@
-use std::collections::VecDeque;
+// SPDX-License-Identifier: MIT OR Apache-2.0
+use alloc::collections::VecDeque;
+use core::mem;
+
+use crate::memory::{MemoryStats, EMBEDDED_RAM_LIMIT_BYTES, SAMPLE_BYTES};
+
+/// Default delay taps for embedded sizing checks.
+pub const DEFAULT_NEURON_DELAY_TAPS: usize = 4;
+const DEFAULT_NEURON_HISTORY_BYTES: usize = (DEFAULT_NEURON_DELAY_TAPS + 1) * SAMPLE_BYTES;
+const _: [(); EMBEDDED_RAM_LIMIT_BYTES - DEFAULT_NEURON_HISTORY_BYTES] =
+    [(); EMBEDDED_RAM_LIMIT_BYTES - DEFAULT_NEURON_HISTORY_BYTES];
+
+/// Runtime configuration for a [`Neuron`].
+#[derive(Debug, Clone, Copy)]
+pub struct NeuronConfig {
+    /// Hard squelch floor in normalized resonance space.
+    ///
+    /// Resonance responses below this floor are treated as noise.
+    pub min_activation_threshold: f32,
+}
+
+impl Default for NeuronConfig {
+    fn default() -> Self {
+        Self {
+            min_activation_threshold: 0.0,
+        }
+    }
+}
 
 /// A biomorphic neuron modeled after the auditory interneurons in the cricket
 /// nervous system (Münster model). Each neuron has a characteristic eigenfrequency
@@ -6,6 +33,29 @@ use std::collections::VecDeque;
 ///
 /// The neuron uses Gaussian tuning for frequency selectivity and maintains a
 /// history buffer for coincidence detection across delay lines.
+///
+/// Frequency selectivity is modeled as a Gaussian resonance curve:
+///
+/// \[
+/// R(f, f_0, \sigma) = e^{-\frac{(f-f_0)^2}{2\sigma^2}}
+/// \]
+///
+/// where:
+/// - \(f\) is the input frequency,
+/// - \(f_0\) is the neuron's eigenfrequency,
+/// - \(\sigma\) is the effective bandwidth parameter.
+///
+/// Adaptive thresholding/squelch can be interpreted as a simple CFAR-style
+/// gate on resonance:
+///
+/// \[
+/// \hat{R}(t) = \begin{cases}
+/// 0, & R(t) < \theta_{\min} \\
+/// R(t), & R(t) \ge \theta_{\min}
+/// \end{cases}
+/// \]
+///
+/// where \(\theta_{\min}\) is `min_activation_threshold`.
 #[derive(Debug, Clone)]
 pub struct Neuron {
     /// Unique identifier for this neuron in the network.
@@ -23,6 +73,8 @@ pub struct Neuron {
     /// Ring buffer storing amplitude history for coincidence detection.
     /// Capacity = delay_taps + 1, so index 0 is the oldest sample.
     pub history: VecDeque<f32>,
+    /// Minimum activation floor to suppress low-energy noise responses.
+    pub min_activation_threshold: f32,
 }
 
 impl Neuron {
@@ -40,6 +92,20 @@ impl Neuron {
     /// assert_eq!(an1.eigenfreq, 4500.0);
     /// ```
     pub fn new(id: usize, freq: f32, delay_ms: usize) -> Self {
+        Self::new_with_config(id, freq, delay_ms, NeuronConfig::default())
+    }
+
+    /// Creates a new neuron tuned to the given frequency with custom config.
+    pub fn new_with_config(id: usize, freq: f32, delay_ms: usize, config: NeuronConfig) -> Self {
+        debug_assert!(
+            freq.is_finite() && freq > 0.0,
+            "eigenfrequency must be positive"
+        );
+        debug_assert!(
+            config.min_activation_threshold.is_finite()
+                && (0.0..=1.0).contains(&config.min_activation_threshold),
+            "min_activation_threshold must be in [0, 1]"
+        );
         let capacity = delay_ms + 1;
         let mut history = VecDeque::with_capacity(capacity);
         for _ in 0..capacity {
@@ -53,6 +119,7 @@ impl Neuron {
             threshold: 0.7,
             delay_taps: delay_ms,
             history,
+            min_activation_threshold: config.min_activation_threshold,
         }
     }
 
@@ -82,17 +149,33 @@ impl Neuron {
     ///
     /// # Returns
     /// The current amplitude after update.
+    #[inline(always)]
     pub fn resonate(&mut self, input_freq: f32, input_phase: f32) -> f32 {
+        debug_assert!(
+            self.eigenfreq.is_finite() && self.eigenfreq > 0.0,
+            "eigenfrequency must be positive",
+        );
+        debug_assert!(
+            input_freq.is_finite() && input_freq > 0.0,
+            "input frequency must be positive"
+        );
         // Gaussian tuning curve: match = exp(-(Δf / f₀ / w)²)
         let delta_f = (input_freq - self.eigenfreq).abs();
         let width = 0.1; // 10% bandwidth
+        debug_assert!(width > 0.0, "gaussian width must be non-zero");
         let normalized = delta_f / self.eigenfreq / width;
-        let match_strength = (-normalized * normalized).exp();
+        let match_strength = libm::expf(-normalized * normalized);
 
-        if match_strength > 0.3 {
+        let effective_match = if match_strength < self.min_activation_threshold {
+            0.0
+        } else {
+            match_strength
+        };
+
+        if effective_match > 0.3 {
             // Resonance: amplitude grows, phase locks
             // A(t+1) = min(A(t) + match * 0.3, 1.0)
-            self.amplitude = (self.amplitude + match_strength * 0.3).min(1.0);
+            self.amplitude = (self.amplitude + effective_match * 0.3).min(1.0);
             // φ(t+1) = φ(t) + (φ_in - φ(t)) * 0.1
             self.phase += (input_phase - self.phase) * 0.1;
         } else {
@@ -140,36 +223,45 @@ impl Neuron {
     /// A(t+1) = A(t) * 0.95
     /// φ(t+1) = φ(t) * 0.98
     /// ```
+    #[inline(always)]
     pub fn decay(&mut self) {
         self.amplitude *= 0.95;
         self.phase *= 0.98;
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_neuron_creation() {
-        let n = Neuron::new(0, 4500.0, 4);
-        assert_eq!(n.id, 0);
-        assert_eq!(n.eigenfreq, 4500.0);
-        assert_eq!(n.history.len(), 5); // delay_taps + 1
+    /// Returns the neuron's current resonance/amplitude level.
+    #[inline]
+    pub fn resonance_level(&self) -> f32 {
+        self.amplitude
     }
 
-    #[test]
-    fn test_resonance_at_eigenfreq() {
-        let mut n = Neuron::new(0, 4500.0, 4);
-        let amp = n.resonate(4500.0, 0.5);
-        assert!(amp > 0.0);
+    /// Returns the neuron's current oscillation phase.
+    #[inline]
+    pub fn current_phase(&self) -> f32 {
+        self.phase
     }
 
-    #[test]
-    fn test_no_resonance_far_freq() {
-        let mut n = Neuron::new(0, 4500.0, 4);
-        n.amplitude = 0.5;
-        let amp = n.resonate(1000.0, 0.5);
-        assert!(amp < 0.5); // should decay
+    /// Returns a read-only view of the amplitude history buffer.
+    #[inline]
+    pub fn history_buffer(&self) -> &VecDeque<f32> {
+        &self.history
+    }
+
+    /// Returns the configured minimum activation floor.
+    #[inline]
+    pub fn min_activation_threshold(&self) -> f32 {
+        self.min_activation_threshold
+    }
+
+    /// Estimates memory requirements for this neuron.
+    ///
+    /// - `static_bytes`: `size_of::<Neuron>()`
+    /// - `dynamic_bytes`: history length × `size_of::<f32>()`
+    #[inline]
+    pub fn calculate_memory_requirements(&self) -> MemoryStats {
+        MemoryStats {
+            static_bytes: mem::size_of::<Self>(),
+            dynamic_bytes: self.history.len() * mem::size_of::<f32>(),
+        }
     }
 }

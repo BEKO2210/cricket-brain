@@ -24,7 +24,7 @@ fn main() {
     println!("Encoded: {} segments, {} ms total\n", signal.len(), total_ms);
 
     // Step 2: Feed signal through the brain, collect spikes
-    let mut brain = CricketBrain::new();
+    let mut brain = CricketBrain::new(Default::default()).expect("valid default brain config");
     let mut spikes: Vec<(usize, f32)> = Vec::new();
     let mut t = 0;
 

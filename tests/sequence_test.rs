@@ -20,8 +20,8 @@ fn feed_token(pred: &mut SequencePredictor, label: &str, hold_ms: usize, gap_ms:
 #[test]
 fn predict_next_in_sequence() {
     let vocab = wide_vocab();
-    let mut pred = SequencePredictor::with_params(vocab, 8, 300);
-    pred.register_pattern("abc", &["A", "B", "C"]);
+    let mut pred = SequencePredictor::with_params(vocab, 8, 300).unwrap();
+    pred.register_pattern("abc", &["A", "B", "C"]).unwrap();
 
     // Feed "A" → should predict "B"
     feed_token(&mut pred, "A", 50, 40);
@@ -39,8 +39,9 @@ fn predict_next_in_sequence() {
 #[test]
 fn confidence_increases_with_match_length() {
     let vocab = wide_vocab();
-    let mut pred = SequencePredictor::with_params(vocab, 8, 300);
-    pred.register_pattern("long", &["A", "B", "C", "D", "E"]);
+    let mut pred = SequencePredictor::with_params(vocab, 8, 300).unwrap();
+    pred.register_pattern("long", &["A", "B", "C", "D", "E"])
+        .unwrap();
 
     feed_token(&mut pred, "A", 50, 40);
     let c1 = pred.predict().map(|p| p.confidence).unwrap_or(0.0);
@@ -58,9 +59,11 @@ fn confidence_increases_with_match_length() {
 #[test]
 fn competing_patterns_both_tracked() {
     let vocab = wide_vocab();
-    let mut pred = SequencePredictor::with_params(vocab, 8, 300);
-    pred.register_pattern("abcd", &["A", "B", "C", "D"]);
-    pred.register_pattern("abce", &["A", "B", "C", "E"]);
+    let mut pred = SequencePredictor::with_params(vocab, 8, 300).unwrap();
+    pred.register_pattern("abcd", &["A", "B", "C", "D"])
+        .unwrap();
+    pred.register_pattern("abce", &["A", "B", "C", "E"])
+        .unwrap();
 
     // Feed "A", "B" — both patterns should be active
     feed_token(&mut pred, "A", 50, 40);
@@ -83,9 +86,11 @@ fn competing_patterns_both_tracked() {
 #[test]
 fn patterns_diverge_after_shared_prefix() {
     let vocab = wide_vocab();
-    let mut pred = SequencePredictor::with_params(vocab, 8, 300);
-    pred.register_pattern("abcd", &["A", "B", "C", "D"]);
-    pred.register_pattern("abce", &["A", "B", "C", "E"]);
+    let mut pred = SequencePredictor::with_params(vocab, 8, 300).unwrap();
+    pred.register_pattern("abcd", &["A", "B", "C", "D"])
+        .unwrap();
+    pred.register_pattern("abce", &["A", "B", "C", "E"])
+        .unwrap();
 
     feed_token(&mut pred, "A", 50, 40);
     feed_token(&mut pred, "B", 50, 40);
@@ -104,8 +109,8 @@ fn patterns_diverge_after_shared_prefix() {
 #[test]
 fn no_prediction_for_unknown_sequence() {
     let vocab = wide_vocab();
-    let mut pred = SequencePredictor::with_params(vocab, 8, 300);
-    pred.register_pattern("abc", &["A", "B", "C"]);
+    let mut pred = SequencePredictor::with_params(vocab, 8, 300).unwrap();
+    pred.register_pattern("abc", &["A", "B", "C"]).unwrap();
 
     // Feed "D", "E" — no pattern starts with D
     feed_token(&mut pred, "D", 50, 40);
@@ -120,8 +125,8 @@ fn no_prediction_for_unknown_sequence() {
 #[test]
 fn reset_clears_all_state() {
     let vocab = wide_vocab();
-    let mut pred = SequencePredictor::with_params(vocab, 8, 300);
-    pred.register_pattern("abc", &["A", "B", "C"]);
+    let mut pred = SequencePredictor::with_params(vocab, 8, 300).unwrap();
+    pred.register_pattern("abc", &["A", "B", "C"]).unwrap();
 
     feed_token(&mut pred, "A", 50, 40);
     assert!(pred.predict().is_some());
@@ -134,8 +139,8 @@ fn reset_clears_all_state() {
 #[test]
 fn history_tracks_detected_tokens() {
     let vocab = wide_vocab();
-    let mut pred = SequencePredictor::with_params(vocab, 8, 300);
-    pred.register_pattern("abc", &["A", "B", "C"]);
+    let mut pred = SequencePredictor::with_params(vocab, 8, 300).unwrap();
+    pred.register_pattern("abc", &["A", "B", "C"]).unwrap();
 
     feed_token(&mut pred, "A", 50, 40);
     feed_token(&mut pred, "B", 50, 40);
@@ -154,9 +159,11 @@ fn history_tracks_detected_tokens() {
 #[test]
 fn weighted_patterns() {
     let vocab = wide_vocab();
-    let mut pred = SequencePredictor::with_params(vocab, 8, 300);
-    pred.register_weighted_pattern("important", &["A", "B", "C"], 2.0);
-    pred.register_weighted_pattern("normal", &["A", "B", "D"], 1.0);
+    let mut pred = SequencePredictor::with_params(vocab, 8, 300).unwrap();
+    pred.register_weighted_pattern("important", &["A", "B", "C"], 2.0)
+        .unwrap();
+    pred.register_weighted_pattern("normal", &["A", "B", "D"], 1.0)
+        .unwrap();
 
     feed_token(&mut pred, "A", 50, 40);
     feed_token(&mut pred, "B", 50, 40);

@@ -16,7 +16,8 @@ fn main() {
 
     let t0 = Instant::now();
     let vocab = TokenVocabulary::from_labels(&label_refs);
-    let mut pred = SequencePredictor::with_params(vocab, 8, 300);
+    let mut pred = SequencePredictor::with_params(vocab, 8, 300)
+        .expect("valid predictor config");
 
     // Register 1000 random-ish patterns (3-8 tokens each)
     for i in 0..1000 {
@@ -25,7 +26,8 @@ fn main() {
             .map(|j| label_refs[(i * 7 + j * 13) % 256])
             .collect();
         let name = format!("pat_{i:04}");
-        pred.register_pattern(&name, &pattern_labels);
+        pred.register_pattern(&name, &pattern_labels)
+            .expect("generated pattern labels must exist in vocabulary");
     }
 
     let init_time = t0.elapsed();

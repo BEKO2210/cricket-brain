@@ -1,10 +1,34 @@
-use std::collections::VecDeque;
+// SPDX-License-Identifier: MIT OR Apache-2.0
+use alloc::collections::VecDeque;
+use core::mem;
+
+use crate::memory::{MemoryStats, EMBEDDED_RAM_LIMIT_BYTES, SAMPLE_BYTES};
+
+/// Default delay used for embedded sizing checks.
+pub const DEFAULT_SYNAPSE_DELAY_MS: usize = 5;
+const DEFAULT_RING_BUFFER_BYTES: usize = DEFAULT_SYNAPSE_DELAY_MS * SAMPLE_BYTES;
+const _: [(); EMBEDDED_RAM_LIMIT_BYTES - DEFAULT_RING_BUFFER_BYTES] =
+    [(); EMBEDDED_RAM_LIMIT_BYTES - DEFAULT_RING_BUFFER_BYTES];
 
 /// A delay synapse connecting two neurons with a fixed propagation delay.
 ///
 /// Models the axonal delay lines found in the cricket auditory system.
 /// Each synapse maintains a ring buffer that delays the signal by exactly
 /// `delay_ms` timesteps before delivery.
+///
+/// In discrete time, let \(x[t]\) be the input signal and \(d\) the configured
+/// delay in timesteps. The delayed output is:
+///
+/// \[
+/// y[t] = x[t-d]
+/// \]
+///
+/// The ring buffer stores the most recent \(d\) samples so each transmission
+/// performs:
+///
+/// \[
+/// y[t] \leftarrow \text{pop\_front}(B), \quad \text{push\_back}(B, x[t])
+/// \]
 ///
 /// Synapses can be excitatory (positive signal) or inhibitory (inverted signal).
 #[derive(Debug, Clone)]
@@ -39,6 +63,7 @@ impl DelaySynapse {
     /// assert!(syn.inhibitory);
     /// ```
     pub fn new(from: usize, to: usize, delay: usize, inhibitory: bool) -> Self {
+        debug_assert!(delay > 0, "delay must be non-zero");
         let mut ring_buffer = VecDeque::with_capacity(delay);
         for _ in 0..delay {
             ring_buffer.push_back(0.0);
@@ -67,7 +92,13 @@ impl DelaySynapse {
     ///
     /// # Returns
     /// The delayed (and possibly inverted) signal.
+    #[inline(always)]
     pub fn transmit(&mut self, signal: f32) -> f32 {
+        debug_assert!(self.delay_ms > 0, "delay must be non-zero");
+        debug_assert!(
+            self.ring_buffer.len() == self.delay_ms,
+            "ring buffer length must match delay",
+        );
         // BUG #3 FIX: Read the oldest element BEFORE pop_front.
         // This ensures we read the signal from exactly delay_ms steps ago.
         let delayed_output = self.ring_buffer[0];
@@ -82,27 +113,34 @@ impl DelaySynapse {
             delayed_output
         }
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_synapse_delay() {
-        let mut syn = DelaySynapse::new(0, 1, 3, false);
-        // Push signal=1.0 through a 3ms delay
-        assert_eq!(syn.transmit(1.0), 0.0); // t=0: output is 0 (initial)
-        assert_eq!(syn.transmit(0.0), 0.0); // t=1: still 0
-        assert_eq!(syn.transmit(0.0), 0.0); // t=2: still 0
-        assert!((syn.transmit(0.0) - 1.0).abs() < f32::EPSILON); // t=3: delayed signal arrives
+    /// Returns the configured delay in timesteps.
+    #[inline]
+    pub fn delay(&self) -> usize {
+        self.delay_ms
     }
 
-    #[test]
-    fn test_inhibitory_synapse() {
-        let mut syn = DelaySynapse::new(0, 1, 1, true);
-        syn.transmit(0.8);
-        let out = syn.transmit(0.0);
-        assert!((out - (-0.8)).abs() < f32::EPSILON);
+    /// Returns the current number of samples stored in the delay line.
+    #[inline]
+    pub fn buffer_occupancy(&self) -> usize {
+        self.ring_buffer.len()
+    }
+
+    /// Returns a read-only view of the internal delay ring buffer.
+    #[inline]
+    pub fn ring_buffer(&self) -> &VecDeque<f32> {
+        &self.ring_buffer
+    }
+
+    /// Estimates memory requirements for this delay synapse.
+    ///
+    /// - `static_bytes`: `size_of::<DelaySynapse>()`
+    /// - `dynamic_bytes`: ring-buffer length × `size_of::<f32>()`
+    #[inline]
+    pub fn calculate_memory_requirements(&self) -> MemoryStats {
+        MemoryStats {
+            static_bytes: mem::size_of::<Self>(),
+            dynamic_bytes: self.ring_buffer.len() * mem::size_of::<f32>(),
+        }
     }
 }

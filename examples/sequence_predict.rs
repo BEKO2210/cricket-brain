@@ -30,13 +30,18 @@ fn main() {
         9000.0,
     );
 
-    let mut pred = SequencePredictor::with_params(vocab, 8, 300);
+    let mut pred = SequencePredictor::with_params(vocab, 8, 300)
+        .expect("valid predictor config");
 
     // Register known patterns (our "training data" — but it's topology, not weights)
-    pred.register_pattern("hello", &["H", "E", "L", "L", "O"]);
-    pred.register_pattern("help", &["H", "E", "L", "P"]);
-    pred.register_pattern("world", &["W", "O", "R", "L"]);
-    pred.register_pattern("sos", &["S", "O", "S"]);
+    pred.register_pattern("hello", &["H", "E", "L", "L", "O"])
+        .expect("pattern tokens must exist");
+    pred.register_pattern("help", &["H", "E", "L", "P"])
+        .expect("pattern tokens must exist");
+    pred.register_pattern("world", &["W", "O", "R", "L"])
+        .expect("pattern tokens must exist");
+    pred.register_pattern("sos", &["S", "O", "S"])
+        .expect("pattern tokens must exist");
 
     println!(
         "Registered {} patterns: {}",

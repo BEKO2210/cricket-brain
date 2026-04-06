@@ -4,6 +4,10 @@
 //! for driving the CricketBrain, and decoding of spike outputs back
 //! into text.
 
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
+
 /// Carrier frequency for Morse signals (Hz).
 pub const MORSE_FREQ: f32 = 4500.0;
 /// Duration of a dot in milliseconds.

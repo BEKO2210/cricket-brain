@@ -8,8 +8,10 @@
 //! Note: This is a standalone example that does not depend on the library's
 //! std-based types. It reimplements the core logic with fixed arrays.
 
-#![cfg_attr(feature = "no_std", no_std)]
-#![cfg_attr(feature = "no_std", no_main)]
+#![cfg_attr(all(feature = "no_std", not(feature = "std")), no_std)]
+
+use core::fmt;
+use cricket_brain::logger::CricketLogger;
 
 const MAX_DELAY: usize = 16;
 const NUM_NEURONS: usize = 5;
@@ -135,11 +137,32 @@ fn exp_approx(x: f32) -> f32 {
     let t2 = t * t;
     let t4 = t2 * t2;
     let t8 = t4 * t4;
-    if t8 < 0.0 { 0.0 } else { t8 }
+    if t8 < 0.0 {
+        0.0
+    } else {
+        t8
+    }
+}
+
+#[derive(Default)]
+struct EventCounterLogger {
+    events: u32,
+    spikes: u32,
+}
+
+impl CricketLogger for EventCounterLogger {
+    fn log_fmt(&mut self, _args: fmt::Arguments<'_>) {
+        self.events = self.events.saturating_add(1);
+    }
+
+    fn log_spike(&mut self, _amplitude: f32) {
+        self.spikes = self.spikes.saturating_add(1);
+    }
 }
 
 fn main() {
-    println!("=== Cricket-Brain: Arduino Minimal (no_std compatible) ===\n");
+    let mut logger = EventCounterLogger::default();
+    logger.log_event("arduino_minimal:start");
 
     let mut neurons = [
         FixedNeuron::new(4500.0, 4), // AN1
@@ -184,10 +207,8 @@ fn main() {
                 let sig = incoming[i];
                 if abs_f32(sig) > 0.01 {
                     neurons[i].resonate(freq, phase);
-                    neurons[i].amplitude = {
-                        let v = neurons[i].amplitude + sig * 0.2;
-                        if v < 0.0 { 0.0 } else if v > 1.0 { 1.0 } else { v }
-                    };
+                    let v = neurons[i].amplitude + sig * 0.2;
+                    neurons[i].amplitude = v.clamp(0.0, 1.0);
                 } else {
                     neurons[i].decay();
                 }
@@ -195,23 +216,18 @@ fn main() {
 
             if neurons[NUM_NEURONS - 1].check_coincidence() {
                 spike_count += 1;
+                logger.log_spike(neurons[NUM_NEURONS - 1].amplitude);
             }
             total += 1;
             let _ = ms;
         }
     }
 
-    println!("Total timesteps: {total}");
-    println!("Spikes detected: {spike_count}");
     let mem = NUM_NEURONS * (MAX_DELAY * 4 + 24) + NUM_SYNAPSES * (MAX_DELAY * 4 + 20);
-    println!("Estimated RAM:   {mem} bytes");
-    println!("Arduino Uno has: 2048 bytes");
-    println!(
-        "{}",
-        if mem < 2048 {
-            "✓ Fits on Arduino Uno!"
-        } else {
-            "✗ Too large for Arduino Uno"
-        }
-    );
+    let fits_uno = mem < 2048;
+
+    logger.log_event("arduino_minimal:done");
+
+    // Keep variables used in no_std builds without requiring stdout.
+    let _ = (total, spike_count, mem, fits_uno, logger.events, logger.spikes);
 }
