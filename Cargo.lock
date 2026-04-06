@@ -251,7 +251,7 @@ checksum = "1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570"
 
 [[package]]
 name = "cricket-brain"
-version = "1.0.0-rc1"
+version = "1.0.0"
 dependencies = [
  "clap",
  "cricket-brain-core",
@@ -266,14 +266,14 @@ dependencies = [
 
 [[package]]
 name = "cricket-brain-core"
-version = "1.0.0-rc1"
+version = "1.0.0"
 dependencies = [
  "libm",
 ]
 
 [[package]]
 name = "cricket-brain-ffi"
-version = "1.0.0-rc1"
+version = "1.0.0"
 dependencies = [
  "cbindgen",
  "cricket-brain",
@@ -281,7 +281,7 @@ dependencies = [
 
 [[package]]
 name = "cricket-brain-python"
-version = "1.0.0-rc1"
+version = "1.0.0"
 dependencies = [
  "cricket-brain",
  "pyo3",
@@ -289,7 +289,7 @@ dependencies = [
 
 [[package]]
 name = "cricket-brain-wasm"
-version = "1.0.0-rc1"
+version = "1.0.0"
 dependencies = [
  "cricket-brain",
  "serde",

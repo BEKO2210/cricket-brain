@@ -1,6 +1,6 @@
 [package]
 name = "cricket-brain-ffi"
-version = "1.0.0-rc1"
+version = "1.0.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "C-compatible FFI bridge for cricket-brain"
@@ -13,10 +13,10 @@ categories = ["api-bindings", "science", "algorithms"]
 crate-type = ["cdylib", "staticlib", "lib"]
 
 [dependencies]
-cricket-brain = { version = "1.0.0-rc1", path = "../.." }
+cricket-brain = { version = "1.0.0", path = "../.." }
 
 [dev-dependencies]
-cricket-brain = { version = "1.0.0-rc1", path = "../.." }
+cricket-brain = { version = "1.0.0", path = "../.." }
 
 [build-dependencies]
 cbindgen = "0.28"
