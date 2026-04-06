@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   hash verification (requires `serde` feature).
 - **no_std Core:** `crates/core` runs without standard library (only `libm`),
   enforced with `#![deny(unsafe_code)]`.
-- **Examples:** 12 reference implementations including ECG sentinel monitor,
+- **Examples:** 14 reference implementations including ECG sentinel monitor,
   research SNR sweep generator, CLI with config/snapshot support, Arduino
   minimal (944 bytes RAM), and WASM browser demo.
 - **CI Pipeline:** Cross-platform tests (Linux/macOS/Windows), rustfmt, clippy,

@@ -1,9 +1,9 @@
 # Projekt-Dossier: CricketBrain (Silent Sentinel)
 
-**Status:** Release Candidate 1 (RC1) — `v1.0.0-rc1`
+**Status:** Released — `v1.0.0`
 **Vision:** *"The Java of Sensing"*
 **Rust Edition:** 2021 | **MSRV:** 1.75+
-**Lizenz:** MIT OR Apache-2.0
+**Lizenz:** AGPL-3.0 + Commercial (see [COMMERCIAL.md](COMMERCIAL.md))
 
 ---
 
@@ -25,7 +25,7 @@ CricketBrain ist ein hochperformanter, biologisch inspirierter Signalprozessor. 
 Das Projekt ist als Rust-Workspace organisiert, um strikte Trennung zwischen Kernlogik und Anwendung zu gewaehrleisten:
 
 ```
-cricket-brain/                    # Workspace Root (v1.0.0-rc1)
+cricket-brain/                    # Workspace Root (v1.0.0)
 |
 |-- crates/core/                  # [1] Das wissenschaftliche Herz (no_std)
 |-- src/                          # [2] Die Anwendungs-Logik (brain, sequence, tokens)
@@ -44,10 +44,10 @@ cricket-brain/                    # Workspace Root (v1.0.0-rc1)
 
 | Datei | Zeilen | Beschreibung |
 |-------|--------|--------------|
-| `neuron.rs` | 267 | Gausssche Frequenzselektivitaet + Phasen-Locking Resonator. Mathematisches Modell: `R(f, f0, w) = exp(-(df / f0 / w)^2)` mit w=0.1 (10% Bandbreite). Koinzidenz-Gate: `A(t) > theta AND A(t-tau) > theta x 0.8` |
+| `neuron.rs` | 270 | Gausssche Frequenzselektivitaet + Phasen-Locking Resonator. Mathematisches Modell: `R(f, f0, w) = exp(-(df / f0 / w)^2)` mit w=0.1 (10% Bandbreite). Koinzidenz-Gate: `A(t) > theta AND A(t-tau) > theta x 0.8` |
 | `synapse.rs` | 146 | Ringbuffer-basierte Signalverzoegerung (VecDeque). Axonale Delay-Simulation mit inhibitorischer Inversion. `#[inline(always)]` auf `transmit()` |
 | `memory.rs` | 24 | Statisches & dynamisches Memory-Accounting (`MemoryStats`). Konstante: `EMBEDDED_RAM_LIMIT_BYTES = 64 * 1024` |
-| `logger.rs` | 132 | `no_std` Telemetrie-Traits (`CricketLogger`, `Telemetry`). Events: Spike, ResonanceChange, SequenceMatched, SnrReport, SystemOverload |
+| `logger.rs` | 138 | `no_std` Telemetrie-Traits (`CricketLogger`, `Telemetry`). Events: Spike, ResonanceChange, SequenceMatched, SnrReport, SystemOverload |
 | `error.rs` | 28 | `CricketError` Enum: InvalidConfiguration, TokenNotFound, InvalidInput |
 
 **Kern-Structs:**
@@ -80,12 +80,13 @@ pub struct DelaySynapse {
 | Datei | Zeilen | Beschreibung |
 |-------|--------|--------------|
 | `lib.rs` | 73 | Oeffentliche API, Prelude, FFI-Fehlercodes (`CRICKET_OK=0` bis `CRICKET_ERR_INTERNAL=255`) |
-| `brain.rs` | 875 | Haupt-Netzwerk-Steuerung (`CricketBrain`). Muenster-Modell: AN1->LN2->LN3->LN5->ON1 Schaltkreis |
-| `sequence.rs` | 679 | Mustererkennung mit Confidence-Scoring: `C = SNR * (1 - jitter/tolerance)`. N-Gram Pattern-Matching |
-| `resonator_bank.rs` | 306 | Parallelisierbare Frequenzueberwachung (optionales Rayon). Ein 5-Neuron-Kanal pro Token |
+| `main.rs` | 60 | SOS Morse Demo Binary (Default `cargo run` Einstiegspunkt) |
+| `brain.rs` | 876 | Haupt-Netzwerk-Steuerung (`CricketBrain`). Muenster-Modell: AN1->LN2->LN3->LN5->ON1 Schaltkreis |
+| `sequence.rs` | 680 | Mustererkennung mit Confidence-Scoring: `C = SNR * (1 - jitter/tolerance)`. N-Gram Pattern-Matching |
+| `resonator_bank.rs` | 327 | Parallelisierbare Frequenzueberwachung (optionales Rayon). Ein 5-Neuron-Kanal pro Token |
 | `token.rs` | 221 | Multi-Frequenz Token-Vokabular (v0.2). Alphabet: 27 Tokens, 2000-8000 Hz |
-| `patterns.rs` | 294 | Morse-Code Encoding/Decoding. DOT=50ms, DASH=150ms bei 4500 Hz |
-| `json_telemetry.rs` | 133 | JSONL Echtzeit-Datenstrom (erfordert `cli` Feature) |
+| `patterns.rs` | 297 | Morse-Code Encoding/Decoding. DOT=50ms, DASH=150ms bei 4500 Hz |
+| `json_telemetry.rs` | 139 | JSONL Echtzeit-Datenstrom (erfordert `cli` Feature) |
 
 **Muenster-Modell (Kanonischer 5-Neuron Schaltkreis):**
 
@@ -237,22 +238,24 @@ Jeder `CricketBrain::step(input_freq)` Aufruf:
 
 | Bereich | Dateien | Zeilen |
 |---------|---------|--------|
-| Core (crates/core/src) | 5 | ~597 |
-| Brain (src/) | 7 | ~3.181 |
-| FFI (crates/ffi) | 1 | ~165 |
-| Python (crates/python) | 1 | ~122 |
-| WASM (crates/wasm) | 1 | ~111 |
-| **Gesamt Produktionscode** | **15** | **~4.176** |
-| Beispiele | 12 | ~1.500+ |
+| Core (crates/core/src) | 6 | 617 |
+| Brain (src/) | 8 | 2.673 |
+| FFI (crates/ffi) | 1 | 164 |
+| Python (crates/python) | 1 | 121 |
+| WASM (crates/wasm) | 1 | 130 |
+| **Gesamt Produktionscode** | **17** | **3.705** |
+| Beispiele | 14 | ~2.500+ |
 
 ---
 
-## 8. Handover: Naechste Schritte (Post-Run 20)
+## 8. Handover: Naechste Schritte (Post v1.0.0)
 
-1. **Final Audit:** Pruefung der FFI-Speichersicherheit (Ownership-Transfer in `brain_new`/`brain_free`).
+1. ~~**Final Audit:** Pruefung der FFI-Speichersicherheit~~ — Erledigt (12 FFI-Tests).
 2. **Performance-Profile:** Verifizierung des 0.175us-Ziels auf ARM-Cortex-M Hardware.
-3. **Commercial-Ready:** Finalisierung der `COMMERCIAL.md` fuer Lizenznehmer.
-4. **Release 1.0:** Entfernen des RC1-Tags nach erfolgreichem Review.
+3. ~~**Commercial-Ready:** Finalisierung der `COMMERCIAL.md`~~ — Erledigt (AGPL + 4-Tier Commercial).
+4. ~~**Release 1.0:** Entfernen des RC1-Tags~~ — Erledigt (v1.0.0 released).
+5. **STDP Learning:** Spike-Timing Dependent Plasticity fuer Online-Gewichtsanpassung.
+6. **Hardware Deployment:** RISC-V / ARM Cortex-M Portierung mit Echtzeit-ADC.
 
 ---
 

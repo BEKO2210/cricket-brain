@@ -76,19 +76,18 @@ fn background_freq(rng: &mut Lcg, snr_db: i32) -> f32 {
 // ---------------------------------------------------------------------------
 // Shared trial signal builder
 //
-// Returns a Vec<f32> of 120 frequency samples (the observation window only,
-// matching the loop over t in 0..120 in research_gen.rs).  Warmup samples are
-// generated and consumed from the RNG but not stored — detectors run the same
-// warmup internally.
+// Returns (warmup, observation) frequency vectors matching the exact RNG
+// consumption pattern of research_gen.rs:
+//   - 24 warmup steps: background_freq() calls
+//   - 120 observation steps: signal_present_freq() in [32..92], else background
+//
+// Both vectors are returned so each detector receives identical input.
+// The RNG is consumed exactly once per trial — no double-draw.
 // ---------------------------------------------------------------------------
 
-fn build_trial_signal(rng: &mut Lcg, snr_db: i32, target_present: bool) -> Vec<f32> {
-    // Warmup: consume exactly 24 RNG draws (matching brain.reset() + 24 silent steps)
-    for _ in 0..24 {
-        let _ = background_freq(rng, snr_db);
-    }
-    // Observation window
-    (0..120)
+fn build_trial_signal(rng: &mut Lcg, snr_db: i32, target_present: bool) -> (Vec<f32>, Vec<f32>) {
+    let warmup: Vec<f32> = (0..24).map(|_| background_freq(rng, snr_db)).collect();
+    let observation: Vec<f32> = (0..120)
         .map(|t| {
             if target_present && (32..92).contains(&t) {
                 signal_present_freq(rng, snr_db)
@@ -96,23 +95,41 @@ fn build_trial_signal(rng: &mut Lcg, snr_db: i32, target_present: bool) -> Vec<f
                 background_freq(rng, snr_db)
             }
         })
-        .collect()
+        .collect();
+    (warmup, observation)
 }
 
 // ---------------------------------------------------------------------------
 // Frequency → audio sample conversion
 //
-// Each "step" in the protocol delivers one frequency value representing one
-// millisecond of a sinusoidal tone.  We convert it to a single f32 sample
-// value by evaluating cos(2π·f·t/Fs) where Fs = 1000 Hz and t is the step
-// index.  Silence (freq = 0) yields 0.0.
+// The protocol's frequency labels (e.g. 4500 Hz) are symbolic — the actual
+// Fs is 1000 Sa/s (one sample per ms step).  We normalise all frequencies
+// into the representable band [0, Fs/2 = 500 Hz] by mapping the protocol
+// range [2000, 8000] linearly to [100, 400] Hz.  This gives every method
+// (MF, Goertzel, IIR, CricketBrain) the same consistent signal, avoiding
+// aliasing artefacts that would unfairly penalise frequency-domain methods.
+//
+// CricketBrain receives the raw protocol frequency (it has its own Gaussian
+// matching that doesn't depend on Nyquist constraints).
 // ---------------------------------------------------------------------------
 
-fn freq_to_sample(freq: f32, t: usize) -> f32 {
+/// Map protocol frequency (2000–8000 Hz) into representable digital band
+/// (100–400 Hz @ Fs=1000).  Silence (freq ≤ 0) stays at 0.
+fn map_freq(freq: f32) -> f32 {
     if freq <= 0.0 {
         0.0
     } else {
-        (2.0 * PI * freq * t as f32 / 1000.0).cos()
+        // Linear map: 2000→100, 8000→400
+        100.0 + (freq - 2000.0) * (300.0 / 6000.0)
+    }
+}
+
+fn freq_to_sample(freq: f32, t: usize) -> f32 {
+    let mapped = map_freq(freq);
+    if mapped <= 0.0 {
+        0.0
+    } else {
+        (2.0 * PI * mapped * t as f32 / SAMPLE_RATE).cos()
     }
 }
 
@@ -128,9 +145,10 @@ const TARGET_FREQ: f32 = 4500.0;
 const SAMPLE_RATE: f32 = 1000.0;
 
 fn make_mf_template() -> [f32; MF_LEN] {
+    let mapped_freq = map_freq(TARGET_FREQ);
     let mut tmpl = [0.0f32; MF_LEN];
     for (i, v) in tmpl.iter_mut().enumerate() {
-        *v = (2.0 * PI * TARGET_FREQ * i as f32 / SAMPLE_RATE).cos();
+        *v = (2.0 * PI * mapped_freq * i as f32 / SAMPLE_RATE).cos();
     }
     tmpl
 }
@@ -197,7 +215,8 @@ struct GoertzelDetector {
 
 impl GoertzelDetector {
     fn new(block_size: usize, threshold: f32) -> Self {
-        let coeff = 2.0 * (2.0 * PI * TARGET_FREQ / SAMPLE_RATE).cos();
+        let mapped_freq = map_freq(TARGET_FREQ);
+        let coeff = 2.0 * (2.0 * PI * mapped_freq / SAMPLE_RATE).cos();
         Self {
             block_size,
             coeff,
@@ -246,28 +265,13 @@ impl GoertzelDetector {
 // ---------------------------------------------------------------------------
 // Baseline 3: Second-order IIR Bandpass Filter
 //
-// Design: bilinear-transform bandpass.  Center = 4500 Hz, BW = 900 Hz,
-// Fs = 1000 Hz.
-//
-// Pre-warp frequencies to the analogue domain:
-//   ω₀  = 2·tan(π·f₀/Fs) = 2·tan(π·4.5)   — but f₀/Fs = 4.5 > 0.5 so the
-//   analogue-prototype approach via BLT must use the folded frequency.
-//
-// Because Fs = 1000 Hz and f₀ = 4500 Hz, the digital frequency is
-//   θ = 2π·4500/1000 = 9π  ≡  π  (mod 2π)
-// which aliases to the Nyquist edge.  To keep the filter well-posed at a
-// practically useful frequency we interpret the protocol's "4500 Hz tone"
-// as a normalised label and map it to a digital frequency of 0.45·π
-// (= 225 Hz equivalent in a 1000 Sa/s system) — identical to the convention
-// used by the CricketBrain neuron eigenfrequency calculation.
-//
-// Analogue prototype centre: f_mapped = 225 Hz, BW_mapped = 45 Hz
-//   (BW ratio preserved: 900/4500 = 45/225 = 0.2)
+// Design: bilinear-transform BPF using map_freq() for consistent frequency
+// mapping.  All detectors now operate on the same digital signal where the
+// protocol's [2000, 8000] Hz labels are mapped to [100, 400] Hz @ Fs=1000.
 //
 // Second-order BPF coefficients (direct form II):
-//   b = [K/Q, 0, -K/Q]
-//   a = [1 + K/Q + K², -(2(K²-1) + ... )]
-// where K = tan(π·f₀/Fs), Q = f₀/BW.
+//   b = [K/Q, 0, -K/Q],  a = [1 + K/Q + K², 2(K²-1)/(1+K/Q+K²), ...]
+//   where K = tan(π·f_center/Fs), Q = f_center/BW.
 // ---------------------------------------------------------------------------
 
 struct IirBandpass {
@@ -289,11 +293,10 @@ struct IirBandpass {
 
 impl IirBandpass {
     fn new(threshold: f32) -> Self {
-        // Map 4500 Hz protocol label to a representable digital frequency.
-        // Use f_center = 225 Hz, BW = 45 Hz within Fs = 1000 Hz so that the
-        // normalised centre is at the same fractional position (0.45 × Nyquist).
-        let f_center = 225.0_f32;
-        let bw = 45.0_f32;
+        // Use the same map_freq() as all other detectors for consistency.
+        // TARGET_FREQ (4500 Hz) maps to 250 Hz in the digital domain.
+        let f_center = map_freq(TARGET_FREQ); // 250 Hz
+        let bw = f_center * 0.2; // 20% bandwidth = 50 Hz
         let fs = SAMPLE_RATE;
 
         let q = f_center / bw; // Q = 5.0
@@ -497,7 +500,6 @@ fn record(stats: &mut Stats, result: TrialResult, target_present: bool) {
 fn main() {
     const SEED: u64 = 1337;
     const TRIALS_PER_CLASS: usize = 120;
-    const WARMUP_STEPS: usize = 24;
 
     let snr_levels: Vec<i32> = (-10..=30).step_by(5).collect();
 
@@ -530,11 +532,8 @@ fn main() {
 
         // ---- target_present trials ----
         for _ in 0..TRIALS_PER_CLASS {
-            // Build warmup frequency sequence.
-            let warmup: Vec<f32> = (0..WARMUP_STEPS)
-                .map(|_| background_freq(&mut rng, snr_db))
-                .collect();
-            let obs = build_trial_signal(&mut rng, snr_db, true);
+            // build_trial_signal returns (warmup, observation) — single RNG source.
+            let (warmup, obs) = build_trial_signal(&mut rng, snr_db, true);
 
             let r_mf = run_mf_trial(&mut mf, &obs, &warmup);
             let r_gz = run_goertzel_trial(&mut gz, &obs, &warmup);
@@ -549,10 +548,7 @@ fn main() {
 
         // ---- target_absent trials ----
         for _ in 0..TRIALS_PER_CLASS {
-            let warmup: Vec<f32> = (0..WARMUP_STEPS)
-                .map(|_| background_freq(&mut rng, snr_db))
-                .collect();
-            let obs = build_trial_signal(&mut rng, snr_db, false);
+            let (warmup, obs) = build_trial_signal(&mut rng, snr_db, false);
 
             let r_mf = run_mf_trial(&mut mf, &obs, &warmup);
             let r_gz = run_goertzel_trial(&mut gz, &obs, &warmup);
@@ -571,7 +567,7 @@ fn main() {
     // ---------------------------------------------------------------------------
 
     println!("# Baseline Comparison — CricketBrain vs Classical Detectors\n");
-    println!("Parameters: seed={SEED}, trials_per_class={TRIALS_PER_CLASS}, warmup={WARMUP_STEPS}");
+    println!("Parameters: seed={SEED}, trials_per_class={TRIALS_PER_CLASS}, warmup=24");
     println!("Thresholds: MatchedFilter={mf_threshold:.2}, Goertzel={gz_threshold:.2}, IIR={iir_threshold:.2}\n");
 
     let header = "| SNR (dB) | Method          | TPR    | FPR    | Latency (steps) |";

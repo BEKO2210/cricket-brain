@@ -48,6 +48,14 @@ Just 5 neurons and 6 synapses, processing at **0.175 us per step** in **944 byte
      ON1 (Output Gate)      ← fires only on temporal coincidence
 ```
 
+<details>
+<summary><b>View Interactive Circuit Diagram</b> (click to expand)</summary>
+<br>
+<p align="center">
+  <img src="assets/circuit_diagram.svg" alt="CricketBrain Muenster Circuit — Animated" width="700">
+</p>
+</details>
+
 ### Why Should You Care?
 
 | | CricketBrain | Traditional ML | Deep Learning |
@@ -359,7 +367,7 @@ cricket-brain/
 |   |-- python/        PyO3 bindings
 |   `-- wasm/          wasm-bindgen bindings
 |-- src/               Brain network, sequence predictor, resonator bank
-|-- examples/          15 runnable examples
+|-- examples/          14 runnable examples
 |-- tests/             85 tests (unit, integration, edge-case, FFI, property)
 |-- benches/           Criterion benchmarks
 `-- docs/              Mathematical derivations
@@ -388,7 +396,7 @@ cricket-brain/
 - [x] **v0.2** — Multi-frequency token recognition
 - [x] **v0.3** — Sequence prediction via delay-line pattern memory
 - [x] **v1.0** — Production release with FFI/Python/WASM bindings
-- [ ] **v1.1** — Adaptive Gaussian bandwidth (auto-tune for dense vocabularies)
+- [x] **v1.0.1** — Adaptive Gaussian bandwidth (auto-tune for dense vocabularies)
 - [ ] **v1.2** — STDP (spike-timing dependent plasticity) for online learning
 - [ ] **v2.0** — Hardware deployment on RISC-V / ARM Cortex-M with real-time ADC
 

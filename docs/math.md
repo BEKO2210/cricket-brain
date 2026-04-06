@@ -11,7 +11,7 @@ match = exp( -(Δf / f₀ / w)² )
 where:
 - `Δf = |f_in - f₀|` — absolute frequency deviation
 - `f₀` — neuron's eigenfrequency (e.g., 4500 Hz)
-- `w = 0.1` — bandwidth parameter (10% of eigenfrequency)
+- `w` — bandwidth parameter (default: 0.1 = 10% of eigenfrequency; configurable per-neuron via `Neuron.bandwidth`. `ResonatorBank` adapts this automatically based on token spacing)
 
 At 0% deviation: `match = exp(0) = 1.0`
 At 10% deviation: `match = exp(-1) ≈ 0.368`
