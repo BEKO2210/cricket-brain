@@ -145,16 +145,67 @@ cargo run --example arduino_minimal
 
 The `no_std` example uses fixed-size arrays (no heap) and fits in **944 bytes** — well within an Arduino Uno's 2 KB RAM. See [examples/arduino_minimal.rs](examples/arduino_minimal.rs) for the complete implementation.
 
+### Step 8: Multi-frequency token recognition (v0.2)
+
+```bash
+cargo run --example multi_freq_demo -- "RUST"
+```
+
+Each character gets a unique frequency. Parallel resonator banks detect which token is active:
+
+```
+Char    Freq Hz     Spikes   Detected  Correct
+H          3615         51          H       OK
+E          2923         51          E       OK
+L          4538         51          L       OK
+Accuracy: 100%
+```
+
+### Step 9: Sequence prediction (v0.3)
+
+```bash
+cargo run --example sequence_predict
+```
+
+Register patterns, feed partial input, get predictions — no training:
+
+```
+[H]     → predict 'E' (pattern: "hello", conf: 0.20)
+[H,E]   → predict 'L' (pattern: "hello", conf: 0.40)
+[H,E,L] → predict 'P' (pattern: "help",  conf: 0.75)   ← competing!
+          predict 'L' (pattern: "hello", conf: 0.60)
+[H,E,L,L] → predict 'O' (pattern: "hello", conf: 0.80) ← disambiguated!
+```
+
+### Step 10: Scale it with 256 tokens
+
+```bash
+cargo run --release --example scale_predict
+```
+
+256-token vocabulary, 1000 patterns, 1280 neurons — 168M ops/sec on a single CPU thread.
+
 ## Quick Reference
 
 ```bash
+# v0.1: Morse code
 cargo run                                    # SOS demo
 cargo run --example live_demo -- "TEXT"       # Full encode→brain→decode roundtrip
 cargo run --example frequency_discrimination # Bandpass filter demo
 cargo run --example morse_alphabet           # All 26 letters
 cargo run --example arduino_minimal          # no_std microcontroller demo
 cargo run --release --example scale_test     # 40k neuron benchmark
-cargo test                                   # Run all 31 tests
+
+# v0.2: Multi-frequency tokens
+cargo run --example multi_freq_demo          # Token discrimination demo
+cargo run --example multi_freq_demo -- "XYZ" # Custom text
+
+# v0.3: Sequence prediction
+cargo run --example sequence_predict         # Pattern prediction demo
+cargo run --release --example scale_predict  # 256-token benchmark
+
+# Quality
+cargo test                                   # Run all 51 tests
 cargo bench                                  # Criterion throughput benchmarks
 ```
 
@@ -168,21 +219,31 @@ Cricket-Brain takes this principle and applies it to arbitrary pattern recogniti
 
 ## What Can It Actually Do?
 
-**What works today (v0.1):**
+**v0.1 — Morse code recognition:**
 - Frequency-selective signal detection (Gaussian bandpass, ±10% bandwidth)
-- Temporal pattern encoding/decoding (Morse code A-Z, 0-9)
 - Full roundtrip: text → Morse → neuromorphic processing → spike train → text
 - Zero false positives during silence (coincidence gate prevents noise)
-- Scales to 40,960+ neurons on a single CPU thread
 - Runs on Arduino Uno (944 bytes RAM, no heap)
 
-**What it is NOT (yet):**
-- Not a general-purpose language model
-- Not a classifier that learns from data (topology is hand-designed)
-- Not a replacement for neural networks on high-dimensional tasks
-- The Morse decoder uses spike timing analysis, not pure neural output
+**v0.2 — Multi-frequency token recognition:**
+- Each symbol gets a unique carrier frequency
+- Parallel resonator banks detect which token is active
+- 100% accuracy with proper frequency spacing (>10% of carrier)
+- 27-token alphabet across 2000–8000 Hz
 
-**The real value proposition:** This is a physically-valid computational model that processes temporal patterns with near-zero resources. It proves that useful inference is possible without gradient descent, backpropagation, or GPU clusters.
+**v0.3 — Sequence prediction:**
+- Register patterns as token sequences (N-grams)
+- Feed partial input → get next-token predictions with confidence
+- Competing patterns tracked simultaneously (hello vs. help)
+- Disambiguates as more context arrives
+- 256 tokens, 1000 patterns, 168M ops/sec on single CPU thread
+
+**What it is NOT:**
+- Not a general-purpose language model (patterns are registered, not learned)
+- Not a replacement for neural networks on high-dimensional tasks
+- Dense vocabularies (>50 tokens/octave) need narrower Gaussian bandwidth
+
+**The real value proposition:** This is a physically-valid computational model that processes temporal patterns with near-zero resources. It proves that useful inference — including sequence prediction — is possible without gradient descent, backpropagation, or GPU clusters.
 
 ## Mathematical Foundation
 
@@ -234,17 +295,22 @@ cricket-brain/
 │   ├── frequency_discrimination.rs  Bandpass filter visualization
 │   ├── morse_alphabet.rs  All 26 letters
 │   ├── arduino_minimal.rs no_std with fixed arrays (944 bytes)
-│   └── scale_test.rs     40,960 neuron benchmark
-├── tests/                 Integration tests (31 tests)
+│   ├── scale_test.rs     40,960 neuron benchmark
+│   ├── multi_freq_demo.rs Multi-frequency token discrimination (v0.2)
+│   ├── sequence_predict.rs Pattern prediction demo (v0.3)
+│   └── scale_predict.rs  256-token prediction benchmark (v0.3)
+├── tests/                 Integration tests (51 tests)
 ├── benches/               Criterion benchmarks
 └── docs/                  Architecture & math docs
 ```
 
 ## Roadmap
 
-- **v0.1** — Morse code recognition (current)
-- **v0.2** — Multi-frequency token recognition (parallel resonator banks)
-- **v0.3** — 40k resonator LLM-alternative for sequence prediction
+- **v0.1** — Morse code recognition ✓
+- **v0.2** — Multi-frequency token recognition ✓
+- **v0.3** — Sequence prediction via delay-line pattern memory ✓
+- **v0.4** — Adaptive Gaussian bandwidth (auto-tune for dense vocabularies)
+- **v0.5** — Multi-threaded resonator bank (rayon parallelism)
 - **v1.0** — Arduino port with real-time audio input via ADC
 
 ## License

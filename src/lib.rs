@@ -6,17 +6,11 @@
 //! No matrix multiplication, no CUDA, no weights — just biologically-inspired
 //! resonators connected by delay synapses.
 //!
-//! ## Architecture
+//! ## Features
 //!
-//! The standard configuration models 5 neurons from the cricket auditory pathway:
-//!
-//! | Neuron | Role | Frequency |
-//! |--------|------|-----------|
-//! | AN1 | Auditory receptor | 4500 Hz |
-//! | LN2 | Inhibitory interneuron | 4500 Hz |
-//! | LN3 | Excitatory interneuron | 4500 Hz |
-//! | LN5 | Inhibitory interneuron | 4500 Hz |
-//! | ON1 | Output neuron | 4500 Hz |
+//! - **v0.1**: Morse code recognition with 5-neuron cricket circuit
+//! - **v0.2**: Multi-frequency token recognition via parallel resonator banks
+//! - **v0.3**: Sequence prediction using delay-line pattern memory
 //!
 //! ## Quick Start
 //!
@@ -40,4 +34,7 @@
 pub mod brain;
 pub mod neuron;
 pub mod patterns;
+pub mod resonator_bank;
+pub mod sequence;
 pub mod synapse;
+pub mod token;
