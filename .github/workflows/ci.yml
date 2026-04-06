@@ -19,6 +19,10 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Run tests
         run: cargo test --workspace
+        env:
+          # macOS runners may have Python newer than PyO3's max supported
+          # version. The stable ABI is forward-compatible, so this is safe.
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: "1"
 
   quality:
     name: Quality gates
