@@ -42,6 +42,10 @@ name = "throughput"
 harness = false
 
 [[example]]
+name = "arduino_minimal"
+path = "examples/arduino_minimal.rs"
+
+[[example]]
 name = "morse_alphabet"
 path = "examples/morse_alphabet.rs"
 

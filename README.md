@@ -396,7 +396,7 @@ cricket-brain/
 - [x] **v0.2** — Multi-frequency token recognition
 - [x] **v0.3** — Sequence prediction via delay-line pattern memory
 - [x] **v1.0** — Production release with FFI/Python/WASM bindings
-- [ ] **v1.1** — Adaptive Gaussian bandwidth (auto-tune for dense vocabularies)
+- [x] **v1.0.1** — Adaptive Gaussian bandwidth (auto-tune for dense vocabularies)
 - [ ] **v1.2** — STDP (spike-timing dependent plasticity) for online learning
 - [ ] **v2.0** — Hardware deployment on RISC-V / ARM Cortex-M with real-time ADC
 

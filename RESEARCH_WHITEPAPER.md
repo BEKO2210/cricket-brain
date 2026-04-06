@@ -156,7 +156,10 @@ Each neuron *i* has an eigenfrequency *f_0* and responds to input frequency
 R(f_in, f_0) = exp( -(|f_in - f_0| / (f_0 * w))^2 )
 ```
 
-where *w* = 0.1 (10% relative bandwidth). The resonance threshold is set at
+where *w* is the bandwidth parameter (default 0.1 = 10% relative bandwidth;
+configurable per-neuron via `Neuron.bandwidth`, and automatically adapted by
+`ResonatorBank` based on token spacing for dense vocabularies). The resonance
+threshold is set at
 *R* > 0.3, yielding an effective bandwidth of approximately +-11% of the
 eigenfrequency. This matches the frequency selectivity observed in cricket AN1
 neurons [8].
@@ -241,7 +244,7 @@ The implementation is organized as a Rust workspace:
 | Crate | Purpose | `no_std` | LOC |
 |-------|---------|----------|-----|
 | `cricket-brain-core` | Neuron, synapse, memory, telemetry primitives | Yes | ~600 |
-| `cricket-brain` | Brain network, sequence predictor, resonator bank | Optional | ~3,200 |
+| `cricket-brain` | Brain network, sequence predictor, resonator bank | Optional | ~2,700 |
 | `cricket-brain-ffi` | C-compatible API | No | ~165 |
 | `cricket-brain-python` | PyO3 bindings | No | ~122 |
 | `cricket-brain-wasm` | wasm-bindgen bindings | No | ~120 |
@@ -453,7 +456,7 @@ industrial IoT, and edge-computing applications.
 |--------|---------|
 | f_0 | Neuron eigenfrequency (Hz) |
 | f_in | Input frequency (Hz) |
-| w | Bandwidth parameter (0.1 = 10%) |
+| w | Bandwidth parameter (default 0.1 = 10%; adaptive in ResonatorBank) |
 | R | Resonance response (0-1) |
 | A(t) | Neuron amplitude at timestep t |
 | phi(t) | Neuron phase at timestep t |

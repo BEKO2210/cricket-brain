@@ -248,12 +248,14 @@ Jeder `CricketBrain::step(input_freq)` Aufruf:
 
 ---
 
-## 8. Handover: Naechste Schritte (Post-Run 20)
+## 8. Handover: Naechste Schritte (Post v1.0.0)
 
-1. **Final Audit:** Pruefung der FFI-Speichersicherheit (Ownership-Transfer in `brain_new`/`brain_free`).
+1. ~~**Final Audit:** Pruefung der FFI-Speichersicherheit~~ — Erledigt (12 FFI-Tests).
 2. **Performance-Profile:** Verifizierung des 0.175us-Ziels auf ARM-Cortex-M Hardware.
-3. **Commercial-Ready:** Finalisierung der `COMMERCIAL.md` fuer Lizenznehmer.
-4. **Release 1.0:** Entfernen des RC1-Tags nach erfolgreichem Review.
+3. ~~**Commercial-Ready:** Finalisierung der `COMMERCIAL.md`~~ — Erledigt (AGPL + 4-Tier Commercial).
+4. ~~**Release 1.0:** Entfernen des RC1-Tags~~ — Erledigt (v1.0.0 released).
+5. **STDP Learning:** Spike-Timing Dependent Plasticity fuer Online-Gewichtsanpassung.
+6. **Hardware Deployment:** RISC-V / ARM Cortex-M Portierung mit Echtzeit-ADC.
 
 ---
 
