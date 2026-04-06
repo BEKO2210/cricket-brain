@@ -2,6 +2,9 @@ use crate::logger::{Telemetry, TelemetryEvent};
 use serde::Serialize;
 use std::io::{BufWriter, Write};
 
+/// JSON Lines (JSONL) telemetry sink that serializes [`TelemetryEvent`]s to a
+/// writer, one JSON object per line. Suitable for piping into dashboards,
+/// log aggregators, or file-based analysis pipelines.
 #[derive(Debug)]
 pub struct JsonTelemetry<W: Write> {
     sink: BufWriter<W>,
@@ -24,12 +27,14 @@ struct JsonEvent<'a> {
 }
 
 impl<W: Write> JsonTelemetry<W> {
+    /// Creates a new JSON telemetry sink writing to the given [`Write`] target.
     pub fn new(writer: W) -> Self {
         Self {
             sink: BufWriter::new(writer),
         }
     }
 
+    /// Flushes the internal buffer, ensuring all queued events are written out.
     pub fn flush(&mut self) -> std::io::Result<()> {
         self.sink.flush()
     }
@@ -42,6 +47,7 @@ impl<W: Write> JsonTelemetry<W> {
 }
 
 impl JsonTelemetry<std::io::Stdout> {
+    /// Convenience constructor that writes JSONL events to standard output.
     pub fn stdout() -> Self {
         Self::new(std::io::stdout())
     }

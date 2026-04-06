@@ -56,6 +56,16 @@ jobs:
       - name: Verify header committed
         run: git diff --exit-code -- crates/ffi/include/cricket_brain.h
 
+  no-std-check:
+    name: no_std core verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build core without std
+        run: cargo build -p cricket-brain-core --no-default-features
+
   security-audit:
     name: Security audit
     runs-on: ubuntu-latest

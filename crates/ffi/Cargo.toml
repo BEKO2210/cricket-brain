@@ -10,9 +10,12 @@ keywords = ["ffi", "c", "jni", "swift", "neuromorphic"]
 categories = ["api-bindings", "science", "algorithms"]
 
 [lib]
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["cdylib", "staticlib", "lib"]
 
 [dependencies]
+cricket-brain = { version = "1.0.0-rc1", path = "../.." }
+
+[dev-dependencies]
 cricket-brain = { version = "1.0.0-rc1", path = "../.." }
 
 [build-dependencies]

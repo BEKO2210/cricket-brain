@@ -61,9 +61,29 @@ impl Brain {
             });
         }
 
-        // Lightweight confidence/SNR estimation for browser consumers.
-        let snr = if input_freq > 0.0 { 20.0 } else { 8.0 };
-        let confidence = if out > 0.0 { 0.96 } else { 0.10 };
+        // Estimate SNR from neuron amplitudes: ratio of output (signal) to
+        // mean resting activity (noise).  This replaces the previous hardcoded
+        // placeholder and gives browser consumers a meaningful quality metric.
+        let mean_amp = self
+            .inner
+            .neurons
+            .iter()
+            .map(|n| n.resonance_level())
+            .sum::<f32>()
+            / self.inner.neurons.len().max(1) as f32;
+        let snr = if mean_amp > 1e-6 {
+            out / mean_amp
+        } else if out > 0.0 {
+            40.0 // strong signal, no noise floor
+        } else {
+            0.0
+        };
+        // Confidence derived from SNR: saturates toward 1.0 for high SNR.
+        let confidence = if snr > 0.0 {
+            (snr / (1.0 + snr)).clamp(0.0, 1.0)
+        } else {
+            0.0
+        };
         self.prediction = PredictionSnapshot {
             confidence,
             snr,
