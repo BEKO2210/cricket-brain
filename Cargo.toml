@@ -76,6 +76,10 @@ name = "research_gen"
 path = "examples/research_gen.rs"
 
 [[example]]
+name = "ablation_study"
+path = "examples/ablation_study.rs"
+
+[[example]]
 name = "sentinel_ecg_monitor"
 path = "examples/sentinel_ecg_monitor.rs"
 
@@ -83,3 +87,7 @@ path = "examples/sentinel_ecg_monitor.rs"
 name = "cricket_cli"
 path = "examples/cricket_cli.rs"
 required-features = ["cli"]
+
+[[example]]
+name = "baselines"
+path = "examples/baselines.rs"
