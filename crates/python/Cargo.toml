@@ -12,4 +12,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 cricket-brain = { path = "../..", version = "1.0.0-rc1" }
-pyo3 = { version = "0.22", features = ["extension-module"] }
+pyo3 = { version = "0.24", features = ["extension-module"] }

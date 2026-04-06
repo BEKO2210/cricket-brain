@@ -33,10 +33,7 @@ fn gaussian_10_percent_boundary() {
     // match = exp(-1.0) ≈ 0.368 > 0.3 → should still resonate
     let mut neuron = Neuron::new(0, 4500.0, 4);
     let amp = neuron.resonate(4500.0 * 1.1, 0.5);
-    assert!(
-        amp > 0.0,
-        "Expected resonance at 10% deviation, got {amp}"
-    );
+    assert!(amp > 0.0, "Expected resonance at 10% deviation, got {amp}");
 }
 
 #[test]

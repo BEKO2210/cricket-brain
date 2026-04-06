@@ -121,12 +121,20 @@ impl FixedSynapse {
 
 /// Fast absolute value without std.
 fn abs_f32(x: f32) -> f32 {
-    if x < 0.0 { -x } else { x }
+    if x < 0.0 {
+        -x
+    } else {
+        x
+    }
 }
 
 /// Fast min without std.
 fn min_f32(a: f32, b: f32) -> f32 {
-    if a < b { a } else { b }
+    if a < b {
+        a
+    } else {
+        b
+    }
 }
 
 /// Approximation of exp(x) using Padé approximant — good enough for Gaussian.
@@ -183,9 +191,17 @@ fn main() {
 
     // SOS pattern: ... --- ... (simplified as tone/silence segments)
     let signal: [(f32, usize); 11] = [
-        (4500.0, 50), (0.0, 50), (4500.0, 50), (0.0, 50), (4500.0, 50), // S: ...
-        (0.0, 150),                                                        // gap
-        (4500.0, 150), (0.0, 50), (4500.0, 150), (0.0, 50), (4500.0, 150), // O: ---
+        (4500.0, 50),
+        (0.0, 50),
+        (4500.0, 50),
+        (0.0, 50),
+        (4500.0, 50), // S: ...
+        (0.0, 150),   // gap
+        (4500.0, 150),
+        (0.0, 50),
+        (4500.0, 150),
+        (0.0, 50),
+        (4500.0, 150), // O: ---
     ];
 
     let mut spike_count = 0u32;
@@ -229,5 +245,12 @@ fn main() {
     logger.log_event("arduino_minimal:done");
 
     // Keep variables used in no_std builds without requiring stdout.
-    let _ = (total, spike_count, mem, fits_uno, logger.events, logger.spikes);
+    let _ = (
+        total,
+        spike_count,
+        mem,
+        fits_uno,
+        logger.events,
+        logger.spikes,
+    );
 }

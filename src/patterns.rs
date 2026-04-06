@@ -280,7 +280,10 @@ mod tests {
     #[test]
     fn test_char_to_morse_s() {
         let s = char_to_morse('S');
-        assert_eq!(s, vec![MorseSymbol::Dot, MorseSymbol::Dot, MorseSymbol::Dot]);
+        assert_eq!(
+            s,
+            vec![MorseSymbol::Dot, MorseSymbol::Dot, MorseSymbol::Dot]
+        );
     }
 
     #[test]

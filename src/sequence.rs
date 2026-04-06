@@ -454,8 +454,9 @@ impl SequencePredictor {
 
             let next_token_id = pattern.token_ids[matcher.matched_count];
             let progress = matcher.matched_count as f32 / pattern.token_ids.len() as f32;
-            let confidence =
-                self.compute_confidence(matcher.last_snr, matcher.last_jitter) * progress * pattern.weight;
+            let confidence = self.compute_confidence(matcher.last_snr, matcher.last_jitter)
+                * progress
+                * pattern.weight;
 
             let label = self
                 .vocab
@@ -494,8 +495,9 @@ impl SequencePredictor {
 
             let next_token_id = pattern.token_ids[matcher.matched_count];
             let progress = matcher.matched_count as f32 / pattern.token_ids.len() as f32;
-            let confidence =
-                self.compute_confidence(matcher.last_snr, matcher.last_jitter) * progress * pattern.weight;
+            let confidence = self.compute_confidence(matcher.last_snr, matcher.last_jitter)
+                * progress
+                * pattern.weight;
 
             let label = self
                 .vocab

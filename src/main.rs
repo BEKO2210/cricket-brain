@@ -40,9 +40,7 @@ fn main() {
         }
 
         if segment_spikes > 0 {
-            println!(
-                "  {label:>5} {duration:>4}ms @ {freq:>6.0} Hz → {segment_spikes} spikes"
-            );
+            println!("  {label:>5} {duration:>4}ms @ {freq:>6.0} Hz → {segment_spikes} spikes");
         }
     }
 
@@ -50,10 +48,7 @@ fn main() {
     println!("Total timesteps: {total_steps}");
     println!("Total spikes:    {spike_count}");
     println!("Silence spikes:  {silence_spikes} (should be 0)");
-    println!(
-        "Memory usage:    {} bytes",
-        brain.memory_usage_bytes()
-    );
+    println!("Memory usage:    {} bytes", brain.memory_usage_bytes());
     println!(
         "\n{}",
         if silence_spikes == 0 {

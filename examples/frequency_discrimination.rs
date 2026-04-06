@@ -15,13 +15,12 @@ fn main() {
     println!("{}", "-".repeat(42));
 
     let test_freqs = [
-        1000.0, 2000.0, 3000.0, 3500.0, 4000.0, 4200.0, 4400.0, 4500.0, 4600.0, 4800.0,
-        5000.0, 5500.0, 6000.0, 7000.0, 8000.0,
+        1000.0, 2000.0, 3000.0, 3500.0, 4000.0, 4200.0, 4400.0, 4500.0, 4600.0, 4800.0, 5000.0,
+        5500.0, 6000.0, 7000.0, 8000.0,
     ];
 
     for &freq in &test_freqs {
-        let mut brain = CricketBrain::new(Default::default())
-            .expect("valid default brain config");
+        let mut brain = CricketBrain::new(Default::default()).expect("valid default brain config");
         let steps = 200;
         let mut spikes = 0;
 

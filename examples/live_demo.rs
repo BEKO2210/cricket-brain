@@ -11,9 +11,7 @@ use cricket_brain::brain::CricketBrain;
 use cricket_brain::patterns::{decode_spikes, encode_morse};
 
 fn main() {
-    let message = std::env::args()
-        .nth(1)
-        .unwrap_or_else(|| "SOS".to_string());
+    let message = std::env::args().nth(1).unwrap_or_else(|| "SOS".to_string());
 
     println!("=== Cricket-Brain: Live Demo ===\n");
     println!("Input message: \"{message}\"\n");
@@ -21,7 +19,11 @@ fn main() {
     // Step 1: Encode text to frequency signal
     let signal = encode_morse(&message);
     let total_ms: usize = signal.iter().map(|&(_, d)| d).sum();
-    println!("Encoded: {} segments, {} ms total\n", signal.len(), total_ms);
+    println!(
+        "Encoded: {} segments, {} ms total\n",
+        signal.len(),
+        total_ms
+    );
 
     // Step 2: Feed signal through the brain, collect spikes
     let mut brain = CricketBrain::new(Default::default()).expect("valid default brain config");

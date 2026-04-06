@@ -87,7 +87,7 @@ impl Neuron {
     ///
     /// # Example
     /// ```
-    /// use cricket_brain::neuron::Neuron;
+    /// use cricket_brain_core::neuron::Neuron;
     /// let an1 = Neuron::new(0, 4500.0, 4);
     /// assert_eq!(an1.eigenfreq, 4500.0);
     /// ```

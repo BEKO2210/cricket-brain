@@ -54,7 +54,10 @@ fn bank_detects_correct_token() {
     }
 
     assert!(beta_fired, "Beta channel should fire for beta frequency");
-    assert!(!others_fired, "Other channels should NOT fire for beta frequency");
+    assert!(
+        !others_fired,
+        "Other channels should NOT fire for beta frequency"
+    );
 }
 
 #[test]
