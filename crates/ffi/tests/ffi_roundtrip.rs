@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Integration tests for the C-compatible FFI layer.
 //!
 //! These tests call the `extern "C"` functions directly from Rust to verify

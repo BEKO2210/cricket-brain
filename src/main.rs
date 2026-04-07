@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Morse Code "SOS" recognition demo using Cricket-Brain.
 //!
 //! Demonstrates the biomorphic inference engine detecting a Morse-coded

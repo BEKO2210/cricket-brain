@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Edge-case tests for CricketBrain robustness.
 
 use cricket_brain::brain::{BrainConfig, CricketBrain};

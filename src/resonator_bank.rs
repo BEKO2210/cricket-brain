@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Parallel resonator bank for multi-frequency token detection (v0.2).
 //!
 //! A [`ResonatorBank`] contains N parallel 5-neuron circuits (mini cricket-brains),

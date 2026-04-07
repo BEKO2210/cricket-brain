@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Scale test: Creates a 40960-neuron CricketBrain and benchmarks throughput.
 
 use cricket_brain::brain::CricketBrain;

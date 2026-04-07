@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Sequence prediction via delay-line pattern memory (v0.3).
 //!
 //! The [`SequencePredictor`] uses temporal coincidence detection to predict

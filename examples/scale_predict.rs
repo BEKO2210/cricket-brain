@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! v0.3 Scale demo: 40k-neuron sequence predictor benchmark.
 //!
 //! Creates a large vocabulary, registers many patterns, and measures

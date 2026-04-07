@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Morse alphabet demo: encodes and processes all 26 letters through Cricket-Brain.
 
 use cricket_brain::brain::CricketBrain;

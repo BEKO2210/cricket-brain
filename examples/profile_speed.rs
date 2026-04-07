@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 use cricket_brain::brain::{BrainConfig, CricketBrain};
 #[cfg(feature = "telemetry")]
 use cricket_brain::logger::{NoopTelemetry, Telemetry};

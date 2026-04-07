@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Interactive demo: Full encode → brain → decode pipeline.
 //!
 //! Shows how to bring the Cricket-Brain "to life" — feeding it a message,

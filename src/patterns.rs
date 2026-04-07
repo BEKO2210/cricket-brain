@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Morse code and rhythm pattern utilities for the Cricket-Brain.
 //!
 //! Provides encoding of text into frequency/duration pairs suitable

@@ -65,7 +65,7 @@ CricketBrain is a **neuromorphic signal processor** that recognizes temporal pat
 
 | Domain | Application | How CricketBrain Helps |
 |--------|-------------|------------------------|
-| **Medical** | ECG rhythm classification | Real-time arrhythmia detection on wearables ([example](examples/sentinel_ecg_monitor.rs)) |
+| **Medical Research** | ECG rhythm analysis | Temporal pattern detection for rhythm classification research ([demo](examples/sentinel_ecg_monitor.rs)) |
 | **Industrial IoT** | Vibration monitoring | Detect bearing failure patterns at the sensor node |
 | **Audio** | Keyword / wake-word detection | Sub-millisecond response without cloud roundtrip |
 | **Security** | Network traffic analysis | Temporal pattern anomaly detection at line rate |
@@ -228,7 +228,7 @@ Tested against 3 classical detectors under **identical conditions** ([source](ex
 
 | Feature | Description |
 |---------|-------------|
-| **Privacy Mode** | Timestamp anonymization + value coarsening (HIPAA/GDPR) |
+| **Privacy Mode** | Timestamp anonymization + value coarsening (designed for privacy-sensitive contexts) |
 | **Snapshot/Restore** | Serialize full state with CRC64 checksums |
 | **Telemetry** | Structured event hooks + JSON Lines sink |
 | **Chaos Detection** | Shannon entropy monitoring with overload alerts |
@@ -261,9 +261,9 @@ cargo build -p cricket-brain-core --no-default-features
 ```
 
 **Minimal embedded example** ([`examples/arduino_minimal.rs`](examples/arduino_minimal.rs)):
-- Fixed-size arrays (no heap)
-- 944 bytes total RAM
-- Runs on Arduino Uno, STM32, ESP32, any Cortex-M
+- Fixed-size arrays (no heap allocation)
+- 944 bytes calculated RAM footprint
+- Designed for Arduino Uno, STM32, ESP32, any Cortex-M (host-verified)
 
 ---
 
@@ -438,7 +438,7 @@ mit Verzoegerungsleitungs-Koinzidenzdetektion.
 
 ### Anwendungsbereiche
 
-- **Medizin:** EKG-Rhythmus-Klassifikation auf Wearables (HIPAA/DSGVO-konform)
+- **Medizinforschung:** EKG-Rhythmus-Analyse fuer Forschungszwecke (Privacy-Features integriert)
 - **Industrie 4.0:** Vorausschauende Wartung direkt am Sensor-Knoten
 - **Audio:** Wake-Word-Erkennung unter 1 ms ohne Cloud
 - **Sicherheit:** Netzwerk-Anomalie-Erkennung in Leitungsgeschwindigkeit
