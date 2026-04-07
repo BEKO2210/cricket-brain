@@ -78,6 +78,12 @@ pub struct Neuron {
     /// Gaussian bandwidth parameter (default: 0.1 = 10% of eigenfrequency).
     /// Smaller values yield sharper frequency selectivity.
     pub bandwidth: f32,
+    /// Exponential moving average of amplitude for homeostatic plasticity.
+    /// Updated each step: `ema = 0.99 * ema + 0.01 * amplitude`.
+    pub activity_ema: f32,
+    /// Timestep of the most recent spike (coincidence fire). 0 = never spiked.
+    /// Used by STDP to compute pre/post spike timing.
+    pub last_spike_step: u32,
 }
 
 impl Neuron {
@@ -124,6 +130,8 @@ impl Neuron {
             history,
             min_activation_threshold: config.min_activation_threshold,
             bandwidth: 0.1,
+            activity_ema: 0.0,
+            last_spike_step: 0,
         }
     }
 
@@ -195,6 +203,9 @@ impl Neuron {
             self.history.pop_front();
         }
         self.history.push_back(self.amplitude);
+
+        // Update activity EMA for homeostatic plasticity
+        self.activity_ema = 0.99 * self.activity_ema + 0.01 * self.amplitude;
 
         self.amplitude
     }

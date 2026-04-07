@@ -40,6 +40,7 @@ pub use cricket_brain_core::error;
 pub use cricket_brain_core::logger;
 pub use cricket_brain_core::memory;
 pub use cricket_brain_core::neuron;
+pub use cricket_brain_core::plasticity;
 pub use cricket_brain_core::synapse;
 
 pub mod brain;
