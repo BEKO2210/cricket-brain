@@ -1,6 +1,6 @@
 # Projekt-Dossier: CricketBrain (Silent Sentinel)
 
-**Status:** Released — `v1.0.0`
+**Status:** Released — `v3.0.0`
 **Vision:** *"The Java of Sensing"*
 **Rust Edition:** 2021 | **MSRV:** 1.75+
 **Lizenz:** AGPL-3.0 + Commercial (see [COMMERCIAL.md](COMMERCIAL.md))
@@ -25,7 +25,7 @@ CricketBrain ist ein hochperformanter, biologisch inspirierter Signalprozessor. 
 Das Projekt ist als Rust-Workspace organisiert, um strikte Trennung zwischen Kernlogik und Anwendung zu gewaehrleisten:
 
 ```
-cricket-brain/                    # Workspace Root (v1.0.0)
+cricket-brain/                    # Workspace Root (v3.0.0)
 |
 |-- crates/core/                  # [1] Das wissenschaftliche Herz (no_std)
 |-- src/                          # [2] Die Anwendungs-Logik (brain, sequence, tokens)
@@ -248,12 +248,12 @@ Jeder `CricketBrain::step(input_freq)` Aufruf:
 
 ---
 
-## 8. Handover: Naechste Schritte (Post v1.0.0)
+## 8. Handover: Naechste Schritte (Post v3.0.0)
 
 1. ~~**Final Audit:** Pruefung der FFI-Speichersicherheit~~ — Erledigt (12 FFI-Tests).
 2. **Performance-Profile:** Verifizierung des 0.175us-Ziels auf ARM-Cortex-M Hardware.
 3. ~~**Commercial-Ready:** Finalisierung der `COMMERCIAL.md`~~ — Erledigt (AGPL + 4-Tier Commercial).
-4. ~~**Release 1.0:** Entfernen des RC1-Tags~~ — Erledigt (v1.0.0 released).
+4. ~~**Release 1.0:** Entfernen des RC1-Tags~~ — Erledigt (v3.0.0 released).
 5. ~~**STDP Learning:** Spike-Timing Dependent Plasticity~~ — Erledigt (plasticity.rs, 37 Tests).
 6. **Hardware Deployment:** RISC-V / ARM Cortex-M Portierung mit Echtzeit-ADC.
 

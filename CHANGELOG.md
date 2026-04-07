@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Synaptic Weight:** `DelaySynapse` now has a configurable `weight: f32` field.
   `transmit()` multiplies output by weight instead of using if/else for
-  inhibitory. Default weights (1.0/-1.0) produce identical behavior to v1.0.0.
+  inhibitory. Default weights (1.0/-1.0) produce identical behavior to v3.0.0.
 - **STDP (Spike-Timing Dependent Plasticity):** New `plasticity` module in core
   crate with `StdpConfig`, `compute_stdp_delta()`, `apply_stdp()`. Enable via
   `brain.enable_stdp(config)` for online weight adaptation.
@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **37 new plasticity tests:** STDP direction/decay/symmetry/bounds, homeostasis
   up/down/stable/bounds, brain integration, determinism, combined operation.
 
-## [1.0.0] — 2026-04-06
+## [3.0.0] — 2026-04-06
 
 ### Added
 - **Core Engine:** Biomorphic 5-neuron Muenster circuit (AN1, LN2, LN3, LN5, ON1)

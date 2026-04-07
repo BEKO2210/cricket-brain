@@ -42,7 +42,7 @@
   <g filter="url(#glow)">
     <text x="420" y="52" font-family="'SF Mono','Fira Code',monospace" font-size="13" fill="#8b949e" text-anchor="middle" letter-spacing="4">NEUROMORPHIC INFERENCE ENGINE</text>
     <text x="420" y="95" font-family="'Segoe UI',system-ui,sans-serif" font-size="38" fill="#e6edf3" text-anchor="middle" font-weight="700">CricketBrain</text>
-    <text x="420" y="125" font-family="'SF Mono','Fira Code',monospace" font-size="14" fill="#58a6ff" text-anchor="middle">v1.1 | 5 neurons | 97 ns/step | ~1 KB | STDP + Homeostasis | TPR 1.0</text>
+    <text x="420" y="125" font-family="'SF Mono','Fira Code',monospace" font-size="14" fill="#58a6ff" text-anchor="middle">v3.0 | 5 neurons | 97 ns/step | ~1 KB | STDP + Homeostasis | TPR 1.0</text>
   </g>
   <!-- Bottom stat boxes -->
   <g font-family="'SF Mono','Fira Code',monospace" text-anchor="middle">

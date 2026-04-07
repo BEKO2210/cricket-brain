@@ -67,4 +67,4 @@ This is fundamentally different from transformer architectures where inference s
 - **v0.1** — Morse code recognition (current)
 - **v0.2** — Multi-frequency token recognition (parallel resonator banks)
 - **v0.3** — 40k resonator network for sequence prediction
-- **v1.0** — Arduino port with real-time audio input via ADC
+- **v3.0** — Arduino port with real-time audio input via ADC
