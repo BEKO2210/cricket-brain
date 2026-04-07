@@ -133,8 +133,8 @@ fn brain_get_version_returns_non_null() {
     let version = unsafe { std::ffi::CStr::from_ptr(ptr) };
     let s = version.to_str().expect("valid utf-8 version string");
     assert!(
-        s.contains("1.0.0"),
-        "version should contain 1.0.0, got: {s}"
+        s.contains("3.0.0"),
+        "version should contain 3.0.0, got: {s}"
     );
 }
 

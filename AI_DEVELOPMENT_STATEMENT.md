@@ -26,7 +26,7 @@ used:
 2. **Implementation:** Code was generated through iterative AI-assisted sessions.
    Each session's output was reviewed, tested, and integrated by the author.
    20 Codex runs were used for incremental feature development (v0.1 through
-   v1.0.0).
+   v3.0.0).
 
 3. **Validation:** All benchmark results, test outcomes, and performance claims
    were independently verified by running the actual code. No AI-generated

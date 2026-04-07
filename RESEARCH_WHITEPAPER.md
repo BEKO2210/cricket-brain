@@ -371,7 +371,7 @@ The biomorphic approach offers several advantages over classical methods:
 
 ### 7.3 Future Work
 
-- ~~Spike-timing dependent plasticity (STDP)~~ — implemented in v1.1
+- ~~Spike-timing dependent plasticity (STDP)~~ — implemented in v3.0
   (`plasticity` module: `StdpConfig`, `HomeostasisConfig`, 37 tests)
 - Hardware deployment on RISC-V and ARM Cortex-M targets
 - Medical device certification (IEC 62304) for the ECG sentinel application
@@ -472,7 +472,7 @@ industrial IoT, and edge-computing applications.
 
 ## Appendix B: Reproducibility Checklist
 
-- [ ] Clone repository at tagged version (v1.0.0)
+- [ ] Clone repository at tagged version (v3.0.0)
 - [ ] Verify Rust toolchain >= 1.75 (`rustup show`)
 - [ ] Run `cargo test --workspace` (all tests pass)
 - [ ] Run `cargo run --release --example research_gen -- --seed 1337`

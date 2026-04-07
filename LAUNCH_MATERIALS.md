@@ -1,4 +1,4 @@
-# CricketBrain v1.1 — Launch Materials
+# CricketBrain v3.0 — Launch Materials
 
 > **Core positioning:** CricketBrain combines hardwired delay-line coincidence
 > detection with optional adaptive plasticity: weighted synapses, STDP learning,
@@ -21,7 +21,7 @@ and delay-line coincidence detection. I took that biological circuit, built
 it in Rust, and then added something the cricket doesn't have: **adaptive
 learning**.
 
-**CricketBrain v1.1** is a neuromorphic signal processor that combines a
+**CricketBrain v3.0** is a neuromorphic signal processor that combines a
 hardwired core with optional STDP (Spike-Timing Dependent Plasticity) and
 homeostatic threshold regulation. It processes signals at **97 nanoseconds
 per step** in about **1 KB of RAM**.
@@ -35,7 +35,7 @@ mapped in real crickets (Schoeneich et al., 2015):
 2. **LN2, LN3, LN5** — interneurons with different axonal delays (2-5 ms)
 3. **ON1** — coincidence gate, fires only on correct temporal pattern
 
-What's new in v1.1: every synapse now carries a **weight** that can adapt
+What's new in v3.0: every synapse now carries a **weight** that can adapt
 online via STDP. Neurons track their activity and adjust firing thresholds
 via homeostasis. The network can learn from temporal patterns — not just
 detect hardcoded ones.
@@ -117,12 +117,12 @@ researchers, and anyone working on edge computing.
 
 ## 2. Reddit r/rust
 
-### Title: "CricketBrain v1.1 — adaptive neuromorphic engine: STDP learning + homeostasis in no_std Rust (~1 KB, 97 ns/step)"
+### Title: "CricketBrain v3.0 — adaptive neuromorphic engine: STDP learning + homeostasis in no_std Rust (~1 KB, 97 ns/step)"
 
-CricketBrain v1.1 adds online plasticity to a biomorphic signal processor
+CricketBrain v3.0 adds online plasticity to a biomorphic signal processor
 modeled after cricket hearing.
 
-**What's new in v1.1:**
+**What's new in v3.0:**
 - Synaptic weights (configurable, default +-1.0)
 - STDP learning: weights adapt based on pre/post spike timing
 - Homeostatic thresholds: neurons auto-regulate activity level
@@ -153,7 +153,7 @@ Built with AI-assisted development — full transparency statement in repo.
 
 ### Title: "no_std adaptive neuromorphic engine: STDP + homeostasis in ~1 KB RAM, 1 dep (libm) — feedback wanted for Cortex-M"
 
-CricketBrain v1.1 adds synaptic plasticity to a biomorphic signal processor.
+CricketBrain v3.0 adds synaptic plasticity to a biomorphic signal processor.
 Core is `no_std` with `#![deny(unsafe_code)]` and a single dep (libm).
 
 **Memory budget:**
@@ -175,7 +175,7 @@ https://github.com/BEKO2210/cricket-brain
 
 ## 4. Hacker News
 
-### Title: CricketBrain v1.1: Adaptive neuromorphic engine in Rust — STDP, homeostasis, ~1 KB, 97 ns/step
+### Title: CricketBrain v3.0: Adaptive neuromorphic engine in Rust — STDP, homeostasis, ~1 KB, 97 ns/step
 
 ### URL: https://github.com/BEKO2210/cricket-brain
 
@@ -184,7 +184,7 @@ https://github.com/BEKO2210/cricket-brain
 ## 5. Twitter/X Thread
 
 **Tweet 1:**
-CricketBrain v1.1 is out — an adaptive neuromorphic signal processor in Rust.
+CricketBrain v3.0 is out — an adaptive neuromorphic signal processor in Rust.
 
 Hardwired delay-line core + optional STDP learning + homeostatic thresholds.
 
@@ -197,14 +197,14 @@ https://github.com/BEKO2210/cricket-brain
 🧵 (1/5)
 
 **Tweet 2:**
-What's new in v1.1:
+What's new in v3.0:
 
 - Synaptic weights: every connection is now weighted
 - STDP: pre-before-post = strengthen, post-before-pre = weaken
 - Homeostasis: overactive neurons raise threshold, quiet ones lower it
 - 37 new tests (122 total)
 
-All opt-in. Default behavior = identical to v1.0.
+All opt-in. Default behavior = identical to v2.0.
 
 (2/5)
 
@@ -247,9 +247,9 @@ What temporal patterns would you teach it?
 
 ## 6. LinkedIn
 
-**CricketBrain v1.1 — Adaptive Neuromorphic Signal Processing in Rust**
+**CricketBrain v3.0 — Adaptive Neuromorphic Signal Processing in Rust**
 
-CricketBrain v1.1 adds online adaptive learning to the neuromorphic core:
+CricketBrain v3.0 adds online adaptive learning to the neuromorphic core:
 
 - **STDP (Spike-Timing Dependent Plasticity):** Synaptic weights adapt
   based on the relative timing of neural activity — the same learning
@@ -284,11 +284,11 @@ GitHub: https://github.com/BEKO2210/cricket-brain
 
 **Email to:** thisweekinrust@gmail.com
 
-**Subject:** CricketBrain v1.1 — adaptive neuromorphic engine (STDP, no_std, 1 dep)
+**Subject:** CricketBrain v3.0 — adaptive neuromorphic engine (STDP, no_std, 1 dep)
 
 Hi,
 
-CricketBrain v1.1 adds adaptive plasticity to a neuromorphic signal
+CricketBrain v3.0 adds adaptive plasticity to a neuromorphic signal
 processor inspired by cricket auditory circuits:
 
 - **New:** STDP learning, weighted synapses, homeostatic thresholds

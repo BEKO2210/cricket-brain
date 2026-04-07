@@ -96,7 +96,7 @@ Match: EXACT MATCH
 
 ```toml
 [dependencies]
-cricket-brain = "1.0"
+cricket-brain = "3.0"
 ```
 
 ```rust
@@ -365,9 +365,9 @@ cricket-brain/
 - [x] **v0.2** — Multi-frequency token recognition
 - [x] **v0.3** — Sequence prediction via delay-line pattern memory
 - [x] **v1.0** — Production release with FFI/Python/WASM bindings
-- [x] **v1.0.1** — Adaptive Gaussian bandwidth for dense vocabularies
-- [x] **v1.1** — STDP + homeostatic plasticity for online adaptive learning
-- [ ] **v2.0** — Hardware deployment on RISC-V / ARM Cortex-M with real-time ADC
+- [x] **v2.0** — Adaptive Gaussian bandwidth for dense vocabularies
+- [x] **v3.0** — STDP + homeostatic plasticity for online adaptive learning
+- [ ] **v4.0** — Hardware deployment on RISC-V / ARM Cortex-M with real-time ADC
 
 ---
 
@@ -392,7 +392,7 @@ cargo fmt -- --check                                      # Formatting clean
              for Real-Time Temporal Pattern Recognition},
   year    = {2026},
   url     = {https://github.com/BEKO2210/cricket-brain},
-  version = {1.0.0}
+  version = {3.0.0}
 }
 ```
 
@@ -458,7 +458,7 @@ cargo run --example live_demo -- "HALLO WELT"
 
 | Sprache | Befehl |
 |---------|--------|
-| **Rust** | `cricket-brain = "1.0"` in Cargo.toml |
+| **Rust** | `cricket-brain = "3.0"` in Cargo.toml |
 | **C/C++** | `cargo build -p cricket-brain-ffi` (Header: `cricket_brain.h`) |
 | **Python** | `cd crates/python && maturin develop` |
 | **WASM** | `cd crates/wasm && wasm-pack build --target web` |
