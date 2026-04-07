@@ -715,6 +715,7 @@ impl CricketBrain {
                 to: s.to,
                 delay_ms: s.delay_ms,
                 inhibitory: s.inhibitory,
+                weight: if s.inhibitory { -1.0 } else { 1.0 },
                 ring_buffer: VecDeque::from(s.ring_buffer.clone()),
             })
             .collect();

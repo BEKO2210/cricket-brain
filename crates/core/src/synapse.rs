@@ -41,6 +41,10 @@ pub struct DelaySynapse {
     pub delay_ms: usize,
     /// If true, the synapse inverts the signal (inhibitory).
     pub inhibitory: bool,
+    /// Synaptic weight (default: 1.0 excitatory, -1.0 inhibitory).
+    /// Positive = excitatory, negative = inhibitory. Used by `transmit()`.
+    /// Can be adjusted for plasticity (STDP, homeostasis).
+    pub weight: f32,
     /// Ring buffer implementing the delay line.
     /// Length = delay_ms. The oldest element is at index 0.
     pub ring_buffer: VecDeque<f32>,
@@ -68,11 +72,13 @@ impl DelaySynapse {
         for _ in 0..delay {
             ring_buffer.push_back(0.0);
         }
+        let weight = if inhibitory { -1.0 } else { 1.0 };
         DelaySynapse {
             from,
             to,
             delay_ms: delay,
             inhibitory,
+            weight,
             ring_buffer,
         }
     }
@@ -107,11 +113,25 @@ impl DelaySynapse {
         self.ring_buffer.pop_front();
         self.ring_buffer.push_back(signal);
 
-        if self.inhibitory {
-            -delayed_output
-        } else {
-            delayed_output
-        }
+        delayed_output * self.weight
+    }
+
+    /// Adjusts the synaptic weight by `delta`, clamped to `[-2.0, 2.0]`.
+    ///
+    /// Used by plasticity rules (STDP, homeostasis) to strengthen or weaken
+    /// connections over time.
+    ///
+    /// # Arguments
+    /// * `delta` - Amount to add to the current weight (positive = potentiate, negative = depress)
+    #[inline]
+    pub fn adjust_weight(&mut self, delta: f32) {
+        self.weight = (self.weight + delta).clamp(-2.0, 2.0);
+    }
+
+    /// Returns the current synaptic weight.
+    #[inline]
+    pub fn current_weight(&self) -> f32 {
+        self.weight
     }
 
     /// Returns the configured delay in timesteps.
