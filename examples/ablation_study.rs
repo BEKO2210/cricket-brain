@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Systematic ablation study for the CricketBrain Münster circuit.
 //!
 //! Tests 6 configurations across SNR levels to measure the contribution of

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 use cricket_brain::brain::CricketBrain;
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 

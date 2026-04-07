@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 use crate::error::CricketError;
 use crate::neuron::Neuron;
 use crate::synapse::DelaySynapse;

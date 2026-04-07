@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! v0.3 Demo: Sequence prediction using delay-line pattern memory.
 //!
 //! Registers word patterns, feeds partial sequences, and predicts the next token.

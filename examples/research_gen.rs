@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Research data generator for "Silent Sentinel" whitepaper prep.
 //!
 //! Generates:

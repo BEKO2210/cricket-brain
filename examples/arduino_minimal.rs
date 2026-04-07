@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Minimal no_std-compatible Cricket-Brain for Arduino Uno.
 //!
 //! This example demonstrates the core algorithm using only fixed-size arrays

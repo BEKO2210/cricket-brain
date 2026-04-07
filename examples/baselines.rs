@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Classical signal detection baselines for comparison with CricketBrain.
 //!
 //! Implements three classical detectors operating on the same test protocol

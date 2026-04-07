@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Sentinel ECG monitor template (medical developer example).
 //!
 //! Uses a simplified P-QRS-T waveform and CricketBrain inference to classify

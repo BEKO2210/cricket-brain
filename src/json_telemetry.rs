@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 use crate::logger::{Telemetry, TelemetryEvent};
 use serde::Serialize;
 use std::io::{BufWriter, Write};

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! Frequency discrimination demo: proves the brain rejects wrong frequencies.
 //!
 //! The cricket brain is tuned to 4500 Hz. This demo shows that signals

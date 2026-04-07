@@ -9,7 +9,7 @@ We currently support security updates for the latest `main` branch and the most 
 If you discover a security vulnerability:
 
 1. **Do not** open a public issue with exploit details.
-2. Email maintainers with:
+2. Email **belkis.aslani@gmail.com** with:
    - reproduction steps
    - affected commit/release
    - impact assessment

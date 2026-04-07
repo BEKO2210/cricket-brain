@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 #![cfg_attr(not(feature = "std"), no_std)]
 
 //! # Cricket-Brain

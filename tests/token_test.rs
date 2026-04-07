@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 use cricket_brain::resonator_bank::ResonatorBank;
 use cricket_brain::token::TokenVocabulary;
 

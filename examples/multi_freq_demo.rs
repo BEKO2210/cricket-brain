@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 //! v0.2 Demo: Multi-frequency token recognition.
 //!
 //! Encodes each character as a unique frequency and shows that
