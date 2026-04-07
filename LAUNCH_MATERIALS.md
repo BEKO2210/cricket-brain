@@ -1,184 +1,181 @@
-# CricketBrain — Launch Materials
+# CricketBrain v1.1 — Launch Materials
 
-## 1. Dev.to / Blog Post
-
-### Title: "I built a neuromorphic inference engine in Rust that processes signals in 0.175 microseconds with 944 bytes of RAM"
-
-**Tags:** rust, opensource, embedded, machinelearning
+> **Core positioning:** CricketBrain combines hardwired delay-line coincidence
+> detection with optional adaptive plasticity: weighted synapses, STDP learning,
+> and homeostatic threshold regulation — in ~1 KB RAM at 97 ns/step.
 
 ---
 
-What if I told you that a cricket — the insect — solves pattern recognition
-problems faster and more efficiently than most machine learning models?
+## 1. Dev.to / Blog Post
 
-The field cricket (*Gryllus bimaculatus*) recognizes species-specific songs
-using just 5 neurons and delay-line coincidence detection. No training.
-No weights. No gradient descent. I took that biological circuit and built
-it in Rust.
+### Title: "I built an adaptive neuromorphic engine in Rust: STDP learning in 1 KB of RAM at 97 nanoseconds per step"
 
-**The result: CricketBrain** — a neuromorphic signal processor that detects
-temporal patterns in 0.175 microseconds per step, using 944 bytes of RAM.
+**Tags:** rust, opensource, embedded, machinelearning, neuroscience
 
-### What it does
+---
 
-CricketBrain processes streaming signals (frequencies, sensor data, timing
-patterns) and detects specific temporal structures. It works like a biological
-auditory system:
+What if an insect brain could teach us how to build better edge AI?
 
-1. **Gaussian resonators** filter for target frequencies
-2. **Delay-line synapses** create timing-dependent pathways
-3. **A coincidence gate** fires only when the timing pattern matches
+The field cricket (*Gryllus bimaculatus*) recognizes songs using 5 neurons
+and delay-line coincidence detection. I took that biological circuit, built
+it in Rust, and then added something the cricket doesn't have: **adaptive
+learning**.
 
+**CricketBrain v1.1** is a neuromorphic signal processor that combines a
+hardwired core with optional STDP (Spike-Timing Dependent Plasticity) and
+homeostatic threshold regulation. It processes signals at **97 nanoseconds
+per step** in about **1 KB of RAM**.
+
+### The architecture
+
+The core is a 5-neuron Muenster circuit — the same topology neuroscientists
+mapped in real crickets (Schoeneich et al., 2015):
+
+1. **AN1** — receptor neuron, Gaussian frequency selectivity
+2. **LN2, LN3, LN5** — interneurons with different axonal delays (2-5 ms)
+3. **ON1** — coincidence gate, fires only on correct temporal pattern
+
+What's new in v1.1: every synapse now carries a **weight** that can adapt
+online via STDP. Neurons track their activity and adjust firing thresholds
+via homeostasis. The network can learn from temporal patterns — not just
+detect hardcoded ones.
+
+### Adaptive plasticity
+
+```rust
+use cricket_brain::prelude::*;
+use cricket_brain::plasticity::{StdpConfig, HomeostasisConfig};
+
+let mut brain = CricketBrain::new(BrainConfig::default())?;
+
+// Enable online adaptation
+brain.enable_stdp(StdpConfig::default().with_learning_rate(0.02));
+brain.enable_homeostasis(HomeostasisConfig::default());
+
+// Feed signal — weights and thresholds adapt in real-time
+for &freq in &signal {
+    brain.step(freq);
+}
+
+// Inspect what the network learned
+for syn in &brain.synapses {
+    println!("{}->{}: weight={:.3}", syn.from, syn.to, syn.weight);
+}
 ```
-        AN1 (Receptor)
-       / | \
-      v  v  v
-    LN2 LN3 LN5    ← different delays: 3ms, 2ms, 5ms
-      \  |  /
-       v v v
-      ON1 (Gate)    ← fires only on correct timing
-```
 
-### Real numbers
+### Key numbers
 
 | Metric | Value |
 |--------|-------|
-| Latency | 0.175 us/step (Criterion-measured) |
-| Memory | 944 bytes (calculated, no_std) |
-| Detection | TPR 1.0, FPR 0.0 on synthetic benchmarks |
+| Latency | 97 ns/step (Criterion-measured, x86-64) |
+| Memory | ~1008 bytes (no_std, calculated) |
+| Detection | TPR 1.0, FPR 0.0 (synthetic benchmarks) |
 | Dependencies | 1 (libm) in core crate |
-| Training | None — topology is hardwired |
+| Learning | STDP + homeostatic thresholds (opt-in) |
 | Platforms | Linux, macOS, Windows, WASM (CI-verified) |
+| Tests | 122 (including 37 plasticity-specific) |
 
-### vs. Classical signal detection (SNR = 0 dB)
+### vs. classical detectors (SNR = 0 dB)
 
-I compared CricketBrain against three classical detectors — matched filter,
-Goertzel (FFT), and IIR bandpass — under identical conditions:
-
-| Method | True Positive Rate | False Positive Rate |
+| Method | TPR | FPR |
 |--------|:---:|:---:|
 | **CricketBrain** | **1.000** | **0.000** |
 | IIR Bandpass | 1.000 | 0.558 |
 | Matched Filter | 0.000 | 0.000 |
 
-The coincidence gate gives CricketBrain an inherent advantage: it rejects
-noise that would trigger frequency-only detectors.
+**Caveat:** These are synthetic benchmarks. Real-world performance depends
+on the application.
 
-**Important caveat:** These results are on synthetic data with a controlled
-signal generator. Real-world performance will depend on the specific application.
+### What it is and what it isn't
 
-### How to try it
+**What it is:**
+- An ultralight adaptive neuromorphic signal processor
+- A `no_std` Rust library with C, Python, and WASM bindings
+- A research tool grounded in published neuroscience (16 references)
+
+**What it isn't:**
+- A general-purpose ML framework
+- A validated medical device
+- Tested on real embedded hardware (designed for it, verified on host)
+
+### Try it
 
 ```bash
 git clone https://github.com/BEKO2210/cricket-brain.git
 cd cricket-brain
 cargo run --example live_demo -- "HELLO WORLD"
+cargo run --example sequence_predict
+cargo bench
 ```
-
-Or use as a library:
-
-```toml
-[dependencies]
-cricket-brain = "1.0"
-```
-
-```rust
-use cricket_brain::prelude::*;
-
-let mut brain = CricketBrain::new(BrainConfig::default())?;
-let output = brain.step(4500.0); // feed a signal
-```
-
-### Bindings
-
-CricketBrain ships with bindings for C/C++, Python, and WebAssembly:
-
-```python
-from cricket_brain import Brain
-brain = Brain()
-output = brain.step(4500.0)
-```
-
-### What it's NOT
-
-- Not a replacement for neural networks on high-dimensional tasks
-- Not a validated medical device
-- Not tested on real embedded hardware yet (designed for it, verified on host)
-- Patterns are registered, not learned — this is topology, not training
-
-### The science
-
-The architecture is based on published neuroscience research, particularly
-Schoeneich, Kostarakos & Hedwig (2015) who mapped the AN1-LN2/LN3/LN5-ON1
-circuit in *Gryllus bimaculatus*. The project includes a
-[research whitepaper](https://github.com/BEKO2210/cricket-brain/blob/main/RESEARCH_WHITEPAPER.md)
-with 16 peer-reviewed references, baseline comparisons, and an ablation study.
-
-### Open source, dual licensed
-
-CricketBrain is AGPL-3.0 for open source use. Commercial licenses are
-available for proprietary applications.
 
 GitHub: https://github.com/BEKO2210/cricket-brain
 
-I'd love feedback, especially from embedded engineers and signal processing
-folks. What temporal patterns would you want to detect?
+I'd love feedback — especially from embedded engineers, neuroscience
+researchers, and anyone working on edge computing.
 
 ---
 
-## 2. Reddit r/rust Post
+## 2. Reddit r/rust
 
-### Title: "CricketBrain v1.0 — neuromorphic signal processor in Rust: 0.175us/step, 944 bytes, no_std, 1 dependency"
+### Title: "CricketBrain v1.1 — adaptive neuromorphic engine: STDP learning + homeostasis in no_std Rust (~1 KB, 97 ns/step)"
 
-I just released CricketBrain, a biomorphic inference engine modeled after the
-cricket auditory system. It uses delay-line coincidence detection instead of
-ML — 5 neurons, 6 synapses, zero training.
+CricketBrain v1.1 adds online plasticity to a biomorphic signal processor
+modeled after cricket hearing.
 
-**Key facts:**
-- `0.175 us/step` (Criterion-measured on x86-64)
-- `944 bytes` calculated RAM (no_std, no heap)
-- `1 dependency` in core crate (libm)
-- `#![deny(unsafe_code)]` in core
-- `85 tests`, CI on Linux/macOS/Windows
-- Bindings: C FFI, Python (PyO3), WASM
+**What's new in v1.1:**
+- Synaptic weights (configurable, default +-1.0)
+- STDP learning: weights adapt based on pre/post spike timing
+- Homeostatic thresholds: neurons auto-regulate activity level
+- 37 new plasticity tests (122 total)
+- Still ~1 KB, still 97 ns/step, still `no_std`
+
+**Architecture:** 5-neuron Muenster circuit with delay-line coincidence
+detection. The hardwired topology provides the base detection, STDP allows
+online adaptation to patterns.
 
 **What I'd appreciate feedback on:**
-- API design — does `cricket_brain::prelude::*` make sense?
+- Is the STDP implementation reasonable for embedded targets?
+- `no_std` with 1 dep (libm) — viable for Cortex-M?
 - The adaptive bandwidth mechanism for dense token vocabularies
-- Whether the `no_std` architecture is viable for real Cortex-M targets
 
-Repo: https://github.com/BEKO2210/cricket-brain
-Whitepaper: https://github.com/BEKO2210/cricket-brain/blob/main/RESEARCH_WHITEPAPER.md
-
-Built with AI-assisted development (Claude Code, ChatGPT/Codex, Kimi, Gemini)
-— full transparency statement in the repo.
-
----
-
-## 3. Reddit r/embedded Post
-
-### Title: "no_std Rust neuromorphic engine: 944 bytes, 1 dep (libm), deny(unsafe_code) — would this work on Cortex-M?"
-
-Working on CricketBrain, a signal processor inspired by cricket hearing. The
-core crate is `no_std` with a single dependency (`libm`) and
-`#![deny(unsafe_code)]`.
-
-I've designed it for embedded but only verified on host. The `arduino_minimal`
-example uses fixed-size arrays (no heap) and calculates to 944 bytes RAM.
-
-**Honest question:** Has anyone here tried deploying a similar Rust `no_std`
-library on actual Cortex-M0/M4 hardware? What gotchas should I expect?
-
-The architecture: 5 neurons with Gaussian frequency selectivity, 6 delay-line
-synapses, coincidence detection gate. Processes one step in ~0.175us on x86.
+```rust
+brain.enable_stdp(StdpConfig::default().with_learning_rate(0.02));
+brain.enable_homeostasis(HomeostasisConfig::default());
+```
 
 Repo: https://github.com/BEKO2210/cricket-brain
 
+Built with AI-assisted development — full transparency statement in repo.
+
 ---
 
-## 4. Hacker News Submission
+## 3. Reddit r/embedded
 
-### Title: CricketBrain: Neuromorphic signal processor in Rust (0.175us/step, 944 bytes)
+### Title: "no_std adaptive neuromorphic engine: STDP + homeostasis in ~1 KB RAM, 1 dep (libm) — feedback wanted for Cortex-M"
+
+CricketBrain v1.1 adds synaptic plasticity to a biomorphic signal processor.
+Core is `no_std` with `#![deny(unsafe_code)]` and a single dep (libm).
+
+**Memory budget:**
+- 5-neuron circuit: ~1008 bytes (calculated from struct sizes)
+- Includes: 5 neurons with history buffers, 6 synapses with delay lines,
+  synaptic weights, activity EMA, spike timestamps
+
+**New adaptive features (all opt-in):**
+- STDP: `Δw = η·exp(-|Δt|/τ)` — online weight adaptation
+- Homeostasis: threshold adjusts to maintain target activity
+- Weights clamped to [-2.0, 2.0], thresholds to [0.3, 0.95]
+
+Honest question: has anyone deployed a similar Rust `no_std` adaptive
+system on real hardware? I've only verified on host so far.
+
+https://github.com/BEKO2210/cricket-brain
+
+---
+
+## 4. Hacker News
+
+### Title: CricketBrain v1.1: Adaptive neuromorphic engine in Rust — STDP, homeostasis, ~1 KB, 97 ns/step
 
 ### URL: https://github.com/BEKO2210/cricket-brain
 
@@ -187,119 +184,121 @@ Repo: https://github.com/BEKO2210/cricket-brain
 ## 5. Twitter/X Thread
 
 **Tweet 1:**
-Just released CricketBrain v1.0 — a neuromorphic signal processor in Rust
-inspired by cricket hearing.
+CricketBrain v1.1 is out — an adaptive neuromorphic signal processor in Rust.
 
-5 neurons. 6 synapses. 0.175 us/step. 944 bytes RAM. Zero training.
+Hardwired delay-line core + optional STDP learning + homeostatic thresholds.
 
-No CUDA. No weights. No matrices. Just biology turned into code.
+97 ns/step. ~1 KB RAM. no_std. 1 dependency.
+
+The network can now learn from temporal patterns, not just detect them.
 
 https://github.com/BEKO2210/cricket-brain
 
-Thread (1/5)
+🧵 (1/5)
 
 **Tweet 2:**
-How does it work?
+What's new in v1.1:
 
-A cricket finds mates using delay-line coincidence detection — signals
-travel through neurons with different delays, and the output fires only
-when timing matches.
+- Synaptic weights: every connection is now weighted
+- STDP: pre-before-post = strengthen, post-before-pre = weaken
+- Homeostasis: overactive neurons raise threshold, quiet ones lower it
+- 37 new tests (122 total)
 
-CricketBrain implements this exact circuit in safe Rust (no_std, 1 dep).
+All opt-in. Default behavior = identical to v1.0.
 
 (2/5)
 
 **Tweet 3:**
-Benchmarks vs classical detectors (SNR = 0 dB):
+The science: STDP is the same learning rule found in biological neurons.
 
-CricketBrain: TPR 1.0, FPR 0.0
-IIR Bandpass: TPR 1.0, FPR 0.56
-Matched Filter: TPR 0.0, FPR 0.0
+Δw = η · exp(-|Δt| / τ)
 
-The coincidence gate rejects noise that frequency-only methods can't.
+In CricketBrain, it runs in constant time per synapse, no alloc, no_std.
 
-(Note: synthetic benchmark — real-world will vary)
+Combined with the delay-line coincidence gate, the network adapts its
+temporal selectivity online.
 
 (3/5)
 
 **Tweet 4:**
-The stack:
-- Rust workspace (core/brain/ffi/python/wasm)
-- #![deny(unsafe_code)] in core
-- AGPL-3.0 + commercial license
-- 85 tests, CI on 3 platforms
-- Whitepaper with 16 references + ablation study
+Performance after adding plasticity:
 
-Built with AI-assisted development — full transparency in the repo.
+Before: 85 ns/step, 944 bytes
+After:  97 ns/step, ~1008 bytes
+
++14% latency for fully adaptive learning. Still under 100 ns.
+Still under 1.1 KB. Still no_std.
 
 (4/5)
 
 **Tweet 5:**
-Use cases I'm exploring:
-- Embedded sensor pattern detection (IoT)
-- Audio temporal analysis
-- Research tool for neuromorphic computing
+Looking for:
+- Embedded engineers to try this on Cortex-M
+- Neuroscience researchers for real signal datasets
+- Edge computing folks for use-case validation
 
-Looking for feedback from embedded engineers and signal processing folks.
+AGPL-3.0 open source. Commercial license available.
 
-What would you build with sub-microsecond pattern detection?
+What temporal patterns would you teach it?
 
 (5/5)
 
 ---
 
-## 6. LinkedIn Post
+## 6. LinkedIn
 
-**CricketBrain v1.0 — Open Source Neuromorphic Signal Processor**
+**CricketBrain v1.1 — Adaptive Neuromorphic Signal Processing in Rust**
 
-I'm excited to share CricketBrain, a project I've been developing that
-takes a fundamentally different approach to signal processing.
+CricketBrain v1.1 adds online adaptive learning to the neuromorphic core:
 
-Instead of machine learning, CricketBrain uses delay-line coincidence
-detection — the same mechanism field crickets use to recognize songs.
-The result is a signal processor that runs in 0.175 microseconds per step
-with 944 bytes of RAM.
+- **STDP (Spike-Timing Dependent Plasticity):** Synaptic weights adapt
+  based on the relative timing of neural activity — the same learning
+  rule found in biological brains.
+- **Homeostatic regulation:** Neuron firing thresholds automatically adjust
+  to maintain stable network activity.
+- **Weighted synapses:** Every connection now carries a configurable weight
+  that plasticity rules can modify online.
 
-Key technical highlights:
-- Rust implementation with no_std core (1 dependency)
-- Bindings for C/C++, Python, and WebAssembly
-- 85 tests, CI on Linux/macOS/Windows
-- Research whitepaper with 16 peer-reviewed references
+The core architecture remains a hardwired 5-neuron circuit inspired by
+cricket hearing (Schoeneich et al., 2015), but it can now adapt to
+temporal patterns instead of relying solely on fixed registration.
+
+Technical highlights:
+- 97 ns per processing step (Criterion-measured)
+- ~1 KB total RAM with all plasticity features
+- 122 tests including 37 plasticity-specific
+- Rust, no_std core, single dependency (libm)
+- C/C++, Python, and WebAssembly bindings
 - AGPL-3.0 open source + commercial licensing
 
-Potential application areas: embedded IoT sensing, audio pattern detection,
-industrial monitoring, and neuromorphic computing research.
-
-The project was developed with AI-assisted tools (Claude Code, ChatGPT/Codex,
-Kimi, Gemini) — I believe in full transparency about the development process.
-
-I'm looking for feedback from embedded systems engineers, signal processing
-experts, and anyone working in edge computing.
+The project includes a research whitepaper with 16 peer-reviewed references,
+baseline comparisons, an ablation study, and full AI-development transparency.
 
 GitHub: https://github.com/BEKO2210/cricket-brain
 
-#Rust #OpenSource #Embedded #NeuromorphicComputing #SignalProcessing
-#EdgeAI #IoT
+#Rust #NeuromorphicComputing #STDP #EdgeAI #OpenSource #Embedded
 
 ---
 
-## 7. Rust Weekly Newsletter Submission
+## 7. Rust Weekly Newsletter
 
 **Email to:** thisweekinrust@gmail.com
 
-**Subject:** CricketBrain v1.0 — neuromorphic signal processor (no_std, 1 dep, deny(unsafe_code))
+**Subject:** CricketBrain v1.1 — adaptive neuromorphic engine (STDP, no_std, 1 dep)
 
 Hi,
 
-I'd like to submit CricketBrain for This Week in Rust:
+CricketBrain v1.1 adds adaptive plasticity to a neuromorphic signal
+processor inspired by cricket auditory circuits:
 
-- **Category:** Crate of the Week / Interesting Projects
-- **URL:** https://github.com/BEKO2210/cricket-brain
-- **Description:** Biomorphic signal processor inspired by cricket auditory
-  circuits. Uses delay-line coincidence detection for temporal pattern
-  recognition. no_std core with 1 dependency (libm), #![deny(unsafe_code)],
-  0.175us/step latency. Includes C FFI, Python, and WASM bindings.
+- **New:** STDP learning, weighted synapses, homeostatic thresholds
+- **Core:** no_std, 1 dep (libm), #![deny(unsafe_code)], 97 ns/step
+- **Bindings:** C FFI, Python (PyO3), WASM
+- **Tests:** 122 (37 plasticity-specific)
 - **License:** AGPL-3.0 + Commercial
 
-Thank you!
+Category: Crate of the Week / Interesting Projects
+URL: https://github.com/BEKO2210/cricket-brain
+
+Thank you,
 Belkis Aslani

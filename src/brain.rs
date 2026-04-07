@@ -9,6 +9,9 @@ use alloc::vec::Vec;
 use cricket_brain_core::logger::Telemetry;
 use cricket_brain_core::memory::MemoryStats;
 use cricket_brain_core::neuron::NeuronConfig;
+use cricket_brain_core::plasticity::{
+    apply_homeostasis, apply_stdp, HomeostasisConfig, StdpConfig,
+};
 
 /// Configuration object for constructing a [`CricketBrain`].
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -196,6 +199,12 @@ pub struct CricketBrain {
     privacy_mode: bool,
     /// Last telemetry step for relative timestamp deltas.
     last_telemetry_step: usize,
+    /// Optional STDP configuration. When `Some`, plasticity is applied
+    /// after each spike event, adjusting synaptic weights online.
+    stdp_config: Option<StdpConfig>,
+    /// Optional homeostasis configuration. When `Some`, neuron thresholds
+    /// are slowly adjusted to maintain a target activity level.
+    homeostasis_config: Option<HomeostasisConfig>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -321,6 +330,8 @@ impl CricketBrain {
                 initial_seed: config.seed,
                 privacy_mode: config.privacy_mode,
                 last_telemetry_step: 0,
+                stdp_config: None,
+                homeostasis_config: None,
             });
         }
 
@@ -359,6 +370,8 @@ impl CricketBrain {
             initial_seed: config.seed,
             privacy_mode: config.privacy_mode,
             last_telemetry_step: 0,
+            stdp_config: None,
+            homeostasis_config: None,
         })
     }
 
@@ -460,8 +473,35 @@ impl CricketBrain {
         }
 
         self.time_step += 1;
+        let ts = self.time_step as u32;
 
-        // Step 4: Return output neuron amplitude (ON1, last neuron)
+        // Step 4: Track spikes for STDP — update last_spike_step for neurons
+        // that exceed their threshold (any neuron can "spike", not just ON1).
+        for neuron in &mut self.neurons {
+            if neuron.amplitude > neuron.threshold {
+                neuron.last_spike_step = ts;
+            }
+        }
+
+        // Step 5: Apply STDP if enabled — adjust weights based on spike timing.
+        if let Some(ref config) = self.stdp_config {
+            let config = *config;
+            for syn in &mut self.synapses {
+                let pre_time = self.neurons[syn.from].last_spike_step;
+                let post_time = self.neurons[syn.to].last_spike_step;
+                apply_stdp(syn, pre_time, post_time, &config);
+            }
+        }
+
+        // Step 6: Apply homeostasis if enabled — adjust thresholds to target activity.
+        if let Some(ref config) = self.homeostasis_config {
+            let config = *config;
+            for neuron in &mut self.neurons {
+                apply_homeostasis(neuron, &config);
+            }
+        }
+
+        // Step 7: Return output neuron amplitude (ON1, last neuron)
         let output_idx = n - 1;
         let dynamic_threshold =
             self.neurons[output_idx].threshold / self.global_sensitivity.max(0.001);
@@ -591,6 +631,46 @@ impl CricketBrain {
 
     /// Processes a batch of input frequencies and returns all output amplitudes.
     ///
+    /// Enables online STDP (Spike-Timing Dependent Plasticity).
+    ///
+    /// When enabled, synaptic weights are adjusted after each spike based
+    /// on the relative timing of pre- and post-synaptic activity.
+    /// This allows the network to adapt to input patterns over time.
+    ///
+    /// # Arguments
+    /// * `config` - STDP learning parameters (learning rate, time constant, bounds)
+    pub fn enable_stdp(&mut self, config: StdpConfig) {
+        self.stdp_config = Some(config);
+    }
+
+    /// Disables online STDP. Existing weights are preserved.
+    pub fn disable_stdp(&mut self) {
+        self.stdp_config = None;
+    }
+
+    /// Returns the current STDP configuration, if enabled.
+    pub fn stdp_config(&self) -> Option<&StdpConfig> {
+        self.stdp_config.as_ref()
+    }
+
+    /// Enables homeostatic threshold adaptation.
+    ///
+    /// Neuron thresholds slowly adjust to maintain a target activity level:
+    /// overactive neurons become harder to fire, quiet neurons become easier.
+    pub fn enable_homeostasis(&mut self, config: HomeostasisConfig) {
+        self.homeostasis_config = Some(config);
+    }
+
+    /// Disables homeostatic adaptation. Current thresholds are preserved.
+    pub fn disable_homeostasis(&mut self) {
+        self.homeostasis_config = None;
+    }
+
+    /// Returns the current homeostasis configuration, if enabled.
+    pub fn homeostasis_config(&self) -> Option<&HomeostasisConfig> {
+        self.homeostasis_config.as_ref()
+    }
+
     /// # Arguments
     /// * `inputs` - Slice of input frequencies, one per timestep
     ///
@@ -705,6 +785,8 @@ impl CricketBrain {
                 history: VecDeque::from(n.history.clone()),
                 min_activation_threshold: n.min_activation_threshold,
                 bandwidth: 0.1,
+                activity_ema: 0.0,
+                last_spike_step: 0,
             })
             .collect();
         self.synapses = snapshot
@@ -715,6 +797,7 @@ impl CricketBrain {
                 to: s.to,
                 delay_ms: s.delay_ms,
                 inhibitory: s.inhibitory,
+                weight: if s.inhibitory { -1.0 } else { 1.0 },
                 ring_buffer: VecDeque::from(s.ring_buffer.clone()),
             })
             .collect();

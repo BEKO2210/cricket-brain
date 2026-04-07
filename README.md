@@ -21,9 +21,9 @@
 [![MSRV](https://img.shields.io/badge/MSRV-1.75-blue.svg)](https://www.rust-lang.org)
 [![Security Audit](https://img.shields.io/badge/cargo--audit-passing-brightgreen.svg)](#-quality)
 
-**Sub-microsecond pattern recognition. Sub-kilobyte memory. Zero training.**
+**Adaptive neuromorphic signal processing. Sub-kilobyte memory. 97 ns/step.**
 
-*Inspired by 200 million years of cricket evolution. Built for the next generation of edge intelligence.*
+*Hardwired core + adaptive plasticity. Inspired by 200 million years of cricket evolution.*
 
 [Quick Start](#-quick-start) | [Benchmarks](#-benchmarks) | [Science](#-scientific-validation) | [Docs](https://docs.rs/cricket-brain) | [Deutsch](#-auf-deutsch)
 
@@ -35,8 +35,8 @@
 
 CricketBrain is a **neuromorphic signal processor** that recognizes temporal patterns in real-time using delay-line coincidence detection — the same mechanism the field cricket (*Gryllus bimaculatus*) uses to find mates in noisy environments.
 
-> **No matrix multiplication. No CUDA. No weights. No training.**
-> Just 5 neurons and 6 synapses, processing at **0.175 us per step** in **944 bytes of RAM**.
+> **Hardwired core architecture with optional adaptive plasticity.**
+> 5 neurons, 6 synapses, STDP learning, homeostatic regulation — **97 ns/step** in **~1 KB RAM**.
 
 <p align="center">
   <picture>
@@ -50,9 +50,9 @@ CricketBrain is a **neuromorphic signal processor** that recognizes temporal pat
 
 <table>
 <tr><th></th><th>CricketBrain</th><th>Traditional ML</th><th>Deep Learning</th></tr>
-<tr><td><b>Latency</b></td><td align="center"><code>0.175 us</code></td><td align="center"><code>~100 us</code></td><td align="center"><code>~10 ms</code></td></tr>
-<tr><td><b>Memory</b></td><td align="center"><code>944 bytes</code></td><td align="center"><code>10+ KB</code></td><td align="center"><code>100+ MB</code></td></tr>
-<tr><td><b>Training</b></td><td align="center"><code>None</code></td><td align="center"><code>Hours</code></td><td align="center"><code>Days-Weeks</code></td></tr>
+<tr><td><b>Latency</b></td><td align="center"><code>97 ns</code></td><td align="center"><code>~100 us</code></td><td align="center"><code>~10 ms</code></td></tr>
+<tr><td><b>Memory</b></td><td align="center"><code>~1 KB</code></td><td align="center"><code>10+ KB</code></td><td align="center"><code>100+ MB</code></td></tr>
+<tr><td><b>Training</b></td><td align="center"><code>Optional STDP</code></td><td align="center"><code>Hours</code></td><td align="center"><code>Days-Weeks</code></td></tr>
 <tr><td><b>GPU</b></td><td align="center">No</td><td align="center">No</td><td align="center">Yes</td></tr>
 <tr><td><b>Deterministic</b></td><td align="center">Yes</td><td align="center">Depends</td><td align="center">No</td></tr>
 <tr><td><b>no_std / Embedded</b></td><td align="center">Yes</td><td align="center">Rare</td><td align="center">No</td></tr>
@@ -221,6 +221,8 @@ Tested against 3 classical detectors under **identical conditions** ([source](ex
 - **Delay-line synapses** — ring-buffer propagation delays (1-9 ms)
 - **Coincidence detection** — fires only on sustained temporal evidence
 - **Adaptive sensitivity (AGC)** — automatic gain control
+- **Synaptic plasticity (STDP)** — online weight adaptation via spike-timing
+- **Homeostatic thresholds** — automatic target activity maintenance
 - **Sequence prediction** — N-gram pattern matching with confidence scoring
 - **Multi-token detection** — parallel resonator banks (one circuit per token)
 
@@ -327,7 +329,7 @@ cargo bench                                    # Criterion benchmarks
 
 | Check | Status |
 |-------|--------|
-| `cargo test --workspace` | **85 tests** passing |
+| `cargo test --workspace` | **122 tests** passing |
 | `cargo clippy -D warnings` | Zero warnings |
 | `cargo fmt -- --check` | Enforced |
 | `cargo audit --deny warnings` | Zero vulnerabilities |
@@ -350,7 +352,7 @@ cricket-brain/
 |   `-- wasm/          wasm-bindgen bindings
 |-- src/               Brain network, sequence predictor, resonator bank
 |-- examples/          14 runnable examples + Python + WASM demo
-|-- tests/             85 tests (unit, integration, edge-case, FFI, property)
+|-- tests/             122 tests (unit, integration, edge-case, FFI, plasticity)
 |-- benches/           Criterion benchmarks
 `-- docs/              Mathematical derivations
 ```
@@ -364,7 +366,7 @@ cricket-brain/
 - [x] **v0.3** — Sequence prediction via delay-line pattern memory
 - [x] **v1.0** — Production release with FFI/Python/WASM bindings
 - [x] **v1.0.1** — Adaptive Gaussian bandwidth for dense vocabularies
-- [ ] **v1.2** — STDP (spike-timing dependent plasticity) for online learning
+- [x] **v1.1** — STDP + homeostatic plasticity for online adaptive learning
 - [ ] **v2.0** — Hardware deployment on RISC-V / ARM Cortex-M with real-time ADC
 
 ---
@@ -424,17 +426,17 @@ CricketBrain ist ein **neuromorpher Signalprozessor**, inspiriert vom Hoersystem
 der Feldgrille (*Gryllus bimaculatus*). Er erkennt zeitliche Muster in Echtzeit
 mit Verzoegerungsleitungs-Koinzidenzdetektion.
 
-**Keine Matrixmultiplikation. Kein CUDA. Keine Gewichte. Kein Training.**
+**Fest verdrahteter Kern mit optionaler adaptiver Plastizitaet: STDP-Lernen, gewichtete Synapsen, homeostatische Schwellenregelung.**
 
 ### Kernzahlen
 
 | Metrik | Wert |
 |--------|------|
-| Latenz | **0,175 us pro Schritt** |
-| Speicher | **944 Bytes** (no_std, Arduino-kompatibel) |
+| Latenz | **97 ns pro Schritt** |
+| Speicher | **~1 KB** (no_std, Embedded-kompatibel) |
 | Erkennung | **TPR 1,0 / FPR 0,0** ueber alle SNR-Stufen |
 | Neuronen | 5 (Muenster-Modell: AN1, LN2, LN3, LN5, ON1) |
-| Training | Keins — fest verdrahtet |
+| Training | Keins initial — optionales STDP Online-Lernen |
 
 ### Anwendungsbereiche
 
