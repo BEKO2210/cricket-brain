@@ -360,8 +360,9 @@ The biomorphic approach offers several advantages over classical methods:
 
 ### 7.2 Limitations
 
-- **Fixed topology:** The current implementation uses a hardcoded 5-neuron
-  circuit. Learning or adaptation of connection weights is not supported.
+- **Fixed topology:** The circuit structure (5 neurons, 6 synapses) is fixed.
+  However, synaptic weights and thresholds can now adapt online via STDP
+  and homeostatic plasticity (opt-in, see `plasticity` module).
 - **Single-carrier assumption:** The Gaussian tuning curve is centered on a
   single eigenfrequency. Multi-frequency patterns require the ResonatorBank
   extension.
@@ -370,7 +371,8 @@ The biomorphic approach offers several advantages over classical methods:
 
 ### 7.3 Future Work
 
-- Spike-timing dependent plasticity (STDP) for online weight adaptation
+- ~~Spike-timing dependent plasticity (STDP)~~ — implemented in v1.1
+  (`plasticity` module: `StdpConfig`, `HomeostasisConfig`, 37 tests)
 - Hardware deployment on RISC-V and ARM Cortex-M targets
 - Medical device certification (IEC 62304) for the ECG sentinel application
 - Formal verification of the delay-line coincidence logic

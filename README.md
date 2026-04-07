@@ -221,6 +221,8 @@ Tested against 3 classical detectors under **identical conditions** ([source](ex
 - **Delay-line synapses** — ring-buffer propagation delays (1-9 ms)
 - **Coincidence detection** — fires only on sustained temporal evidence
 - **Adaptive sensitivity (AGC)** — automatic gain control
+- **Synaptic plasticity (STDP)** — online weight adaptation via spike-timing
+- **Homeostatic thresholds** — automatic target activity maintenance
 - **Sequence prediction** — N-gram pattern matching with confidence scoring
 - **Multi-token detection** — parallel resonator banks (one circuit per token)
 
@@ -327,7 +329,7 @@ cargo bench                                    # Criterion benchmarks
 
 | Check | Status |
 |-------|--------|
-| `cargo test --workspace` | **85 tests** passing |
+| `cargo test --workspace` | **122 tests** passing |
 | `cargo clippy -D warnings` | Zero warnings |
 | `cargo fmt -- --check` | Enforced |
 | `cargo audit --deny warnings` | Zero vulnerabilities |
@@ -350,7 +352,7 @@ cricket-brain/
 |   `-- wasm/          wasm-bindgen bindings
 |-- src/               Brain network, sequence predictor, resonator bank
 |-- examples/          14 runnable examples + Python + WASM demo
-|-- tests/             85 tests (unit, integration, edge-case, FFI, property)
+|-- tests/             122 tests (unit, integration, edge-case, FFI, plasticity)
 |-- benches/           Criterion benchmarks
 `-- docs/              Mathematical derivations
 ```
@@ -364,7 +366,7 @@ cricket-brain/
 - [x] **v0.3** — Sequence prediction via delay-line pattern memory
 - [x] **v1.0** — Production release with FFI/Python/WASM bindings
 - [x] **v1.0.1** — Adaptive Gaussian bandwidth for dense vocabularies
-- [ ] **v1.2** — STDP (spike-timing dependent plasticity) for online learning
+- [x] **v1.1** — STDP + homeostatic plasticity for online adaptive learning
 - [ ] **v2.0** — Hardware deployment on RISC-V / ARM Cortex-M with real-time ADC
 
 ---
@@ -434,7 +436,7 @@ mit Verzoegerungsleitungs-Koinzidenzdetektion.
 | Speicher | **944 Bytes** (no_std, Arduino-kompatibel) |
 | Erkennung | **TPR 1,0 / FPR 0,0** ueber alle SNR-Stufen |
 | Neuronen | 5 (Muenster-Modell: AN1, LN2, LN3, LN5, ON1) |
-| Training | Keins — fest verdrahtet |
+| Training | Keins initial — optionales STDP Online-Lernen |
 
 ### Anwendungsbereiche
 

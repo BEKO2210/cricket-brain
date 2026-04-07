@@ -17,6 +17,7 @@
 //! This module provides pure functions that operate on timestamps and weights
 //! without any heap allocation, making it fully `no_std` compatible.
 
+use crate::neuron::Neuron;
 use crate::synapse::DelaySynapse;
 
 /// Configuration for the STDP learning rule.
@@ -122,5 +123,78 @@ pub fn apply_stdp(
     if delta.abs() > 1e-8 {
         synapse.weight = (synapse.weight + delta).clamp(config.weight_min, config.weight_max);
     }
+    delta
+}
+
+// =========================================================================
+// Homeostatic Plasticity
+// =========================================================================
+
+/// Configuration for homeostatic threshold adjustment.
+///
+/// Homeostasis slowly adjusts a neuron's firing threshold to maintain a
+/// target activity level. If a neuron is too active, the threshold rises
+/// (making it harder to fire). If too quiet, the threshold drops.
+///
+/// ```text
+/// θ(t+1) = clamp(θ(t) + η_h · (activity_ema − target), θ_min, θ_max)
+/// ```
+#[derive(Debug, Clone, Copy)]
+pub struct HomeostasisConfig {
+    /// Target activity level (EMA amplitude). Typical: 0.3–0.6.
+    pub target_activity: f32,
+    /// Learning rate for threshold adjustment. Typical: 0.001–0.01.
+    /// Smaller = slower, more stable adaptation.
+    pub learning_rate: f32,
+    /// Minimum allowed threshold.
+    pub threshold_min: f32,
+    /// Maximum allowed threshold.
+    pub threshold_max: f32,
+}
+
+impl Default for HomeostasisConfig {
+    fn default() -> Self {
+        Self {
+            target_activity: 0.4,
+            learning_rate: 0.005,
+            threshold_min: 0.3,
+            threshold_max: 0.95,
+        }
+    }
+}
+
+impl HomeostasisConfig {
+    /// Set the target activity level.
+    pub fn with_target(mut self, target: f32) -> Self {
+        self.target_activity = target;
+        self
+    }
+
+    /// Set the learning rate.
+    pub fn with_learning_rate(mut self, lr: f32) -> Self {
+        self.learning_rate = lr;
+        self
+    }
+
+    /// Set threshold bounds.
+    pub fn with_bounds(mut self, min: f32, max: f32) -> Self {
+        self.threshold_min = min;
+        self.threshold_max = max;
+        self
+    }
+}
+
+/// Applies homeostatic threshold adjustment to a neuron.
+///
+/// If `activity_ema > target`, threshold increases (harder to fire).
+/// If `activity_ema < target`, threshold decreases (easier to fire).
+///
+/// # Returns
+/// The threshold delta that was applied.
+#[inline]
+pub fn apply_homeostasis(neuron: &mut Neuron, config: &HomeostasisConfig) -> f32 {
+    let error = neuron.activity_ema - config.target_activity;
+    let delta = config.learning_rate * error;
+    neuron.threshold = (neuron.threshold + delta).clamp(config.threshold_min, config.threshold_max);
     delta
 }

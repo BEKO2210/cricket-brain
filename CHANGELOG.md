@@ -5,6 +5,23 @@ All notable changes to CricketBrain will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Synaptic Weight:** `DelaySynapse` now has a configurable `weight: f32` field.
+  `transmit()` multiplies output by weight instead of using if/else for
+  inhibitory. Default weights (1.0/-1.0) produce identical behavior to v1.0.0.
+- **STDP (Spike-Timing Dependent Plasticity):** New `plasticity` module in core
+  crate with `StdpConfig`, `compute_stdp_delta()`, `apply_stdp()`. Enable via
+  `brain.enable_stdp(config)` for online weight adaptation.
+- **Homeostatic Plasticity:** `HomeostasisConfig` + `apply_homeostasis()` for
+  automatic threshold adjustment. Overactive neurons raise threshold, quiet
+  neurons lower it. Enable via `brain.enable_homeostasis(config)`.
+- **Neuron Activity Tracking:** `activity_ema` (exponential moving average) and
+  `last_spike_step` fields added to `Neuron` for plasticity mechanisms.
+- **37 new plasticity tests:** STDP direction/decay/symmetry/bounds, homeostasis
+  up/down/stable/bounds, brain integration, determinism, combined operation.
+
 ## [1.0.0] — 2026-04-06
 
 ### Added

@@ -3,7 +3,9 @@
 
 use cricket_brain::brain::{BrainConfig, CricketBrain};
 use cricket_brain::neuron::Neuron;
-use cricket_brain::plasticity::{apply_stdp, compute_stdp_delta, StdpConfig};
+use cricket_brain::plasticity::{
+    apply_homeostasis, apply_stdp, compute_stdp_delta, HomeostasisConfig, StdpConfig,
+};
 use cricket_brain::synapse::DelaySynapse;
 
 #[test]
@@ -372,4 +374,134 @@ fn neuron_activity_ema_tracks_amplitude() {
 fn neuron_last_spike_step_starts_at_zero() {
     let n = Neuron::new(0, 4500.0, 4);
     assert_eq!(n.last_spike_step, 0);
+}
+
+// =========================================================================
+// Homeostasis Tests
+// =========================================================================
+
+#[test]
+fn homeostasis_raises_threshold_when_overactive() {
+    let mut n = Neuron::new(0, 4500.0, 4);
+    n.activity_ema = 0.8; // well above default target (0.4)
+    n.threshold = 0.7;
+    let config = HomeostasisConfig::default(); // target=0.4
+    let delta = apply_homeostasis(&mut n, &config);
+    assert!(delta > 0.0, "overactive neuron should raise threshold");
+    assert!(n.threshold > 0.7);
+}
+
+#[test]
+fn homeostasis_lowers_threshold_when_quiet() {
+    let mut n = Neuron::new(0, 4500.0, 4);
+    n.activity_ema = 0.1; // well below target (0.4)
+    n.threshold = 0.7;
+    let config = HomeostasisConfig::default();
+    let delta = apply_homeostasis(&mut n, &config);
+    assert!(delta < 0.0, "quiet neuron should lower threshold");
+    assert!(n.threshold < 0.7);
+}
+
+#[test]
+fn homeostasis_stable_at_target() {
+    let mut n = Neuron::new(0, 4500.0, 4);
+    n.activity_ema = 0.4; // exactly at target
+    n.threshold = 0.7;
+    let config = HomeostasisConfig::default();
+    let delta = apply_homeostasis(&mut n, &config);
+    assert!(delta.abs() < 1e-6, "at target = no adjustment");
+}
+
+#[test]
+fn homeostasis_respects_bounds() {
+    let mut n = Neuron::new(0, 4500.0, 4);
+    n.activity_ema = 1.0; // way over target
+    n.threshold = 0.9;
+    let config = HomeostasisConfig::default()
+        .with_learning_rate(1.0)
+        .with_bounds(0.3, 0.95);
+
+    for _ in 0..100 {
+        apply_homeostasis(&mut n, &config);
+    }
+    assert!(n.threshold <= 0.95, "threshold clamped at max");
+
+    n.activity_ema = 0.0;
+    for _ in 0..100 {
+        apply_homeostasis(&mut n, &config);
+    }
+    assert!(n.threshold >= 0.3, "threshold clamped at min");
+}
+
+#[test]
+fn brain_homeostasis_disabled_by_default() {
+    let brain = CricketBrain::new(BrainConfig::default()).unwrap();
+    assert!(brain.homeostasis_config().is_none());
+}
+
+#[test]
+fn brain_enable_disable_homeostasis() {
+    let mut brain = CricketBrain::new(BrainConfig::default()).unwrap();
+    brain.enable_homeostasis(HomeostasisConfig::default());
+    assert!(brain.homeostasis_config().is_some());
+    brain.disable_homeostasis();
+    assert!(brain.homeostasis_config().is_none());
+}
+
+#[test]
+fn brain_homeostasis_adjusts_thresholds_over_time() {
+    let mut brain = CricketBrain::new(BrainConfig::default().with_seed(42)).unwrap();
+    let initial_thresholds: Vec<f32> = brain.neurons.iter().map(|n| n.threshold).collect();
+
+    brain.enable_homeostasis(HomeostasisConfig::default().with_learning_rate(0.01));
+
+    // Feed signal to build up activity_ema, then let homeostasis adjust
+    for _ in 0..300 {
+        brain.step(4500.0);
+    }
+
+    let final_thresholds: Vec<f32> = brain.neurons.iter().map(|n| n.threshold).collect();
+    let any_changed = initial_thresholds
+        .iter()
+        .zip(final_thresholds.iter())
+        .any(|(a, b)| (a - b).abs() > 1e-4);
+    assert!(
+        any_changed,
+        "homeostasis should adjust thresholds. initial={initial_thresholds:?} final={final_thresholds:?}"
+    );
+}
+
+#[test]
+fn brain_homeostasis_does_not_change_when_disabled() {
+    let mut brain = CricketBrain::new(BrainConfig::default().with_seed(42)).unwrap();
+    let initial_thresholds: Vec<f32> = brain.neurons.iter().map(|n| n.threshold).collect();
+
+    for _ in 0..300 {
+        brain.step(4500.0);
+    }
+
+    let final_thresholds: Vec<f32> = brain.neurons.iter().map(|n| n.threshold).collect();
+    assert_eq!(initial_thresholds, final_thresholds);
+}
+
+#[test]
+fn brain_combined_stdp_and_homeostasis() {
+    let mut brain = CricketBrain::new(BrainConfig::default().with_seed(42)).unwrap();
+    brain.enable_stdp(StdpConfig::default().with_learning_rate(0.02));
+    brain.enable_homeostasis(HomeostasisConfig::default().with_learning_rate(0.005));
+
+    // Pulsed signal to trigger both mechanisms
+    for cycle in 0..60 {
+        for _ in 0..5 {
+            brain.step(4500.0);
+        }
+        for _ in 0..(3 + cycle % 4) {
+            brain.step(0.0);
+        }
+    }
+
+    // Both should have had an effect — brain should still be functional
+    let out = brain.step(4500.0);
+    // Just verify it doesn't crash and produces a valid f32
+    assert!(out.is_finite());
 }

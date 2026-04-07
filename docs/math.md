@@ -90,3 +90,46 @@ output(t) = -input(t - d)
 ```
 
 The delay is implemented as a FIFO ring buffer of length `d`.
+
+## Synaptic Weight
+
+Each synapse has a scalar weight `w` (default: 1.0 excitatory, -1.0 inhibitory):
+
+```
+output(t) = w * input(t - d)
+```
+
+Weights can be adjusted via plasticity rules (STDP, homeostasis).
+
+## Spike-Timing Dependent Plasticity (STDP)
+
+STDP adjusts synaptic weights based on the relative timing of pre- and post-synaptic spikes:
+
+```
+Δw = η · exp(-|Δt| / τ)     if pre fires before post  (LTP: potentiate)
+Δw = -η · exp(-|Δt| / τ)    if post fires before pre  (LTD: depress)
+```
+
+where:
+- `Δt = t_post - t_pre` — temporal difference between post and pre spikes
+- `η` — learning rate (typical: 0.001 to 0.05)
+- `τ` — time constant controlling the STDP window width (typical: 5 to 30 steps)
+
+Weights are clamped to configurable bounds (default: [-2.0, 2.0]).
+
+## Homeostatic Threshold Adaptation
+
+Neuron firing thresholds adjust slowly to maintain a target activity level:
+
+```
+θ(t+1) = clamp(θ(t) + η_h · (EMA(t) - target), θ_min, θ_max)
+```
+
+where:
+- `EMA(t) = 0.99 · EMA(t-1) + 0.01 · A(t)` — exponential moving average of amplitude
+- `target` — desired activity level (typical: 0.3 to 0.6)
+- `η_h` — homeostasis learning rate (typical: 0.001 to 0.01)
+- `θ_min`, `θ_max` — threshold bounds (default: 0.3, 0.95)
+
+This ensures network stability: overactive neurons raise their threshold (harder to fire),
+quiet neurons lower it (easier to fire).

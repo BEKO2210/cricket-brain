@@ -9,7 +9,9 @@ use alloc::vec::Vec;
 use cricket_brain_core::logger::Telemetry;
 use cricket_brain_core::memory::MemoryStats;
 use cricket_brain_core::neuron::NeuronConfig;
-use cricket_brain_core::plasticity::{apply_stdp, StdpConfig};
+use cricket_brain_core::plasticity::{
+    apply_homeostasis, apply_stdp, HomeostasisConfig, StdpConfig,
+};
 
 /// Configuration object for constructing a [`CricketBrain`].
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -200,6 +202,9 @@ pub struct CricketBrain {
     /// Optional STDP configuration. When `Some`, plasticity is applied
     /// after each spike event, adjusting synaptic weights online.
     stdp_config: Option<StdpConfig>,
+    /// Optional homeostasis configuration. When `Some`, neuron thresholds
+    /// are slowly adjusted to maintain a target activity level.
+    homeostasis_config: Option<HomeostasisConfig>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -326,6 +331,7 @@ impl CricketBrain {
                 privacy_mode: config.privacy_mode,
                 last_telemetry_step: 0,
                 stdp_config: None,
+                homeostasis_config: None,
             });
         }
 
@@ -365,6 +371,7 @@ impl CricketBrain {
             privacy_mode: config.privacy_mode,
             last_telemetry_step: 0,
             stdp_config: None,
+            homeostasis_config: None,
         })
     }
 
@@ -486,7 +493,15 @@ impl CricketBrain {
             }
         }
 
-        // Step 6: Return output neuron amplitude (ON1, last neuron)
+        // Step 6: Apply homeostasis if enabled — adjust thresholds to target activity.
+        if let Some(ref config) = self.homeostasis_config {
+            let config = *config;
+            for neuron in &mut self.neurons {
+                apply_homeostasis(neuron, &config);
+            }
+        }
+
+        // Step 7: Return output neuron amplitude (ON1, last neuron)
         let output_idx = n - 1;
         let dynamic_threshold =
             self.neurons[output_idx].threshold / self.global_sensitivity.max(0.001);
@@ -636,6 +651,24 @@ impl CricketBrain {
     /// Returns the current STDP configuration, if enabled.
     pub fn stdp_config(&self) -> Option<&StdpConfig> {
         self.stdp_config.as_ref()
+    }
+
+    /// Enables homeostatic threshold adaptation.
+    ///
+    /// Neuron thresholds slowly adjust to maintain a target activity level:
+    /// overactive neurons become harder to fire, quiet neurons become easier.
+    pub fn enable_homeostasis(&mut self, config: HomeostasisConfig) {
+        self.homeostasis_config = Some(config);
+    }
+
+    /// Disables homeostatic adaptation. Current thresholds are preserved.
+    pub fn disable_homeostasis(&mut self) {
+        self.homeostasis_config = None;
+    }
+
+    /// Returns the current homeostasis configuration, if enabled.
+    pub fn homeostasis_config(&self) -> Option<&HomeostasisConfig> {
+        self.homeostasis_config.as_ref()
     }
 
     /// # Arguments
