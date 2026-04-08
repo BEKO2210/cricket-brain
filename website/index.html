@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Cricket-Brain: A biomorphic AI inference engine using delay-line coincidence detection. No weights, no GPU, no training. Live interactive simulation.">
+  <meta name="description" content="CricketBrain: Adaptive neuromorphic signal processing. 5 neurons, 6 synapses, sub-kilobyte memory, 0.175 us/step. Hardwired core + optional STDP plasticity.">
   <meta name="theme-color" content="#0a0f1c" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
-  <meta property="og:title" content="Cricket-Brain — Neuromorphic AI Engine">
-  <meta property="og:description" content="5 neurons, 6 synapses, 928 bytes. A biomorphic AI that runs on an Arduino.">
+  <meta property="og:title" content="CricketBrain — Neuromorphic AI Engine">
+  <meta property="og:description" content="Adaptive neuromorphic signal processing. Sub-kilobyte memory. 0.175 us/step. Hardwired core + optional STDP plasticity.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://beko2210.github.io/cricket-brain/">
-  <title>Cricket-Brain — Neuromorphic AI Engine</title>
+  <title>CricketBrain — Neuromorphic AI Engine</title>
   <link rel="stylesheet" href="css/style.css">
   <noscript><style>[data-animate]{opacity:1;transform:none;}</style></noscript>
 </head>
@@ -48,10 +48,10 @@
     <!-- Hero -->
     <section class="hero">
       <div class="hero-badge">
-        <span aria-hidden="true">&#9881;</span> v3.0.0 — Sequence Prediction
+        <span aria-hidden="true">&#9881;</span> v3.0.0 — Production Release
       </div>
       <h1>Cricket<span class="text-accent">Brain</span></h1>
-      <p class="hero-subtitle">A biomorphic AI inference engine — no weights, no GPU, no training. Inspired by how crickets hear.</p>
+      <p class="hero-subtitle">Adaptive neuromorphic signal processing. Hardwired core + optional STDP plasticity. Inspired by 200 million years of cricket evolution.</p>
       <div class="hero-actions">
         <a href="#simulation" class="btn btn-primary">Live Simulation</a>
         <a href="https://github.com/BEKO2210/cricket-brain" class="btn btn-secondary" target="_blank" rel="noopener">View Source</a>
@@ -80,7 +80,7 @@
     <section id="simulation" class="section">
       <div class="content-wrap">
         <h2 class="section-title" data-animate="fade-up">Live <span>Simulation</span></h2>
-        <p class="section-subtitle" data-animate="fade-up">Watch 5 neurons process signals in real-time. The network only fires when it detects sustained 4500 Hz — the cricket's carrier frequency.</p>
+        <p class="section-subtitle" data-animate="fade-up">Watch the 5-neuron M&uuml;nster circuit process signals in real-time. ON1 fires only when it detects sustained 4500 Hz via delay-line coincidence detection.</p>
 
         <div class="sim-container" data-animate="scale-in">
           <div class="sim-canvas-wrap">
@@ -205,7 +205,7 @@
     <section id="math" class="section math-section">
       <div class="content-wrap">
         <h2 class="section-title" data-animate="fade-up">Mathematical <span>Foundation</span></h2>
-        <p class="section-subtitle" data-animate="fade-up">The entire engine is built on four equations. No learned weights — just physics.</p>
+        <p class="section-subtitle" data-animate="fade-up">The hardwired core is built on four equations. Optional STDP plasticity enables online weight adaptation.</p>
 
         <div class="formula-grid" data-animate="fade-up" data-stagger="true">
           <div class="formula-card">
@@ -236,25 +236,25 @@
     <section id="comparison" class="section">
       <div class="content-wrap">
         <h2 class="section-title" data-animate="fade-up">How It <span>Compares</span></h2>
-        <p class="section-subtitle" data-animate="fade-up">Cricket-Brain is not competing with GPT-4. It's proving that useful inference is possible at a fundamentally different scale.</p>
+        <p class="section-subtitle" data-animate="fade-up">CricketBrain is not competing with deep learning. It proves that useful inference is possible at a fundamentally different scale.</p>
 
         <div data-animate="fade-up">
           <table class="comparison-table" role="table">
             <thead>
               <tr>
                 <th scope="col">Property</th>
-                <th scope="col">Cricket-Brain</th>
-                <th scope="col">GPT-4</th>
+                <th scope="col">CricketBrain</th>
+                <th scope="col">Deep Learning</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>Parameters</td><td>5 neurons, 6 synapses</td><td>~1.8 trillion</td></tr>
-              <tr><td>RAM</td><td>928 bytes</td><td>~800 GB</td></tr>
-              <tr><td>FLOPS per step</td><td>~30</td><td>~3.1 &#xd7; 10&#xb9;&#x2077;</td></tr>
-              <tr><td>GPU required</td><td>No</td><td>8&#xd7; A100</td></tr>
-              <tr><td>Training time</td><td>0 (hardwired)</td><td>Months on cluster</td></tr>
-              <tr><td>no_std compatible</td><td>Yes</td><td>No</td></tr>
-              <tr><td>Runs on Arduino</td><td>Yes (928 bytes)</td><td>No</td></tr>
+              <tr><td>Latency</td><td>0.175 &#xb5;s/step</td><td>~10 ms</td></tr>
+              <tr><td>Memory</td><td>~1 KB</td><td>~800 GB</td></tr>
+              <tr><td>Training</td><td>Optional STDP</td><td>Months on cluster</td></tr>
+              <tr><td>GPU required</td><td>No</td><td>Yes</td></tr>
+              <tr><td>Deterministic</td><td>Yes</td><td>No</td></tr>
+              <tr><td>no_std / Embedded</td><td>Yes</td><td>No</td></tr>
+              <tr><td>Explainable</td><td>Fully</td><td>Black box</td></tr>
               <tr><td>False positives in silence</td><td>0</td><td>N/A</td></tr>
             </tbody>
           </table>
@@ -269,50 +269,50 @@
 
         <div class="version-grid" data-animate="fade-up" data-stagger="true">
           <article class="version-card">
-            <span class="version-badge">v0.1</span>
+            <span class="version-badge">v0.1.0</span>
             <h3>Morse Code Recognition</h3>
-            <p>Single-frequency detection with full encode/decode roundtrip.</p>
+            <p>Initial implementation. 5-neuron canonical circuit based on the M&uuml;nster model.</p>
             <ul>
-              <li>5-neuron Muenster model</li>
-              <li>"HELLO WORLD" exact roundtrip</li>
+              <li>5-neuron circuit (AN1, LN2, LN3, LN5, ON1)</li>
+              <li>Basic Morse code encoding/decoding</li>
+              <li>Criterion benchmarks (0.175 &micro;s/step)</li>
               <li>0 false positives during silence</li>
-              <li>Arduino-compatible (928 bytes)</li>
             </ul>
           </article>
 
           <article class="version-card">
-            <span class="version-badge">v0.2</span>
+            <span class="version-badge">v0.2.0</span>
             <h3>Multi-Frequency Tokens</h3>
-            <p>Parallel resonator banks — each symbol gets its own frequency.</p>
+            <p>Multi-frequency token vocabulary and parallel resonator banks.</p>
             <ul>
               <li>27-token alphabet (A-Z + space)</li>
-              <li>100% discrimination accuracy</li>
-              <li>135 neurons, 162 synapses</li>
-              <li>Real-time token detection</li>
+              <li>Resonator bank: one 5-neuron circuit per token</li>
+              <li>Live demo with encode-brain-decode roundtrip</li>
+              <li>Frequency discrimination example</li>
             </ul>
           </article>
 
           <article class="version-card">
-            <span class="version-badge">v0.3</span>
+            <span class="version-badge">v0.3.0</span>
             <h3>Sequence Prediction</h3>
-            <p>Predict the next token from partial input — no training required.</p>
+            <p>Temporal pattern matching with confidence scoring and privacy mode.</p>
             <ul>
-              <li>Pattern registration (not learning)</li>
-              <li>Competing pattern tracking</li>
-              <li>Confidence increases with context</li>
-              <li>168M neuron-ops/sec benchmark</li>
+              <li>N-gram pattern matching engine</li>
+              <li>Confidence: C = SNR/(1+SNR) &middot; (1 - jitter/tolerance)</li>
+              <li>Privacy mode for HIPAA/GDPR compliance</li>
+              <li>Dual licensing (MIT OR Apache-2.0)</li>
             </ul>
           </article>
 
           <article class="version-card">
             <span class="version-badge">v3.0.0</span>
             <h3>Production Release</h3>
-            <p>Full workspace with cross-platform bindings and research-grade benchmarks.</p>
+            <p>Full workspace with cross-platform bindings, STDP plasticity, and research-grade benchmarks.</p>
             <ul>
-              <li>C/FFI, Python, WASM bindings</li>
-              <li>122 tests, SynOPS benchmarks</li>
-              <li>no_std embedded support</li>
-              <li>Research whitepaper published</li>
+              <li>C/FFI, Python (PyO3), WASM bindings</li>
+              <li>STDP + homeostatic plasticity</li>
+              <li>no_std core with <code>#![deny(unsafe_code)]</code></li>
+              <li>License: AGPL-3.0 + Commercial</li>
             </ul>
           </article>
         </div>
@@ -345,7 +345,7 @@
 <span class="command">cargo run</span> <span class="flag">--release --example</span> scale_test
 
 <span class="comment"># Run all 122 tests</span>
-<span class="command">cargo test</span></code></pre>
+<span class="command">cargo test</span> <span class="flag">--workspace</span></code></pre>
           </div>
         </div>
       </div>

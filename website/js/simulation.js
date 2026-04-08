@@ -163,16 +163,21 @@ class SimulationRenderer {
     this.canvas.style.height = this.h + 'px';
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // Proportional positioning: adapts to any canvas size
-    const cx = this.w / 2, cy = this.h * 0.38;
-    const sx = this.w * 0.32; // horizontal spread from center
-    const sy = Math.min(this.h * 0.18, 100); // vertical spread for interneurons
+    // Scale factor for all drawing: reference design width is 600px
+    this.scale = Math.max(0.55, Math.min(1.0, this.w / 600));
+
+    // Neuron layout — three columns: AN1 | LN2/LN3/LN5 | ON1
+    const cx = this.w / 2;
+    const cy = this.h * 0.36;
+    const colGap = this.w * 0.30; // horizontal distance between columns
+    const rowGap = 80 * this.scale; // vertical gap between interneurons
+
     this.positions = [
-      { x: cx - sx, y: cy, name: 'AN1', role: 'Receptor' },
-      { x: cx - sx * 0.05, y: cy - sy, name: 'LN2', role: 'Inhibitory' },
-      { x: cx - sx * 0.05, y: cy, name: 'LN3', role: 'Excitatory' },
-      { x: cx - sx * 0.05, y: cy + sy, name: 'LN5', role: 'Inhibitory' },
-      { x: cx + sx * 0.85, y: cy, name: 'ON1', role: 'Output' },
+      { x: cx - colGap,  y: cy,           name: 'AN1', role: 'Receptor' },
+      { x: cx,           y: cy - rowGap,  name: 'LN2', role: 'Inhibitory' },
+      { x: cx,           y: cy,           name: 'LN3', role: 'Excitatory' },
+      { x: cx,           y: cy + rowGap,  name: 'LN5', role: 'Inhibitory' },
+      { x: cx + colGap,  y: cy,           name: 'ON1', role: 'Output' },
     ];
   }
 
@@ -201,6 +206,8 @@ class SimulationRenderer {
       { from: 3, to: 4, label: '1ms', inh: true },
     ];
 
+    const sc = this.scale; // proportional scale factor
+
     for (const s of synMeta) {
       const p0 = this.positions[s.from];
       const p1 = this.positions[s.to];
@@ -212,42 +219,49 @@ class SimulationRenderer {
       ctx.lineTo(p1.x, p1.y);
       ctx.strokeStyle = s.inh ? inhColor : excColor;
       ctx.globalAlpha = alpha;
-      ctx.lineWidth = 1.5 + srcAmp * 2;
+      ctx.lineWidth = (1 + srcAmp * 1.5) * sc;
       ctx.setLineDash(srcAmp > 0.1 ? [6, 4] : []);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.globalAlpha = 1;
 
-      // Delay label
+      // Delay label — offset perpendicular to connection to avoid overlap
       const mx = (p0.x + p1.x) / 2;
-      const my = (p0.y + p1.y) / 2 - 10;
-      ctx.font = '10px system-ui';
+      const my = (p0.y + p1.y) / 2;
+      const dx = p1.x - p0.x, dy = p1.y - p0.y;
+      const len = Math.sqrt(dx * dx + dy * dy) || 1;
+      const nx = -dy / len, ny = dx / len; // perpendicular unit vector
+      const off = 10 * sc; // label offset distance
+      ctx.font = `${Math.round(9 * sc)}px system-ui`;
       ctx.fillStyle = bgText;
       ctx.textAlign = 'center';
-      ctx.fillText(s.label + (s.inh ? ' inh' : ' exc'), mx, my);
+      ctx.fillText(s.label + (s.inh ? ' inh' : ' exc'), mx + nx * off, my + ny * off);
     }
 
-    // Draw neurons
+    // Draw neurons — scaled radius
+    const baseR = 22 * sc;
+    const ampR = 10 * sc;
+
     for (let i = 0; i < 5; i++) {
       const n = brain.neurons[i];
       const p = this.positions[i];
-      const r = 28 + n.amplitude * 14;
+      const r = baseR + n.amplitude * ampR;
       const firing = i === 4 && spikeOutput > 0;
 
       // Glow
       if (n.amplitude > 0.3 || firing) {
-        const grd = ctx.createRadialGradient(p.x, p.y, r * 0.5, p.x, p.y, r * 2.5);
-        grd.addColorStop(0, firing ? 'rgba(245,158,11,0.25)' : 'rgba(0,212,170,0.2)');
+        const grd = ctx.createRadialGradient(p.x, p.y, r * 0.5, p.x, p.y, r * 2);
+        grd.addColorStop(0, firing ? 'rgba(245,158,11,0.2)' : 'rgba(0,212,170,0.15)');
         grd.addColorStop(1, 'transparent');
         ctx.fillStyle = grd;
-        ctx.fillRect(p.x - r * 2.5, p.y - r * 2.5, r * 5, r * 5);
+        ctx.fillRect(p.x - r * 2, p.y - r * 2, r * 4, r * 4);
       }
 
       // Amplitude ring
       ctx.beginPath();
-      ctx.arc(p.x, p.y, r + 4, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * n.amplitude);
+      ctx.arc(p.x, p.y, r + 3 * sc, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * n.amplitude);
       ctx.strokeStyle = firing ? fireColor : accentColor;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 2.5 * sc;
       ctx.stroke();
 
       // Circle
@@ -263,39 +277,40 @@ class SimulationRenderer {
       }
       ctx.fill();
       ctx.strokeStyle = firing ? fireColor : (a > 0.3 ? accentColor : bgLine);
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1.5 * sc;
       ctx.stroke();
 
       // Name
-      ctx.font = 'bold 13px system-ui';
+      ctx.font = `bold ${Math.round(12 * sc)}px system-ui`;
       ctx.fillStyle = firing ? fireColor : (a > 0.3 ? accentColor : bgText);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(p.name, p.x, p.y - 5);
+      ctx.fillText(p.name, p.x, p.y - 4 * sc);
 
       // Amplitude value
-      ctx.font = '10px monospace';
+      ctx.font = `${Math.round(9 * sc)}px monospace`;
       ctx.fillStyle = bgText;
-      ctx.fillText(a.toFixed(2), p.x, p.y + 10);
+      ctx.fillText(a.toFixed(2), p.x, p.y + 8 * sc);
 
       // Role label
-      ctx.font = '9px system-ui';
+      ctx.font = `${Math.round(8 * sc)}px system-ui`;
       ctx.fillStyle = bgText;
-      ctx.fillText(p.role, p.x, p.y + r + 16);
+      ctx.fillText(p.role, p.x, p.y + r + 12 * sc);
     }
 
-    // Spike starburst on ON1
+    // Spike starburst on ON1 — scaled
     if (spikeOutput > 0) {
       const p = this.positions[4];
       const t = brain.timeStep * 0.15;
+      const burstR = baseR + ampR + 6 * sc;
       for (let i = 0; i < 8; i++) {
         const angle = (i / 8) * Math.PI * 2 + t;
-        const len = 20 + Math.sin(t * 3 + i) * 8;
+        const len = (16 + Math.sin(t * 3 + i) * 6) * sc;
         ctx.beginPath();
-        ctx.moveTo(p.x + Math.cos(angle) * 36, p.y + Math.sin(angle) * 36);
-        ctx.lineTo(p.x + Math.cos(angle) * (36 + len), p.y + Math.sin(angle) * (36 + len));
+        ctx.moveTo(p.x + Math.cos(angle) * burstR, p.y + Math.sin(angle) * burstR);
+        ctx.lineTo(p.x + Math.cos(angle) * (burstR + len), p.y + Math.sin(angle) * (burstR + len));
         ctx.strokeStyle = fireColor;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2 * sc;
         ctx.globalAlpha = 0.6;
         ctx.stroke();
         ctx.globalAlpha = 1;
@@ -303,11 +318,12 @@ class SimulationRenderer {
     }
 
     // Input frequency indicator
-    ctx.font = '12px monospace';
+    const infoSize = Math.round(11 * sc);
+    ctx.font = `${infoSize}px monospace`;
     ctx.fillStyle = inputFreq > 0 ? accentColor : bgText;
     ctx.textAlign = 'left';
-    ctx.fillText(`Input: ${inputFreq > 0 ? inputFreq.toFixed(0) + ' Hz' : 'Silence'}`, 16, 24);
-    ctx.fillText(`Step: ${brain.timeStep}`, 16, 40);
+    ctx.fillText(`Input: ${inputFreq > 0 ? inputFreq.toFixed(0) + ' Hz' : 'Silence'}`, 12, 20);
+    ctx.fillText(`Step: ${brain.timeStep}`, 12, 20 + infoSize + 4);
 
     // Output history graph
     const graphY = this.h * 0.78;
