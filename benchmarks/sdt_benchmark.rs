@@ -31,8 +31,12 @@ const RAMP_UP_MS: usize = 20; // discard initial transient
 /// Inverse normal CDF approximation (Abramowitz & Stegun, 1964, formula 26.2.23).
 /// Used to convert hit/FA rates to z-scores for d-prime calculation.
 fn z_score(p: f64) -> f64 {
-    if p <= 0.0001 { return -3.719; }
-    if p >= 0.9999 { return 3.719; }
+    if p <= 0.0001 {
+        return -3.719;
+    }
+    if p >= 0.9999 {
+        return 3.719;
+    }
 
     let p_adj = if p > 0.5 { 1.0 - p } else { p };
     let t = (-2.0 * p_adj.ln()).sqrt();
@@ -46,7 +50,11 @@ fn z_score(p: f64) -> f64 {
     let d3 = 0.001308;
 
     let z = t - (c0 + c1 * t + c2 * t * t) / (1.0 + d1 * t + d2 * t * t + d3 * t * t * t);
-    if p > 0.5 { z } else { -z }
+    if p > 0.5 {
+        z
+    } else {
+        -z
+    }
 }
 
 /// Runs a single trial: feeds `freq` for `TRIAL_DURATION_MS` steps,
@@ -79,8 +87,8 @@ fn compute_roc(signal_outputs: &[f32], noise_outputs: &[f32], n_points: usize) -
     }
 
     roc.push((0.0, 0.0)); // threshold = 1.0+
-    // Sort by FPR ascending, then TPR DESCENDING so dedup keeps the
-    // highest TPR at each FPR level (dedup retains the first of equals).
+                          // Sort by FPR ascending, then TPR DESCENDING so dedup keeps the
+                          // highest TPR at each FPR level (dedup retains the first of equals).
     roc.sort_by(|a, b| {
         a.0.partial_cmp(&b.0)
             .unwrap()

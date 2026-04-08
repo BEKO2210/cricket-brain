@@ -49,7 +49,11 @@ fn measure_mean_amplitude(brain: &mut CricketBrain, freq: f32) -> f32 {
             count += 1;
         }
     }
-    if count > 0 { sum / count as f32 } else { 0.0 }
+    if count > 0 {
+        sum / count as f32
+    } else {
+        0.0
+    }
 }
 
 /// 2IFC trial: present reference and test, return true if system
@@ -133,7 +137,11 @@ fn main() {
         let weber = jnd / REFERENCE_FREQ;
         println!("  {label}:");
         println!("    Trials: {trials}, Reversals: {reversals}");
-        println!("    JND: {jnd:.1} Hz, Weber: {:.4} ({:.2}%)", weber, weber * 100.0);
+        println!(
+            "    JND: {jnd:.1} Hz, Weber: {:.4} ({:.2}%)",
+            weber,
+            weber * 100.0
+        );
     }
 
     // === Narrow bandwidth (w=0.02) for fine pitch discrimination ===
@@ -149,7 +157,11 @@ fn main() {
         let weber = jnd / REFERENCE_FREQ;
         println!("  {label}:");
         println!("    Trials: {trials}, Reversals: {reversals}");
-        println!("    JND: {jnd:.1} Hz, Weber: {:.4} ({:.2}%)", weber, weber * 100.0);
+        println!(
+            "    JND: {jnd:.1} Hz, Weber: {:.4} ({:.2}%)",
+            weber,
+            weber * 100.0
+        );
     }
 
     // === Systematic sweep with both bandwidths ===
@@ -175,18 +187,24 @@ fn main() {
         let std_test = measure_mean_amplitude(&mut brain, test);
         let std_diff = (std_ref - std_test).abs();
         let std_disc = std_diff > 0.005;
-        if std_disc && jnd_std == 0.0 { jnd_std = d; }
+        if std_disc && jnd_std == 0.0 {
+            jnd_std = d;
+        }
 
         // Narrow
         let nar_ref = measure_mean_amplitude(&mut narrow_brain, REFERENCE_FREQ);
         let nar_test = measure_mean_amplitude(&mut narrow_brain, test);
         let nar_diff = (nar_ref - nar_test).abs();
         let nar_disc = nar_diff > 0.005;
-        if nar_disc && jnd_narrow == 0.0 { jnd_narrow = d; }
+        if nar_disc && jnd_narrow == 0.0 {
+            jnd_narrow = d;
+        }
 
         println!(
             "  {:>6.0}Hz {:>12.5} {:>12.5} {:>10} {:>10}",
-            d, std_diff, nar_diff,
+            d,
+            std_diff,
+            nar_diff,
             if std_disc { "YES" } else { "NO" },
             if nar_disc { "YES" } else { "NO" }
         );
@@ -206,18 +224,35 @@ fn main() {
     for (label, above) in [("ABOVE", true), ("BELOW", false)] {
         let (jnd, trials, reversals) = run_staircase(&mut noisy_brain, above);
         let weber = jnd / REFERENCE_FREQ;
-        println!("  {label}: JND={jnd:.1} Hz, Weber={:.4} ({:.2}%), trials={trials}, rev={reversals}",
-                 weber, weber * 100.0);
+        println!(
+            "  {label}: JND={jnd:.1} Hz, Weber={:.4} ({:.2}%), trials={trials}, rev={reversals}",
+            weber,
+            weber * 100.0
+        );
     }
 
     // === Summary ===
-    let w_std = if jnd_std > 0.0 { jnd_std / REFERENCE_FREQ * 100.0 } else { 0.0 };
-    let w_nar = if jnd_narrow > 0.0 { jnd_narrow / REFERENCE_FREQ * 100.0 } else { 0.0 };
+    let w_std = if jnd_std > 0.0 {
+        jnd_std / REFERENCE_FREQ * 100.0
+    } else {
+        0.0
+    };
+    let w_nar = if jnd_narrow > 0.0 {
+        jnd_narrow / REFERENCE_FREQ * 100.0
+    } else {
+        0.0
+    };
     println!("\n╔══════════════════════════════════════════════════════════════╗");
     println!("║  JND Summary                                               ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
-    println!("║  Standard (10%):  JND ~{:>4.0} Hz (Weber: {:.2}%)                ║", jnd_std, w_std);
-    println!("║  Narrow (2%):     JND ~{:>4.0} Hz (Weber: {:.2}%)                ║", jnd_narrow, w_nar);
+    println!(
+        "║  Standard (10%):  JND ~{:>4.0} Hz (Weber: {:.2}%)                ║",
+        jnd_std, w_std
+    );
+    println!(
+        "║  Narrow (2%):     JND ~{:>4.0} Hz (Weber: {:.2}%)                ║",
+        jnd_narrow, w_nar
+    );
     println!("║  Human at 4kHz:   JND ~9 Hz   (Weber: 0.2-0.3%)             ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
     println!("║  Narrow-band mode approaches human-like discrimination.    ║");

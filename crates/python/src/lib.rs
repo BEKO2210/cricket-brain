@@ -25,6 +25,8 @@ pub struct PyBrainConfig {
     pub seed: u64,
     #[pyo3(get, set)]
     pub privacy_mode: bool,
+    #[pyo3(get, set)]
+    pub noise_level: f32,
 }
 
 impl Default for PyBrainConfig {
@@ -40,6 +42,7 @@ impl Default for PyBrainConfig {
             agc_rate: cfg.agc_rate,
             seed: cfg.seed,
             privacy_mode: cfg.privacy_mode,
+            noise_level: cfg.noise_level,
         }
     }
 }
@@ -57,6 +60,7 @@ impl From<PyBrainConfig> for BrainConfig {
             agc_rate: value.agc_rate,
             seed: value.seed,
             privacy_mode: value.privacy_mode,
+            noise_level: value.noise_level,
         }
     }
 }

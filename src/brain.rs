@@ -558,7 +558,6 @@ impl CricketBrain {
         (unit as f32) * 0.001
     }
 
-
     /// Step with telemetry emission.
     pub fn step_with_telemetry<T: Telemetry + ?Sized>(
         &mut self,

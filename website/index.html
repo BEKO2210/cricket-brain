@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0a0f1c" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
   <meta property="og:title" content="Cricket-Brain — Neuromorphic AI Engine">
-  <meta property="og:description" content="5 neurons, 6 synapses, 848 bytes. A biomorphic AI that runs on an Arduino.">
+  <meta property="og:description" content="5 neurons, 6 synapses, 928 bytes. A biomorphic AI that runs on an Arduino.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://beko2210.github.io/cricket-brain/">
   <title>Cricket-Brain — Neuromorphic AI Engine</title>
@@ -28,6 +28,7 @@
         <a href="#math">Math</a>
         <a href="#comparison">Comparison</a>
         <a href="#versions">Versions</a>
+        <a href="pages/whitepaper.html" class="spa-link">Whitepaper</a>
         <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
       </nav>
       <div class="nav-actions">
@@ -47,7 +48,7 @@
     <!-- Hero -->
     <section class="hero">
       <div class="hero-badge">
-        <span aria-hidden="true">&#9881;</span> v0.3 — Sequence Prediction
+        <span aria-hidden="true">&#9881;</span> v3.0.0 — Sequence Prediction
       </div>
       <h1>Cricket<span class="text-accent">Brain</span></h1>
       <p class="hero-subtitle">A biomorphic AI inference engine — no weights, no GPU, no training. Inspired by how crickets hear.</p>
@@ -61,7 +62,7 @@
           <div class="hero-stat-label">Neurons</div>
         </div>
         <div class="hero-stat">
-          <div class="hero-stat-value" data-count-to="848">0</div>
+          <div class="hero-stat-value" data-count-to="928">0</div>
           <div class="hero-stat-label">Bytes RAM</div>
         </div>
         <div class="hero-stat">
@@ -69,7 +70,7 @@
           <div class="hero-stat-label">GPU Required</div>
         </div>
         <div class="hero-stat">
-          <div class="hero-stat-value" data-count-to="60">0</div>
+          <div class="hero-stat-value" data-count-to="122">0</div>
           <div class="hero-stat-label">Tests Passing</div>
         </div>
       </div>
@@ -248,12 +249,12 @@
             </thead>
             <tbody>
               <tr><td>Parameters</td><td>5 neurons, 6 synapses</td><td>~1.8 trillion</td></tr>
-              <tr><td>RAM</td><td>848 bytes</td><td>~800 GB</td></tr>
+              <tr><td>RAM</td><td>928 bytes</td><td>~800 GB</td></tr>
               <tr><td>FLOPS per step</td><td>~30</td><td>~3.1 &#xd7; 10&#xb9;&#x2077;</td></tr>
               <tr><td>GPU required</td><td>No</td><td>8&#xd7; A100</td></tr>
               <tr><td>Training time</td><td>0 (hardwired)</td><td>Months on cluster</td></tr>
               <tr><td>no_std compatible</td><td>Yes</td><td>No</td></tr>
-              <tr><td>Runs on Arduino</td><td>Yes (944 bytes)</td><td>No</td></tr>
+              <tr><td>Runs on Arduino</td><td>Yes (928 bytes)</td><td>No</td></tr>
               <tr><td>False positives in silence</td><td>0</td><td>N/A</td></tr>
             </tbody>
           </table>
@@ -275,7 +276,7 @@
               <li>5-neuron Muenster model</li>
               <li>"HELLO WORLD" exact roundtrip</li>
               <li>0 false positives during silence</li>
-              <li>Arduino-compatible (944 bytes)</li>
+              <li>Arduino-compatible (928 bytes)</li>
             </ul>
           </article>
 
@@ -300,6 +301,18 @@
               <li>Competing pattern tracking</li>
               <li>Confidence increases with context</li>
               <li>168M neuron-ops/sec benchmark</li>
+            </ul>
+          </article>
+
+          <article class="version-card">
+            <span class="version-badge">v3.0.0</span>
+            <h3>Production Release</h3>
+            <p>Full workspace with cross-platform bindings and research-grade benchmarks.</p>
+            <ul>
+              <li>C/FFI, Python, WASM bindings</li>
+              <li>122 tests, SynOPS benchmarks</li>
+              <li>no_std embedded support</li>
+              <li>Research whitepaper published</li>
             </ul>
           </article>
         </div>
@@ -331,7 +344,7 @@
 <span class="comment"># 40k neuron benchmark</span>
 <span class="command">cargo run</span> <span class="flag">--release --example</span> scale_test
 
-<span class="comment"># Run all 60 tests</span>
+<span class="comment"># Run all 122 tests</span>
 <span class="command">cargo test</span></code></pre>
           </div>
         </div>
@@ -346,8 +359,20 @@
       <div class="footer-col">
         <h4>Project</h4>
         <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub Repository</a>
-        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
-        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/docs/architecture.md" target="_blank" rel="noopener">Architecture Docs</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/LICENSE" target="_blank" rel="noopener">AGPL-3.0 License</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/SECURITY.md" target="_blank" rel="noopener">Security Policy</a>
+      </div>
+      <div class="footer-col">
+        <h4>Documentation</h4>
+        <a href="pages/whitepaper.html" class="spa-link">Research Whitepaper</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/docs/architecture.md" target="_blank" rel="noopener">Architecture</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/docs/src/scientific_foundation.md" target="_blank" rel="noopener">Scientific Foundation</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/docs/src/mathematical_core.md" target="_blank" rel="noopener">Mathematical Core</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/README_WASM.md" target="_blank" rel="noopener">WASM Guide</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/docs/src/python_bindings.md" target="_blank" rel="noopener">Python Bindings</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/docs/src/c_cpp_integration.md" target="_blank" rel="noopener">C/C++ Integration</a>
       </div>
       <div class="footer-col">
         <h4>Demos</h4>
@@ -359,6 +384,8 @@
         <h4>Legal</h4>
         <a href="pages/impressum.html" class="spa-link">Impressum</a>
         <a href="pages/datenschutz.html" class="spa-link">Datenschutz</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/AI_DEVELOPMENT_STATEMENT.md" target="_blank" rel="noopener">AI Development Statement</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/CODE_OF_CONDUCT.md" target="_blank" rel="noopener">Code of Conduct</a>
       </div>
     </div>
     <div class="footer-bottom">

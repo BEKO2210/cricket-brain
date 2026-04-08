@@ -163,13 +163,16 @@ class SimulationRenderer {
     this.canvas.style.height = this.h + 'px';
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const cx = this.w / 2, cy = this.h * 0.4;
+    // Proportional positioning: adapts to any canvas size
+    const cx = this.w / 2, cy = this.h * 0.38;
+    const sx = this.w * 0.32; // horizontal spread from center
+    const sy = Math.min(this.h * 0.18, 100); // vertical spread for interneurons
     this.positions = [
-      { x: cx - 220, y: cy, name: 'AN1', role: 'Receptor' },
-      { x: cx - 30, y: cy - 100, name: 'LN2', role: 'Inhibitory' },
-      { x: cx - 30, y: cy, name: 'LN3', role: 'Excitatory' },
-      { x: cx - 30, y: cy + 100, name: 'LN5', role: 'Inhibitory' },
-      { x: cx + 180, y: cy, name: 'ON1', role: 'Output' },
+      { x: cx - sx, y: cy, name: 'AN1', role: 'Receptor' },
+      { x: cx - sx * 0.05, y: cy - sy, name: 'LN2', role: 'Inhibitory' },
+      { x: cx - sx * 0.05, y: cy, name: 'LN3', role: 'Excitatory' },
+      { x: cx - sx * 0.05, y: cy + sy, name: 'LN5', role: 'Inhibitory' },
+      { x: cx + sx * 0.85, y: cy, name: 'ON1', role: 'Output' },
     ];
   }
 
