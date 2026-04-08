@@ -69,7 +69,13 @@ fn main() {
     );
     println!(
         "  {:>20} {:>6} {:>8} {:>8} {:>8} {:>8} {:>8}",
-        "────────────────────", "──────", "────────", "────────", "────────", "────────", "────────"
+        "────────────────────",
+        "──────",
+        "────────",
+        "────────",
+        "────────",
+        "────────",
+        "────────"
     );
 
     for (freq, label) in &test_freqs {
@@ -91,7 +97,11 @@ fn main() {
                 "  {:>20} {:>6} {:>6.1}ms {:>6.2}ms {:>6.0}ms {:>6.0}ms {:>8.4}",
                 label,
                 latencies.len(),
-                mean, sd, min, max, cv
+                mean,
+                sd,
+                min,
+                max,
+                cv
             );
         }
     }
@@ -115,7 +125,10 @@ fn main() {
         let (wmean, wsd, _, _, _) = stats(&wall_times);
 
         println!("  Trials:             1000");
-        println!("  Spike prob:         {:.1}%", latencies_4500.len() as f64 / 10.0);
+        println!(
+            "  Spike prob:         {:.1}%",
+            latencies_4500.len() as f64 / 10.0
+        );
         println!("  Mean latency:       {mean:.2} ms (simulated)");
         println!("  Jitter (SD):        {sd:.3} ms");
         println!("  CV:                 {cv:.4}");
@@ -148,7 +161,10 @@ fn main() {
     }
 
     if spike_times.len() > 1 {
-        let isis: Vec<f64> = spike_times.windows(2).map(|w| (w[1] - w[0]) as f64).collect();
+        let isis: Vec<f64> = spike_times
+            .windows(2)
+            .map(|w| (w[1] - w[0]) as f64)
+            .collect();
         let (isi_mean, isi_sd, isi_min, isi_max, isi_cv) = stats(&isis);
 
         println!("  Duration:           500 ms");
@@ -201,13 +217,25 @@ fn main() {
         if latencies.is_empty() {
             println!(
                 "  {:>12} {:>6} {:>8} {:>8} {:>8} {:>8} {:>10}",
-                format!("{noise:.3}"), 500, "NO SPIKE", "—", "—", "—", "—"
+                format!("{noise:.3}"),
+                500,
+                "NO SPIKE",
+                "—",
+                "—",
+                "—",
+                "—"
             );
         } else {
             let (mean, sd, min, max, cv) = stats(&latencies);
             println!(
                 "  {:>12} {:>6} {:>6.1}ms {:>6.2}ms {:>6.0}ms {:>6.0}ms {:>10.4}",
-                format!("{noise:.3}"), latencies.len(), mean, sd, min, max, cv
+                format!("{noise:.3}"),
+                latencies.len(),
+                mean,
+                sd,
+                min,
+                max,
+                cv
             );
         }
     }

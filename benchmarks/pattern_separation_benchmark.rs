@@ -72,10 +72,22 @@ fn collect_output(brain: &mut CricketBrain, pattern: &[(f32, usize)]) -> (Vec<us
 fn spike_train_distance(a: &[usize], b: &[usize], total_steps: usize) -> f64 {
     let mut train_a = vec![false; total_steps];
     let mut train_b = vec![false; total_steps];
-    for &t in a { if t < total_steps { train_a[t] = true; } }
-    for &t in b { if t < total_steps { train_b[t] = true; } }
+    for &t in a {
+        if t < total_steps {
+            train_a[t] = true;
+        }
+    }
+    for &t in b {
+        if t < total_steps {
+            train_b[t] = true;
+        }
+    }
 
-    let diffs = train_a.iter().zip(&train_b).filter(|(&x, &y)| x != y).count();
+    let diffs = train_a
+        .iter()
+        .zip(&train_b)
+        .filter(|(&x, &y)| x != y)
+        .count();
     diffs as f64 / total_steps as f64
 }
 
@@ -83,7 +95,9 @@ fn spike_train_distance(a: &[usize], b: &[usize], total_steps: usize) -> f64 {
 /// Returns 1.0 - cosine_similarity, so 0.0 = identical, 1.0 = orthogonal, 2.0 = opposite.
 fn trace_distance(a: &[f32], b: &[f32]) -> f64 {
     let min_len = a.len().min(b.len());
-    if min_len == 0 { return 1.0; }
+    if min_len == 0 {
+        return 1.0;
+    }
     let mut dot = 0.0_f64;
     let mut norm_a = 0.0_f64;
     let mut norm_b = 0.0_f64;
@@ -93,14 +107,18 @@ fn trace_distance(a: &[f32], b: &[f32]) -> f64 {
         norm_b += (b[i] as f64).powi(2);
     }
     let denom = norm_a.sqrt() * norm_b.sqrt();
-    if denom < 1e-12 { return 1.0; }
+    if denom < 1e-12 {
+        return 1.0;
+    }
     1.0 - (dot / denom)
 }
 
 /// Input distance: fraction of elements that differ between two patterns.
 fn pattern_distance(a: &[bool], b: &[bool]) -> f64 {
     let max_len = a.len().max(b.len());
-    if max_len == 0 { return 0.0; }
+    if max_len == 0 {
+        return 0.0;
+    }
     let diffs = a.iter().zip(b.iter()).filter(|(&x, &y)| x != y).count();
     let len_diff = (a.len() as isize - b.len() as isize).unsigned_abs();
     (diffs + len_diff) as f64 / max_len as f64
@@ -127,12 +145,12 @@ fn main() {
 
     // Variants with increasing distance from reference
     let variants: Vec<(&str, Vec<bool>)> = vec![
-        ("... (identical)", vec![false, false, false]),       // distance 0
-        (".-. (1 change)",  vec![false, true, false]),        // distance 1/3
-        ("--. (2 changes)", vec![true, true, false]),          // distance 2/3
-        ("--- (all diff)",  vec![true, true, true]),           // distance 3/3
-        (".. (shorter)",    vec![false, false]),                // structural diff
-        (".... (longer)",   vec![false, false, false, false]), // structural diff
+        ("... (identical)", vec![false, false, false]), // distance 0
+        (".-. (1 change)", vec![false, true, false]),   // distance 1/3
+        ("--. (2 changes)", vec![true, true, false]),   // distance 2/3
+        ("--- (all diff)", vec![true, true, true]),     // distance 3/3
+        (".. (shorter)", vec![false, false]),           // structural diff
+        (".... (longer)", vec![false, false, false, false]), // structural diff
     ];
 
     let ref_pattern = make_pattern(&reference);
@@ -145,7 +163,13 @@ fn main() {
     );
     println!(
         "  {:>16} {:>8} {:>10} {:>10} {:>10} {:>10} {:>6}",
-        "────────────────", "────────", "──────────", "──────────", "──────────", "──────────", "──────"
+        "────────────────",
+        "────────",
+        "──────────",
+        "──────────",
+        "──────────",
+        "──────────",
+        "──────"
     );
 
     let mut sep_hamming = Vec::new();
@@ -160,8 +184,16 @@ fn main() {
         let hamming_dist = spike_train_distance(&ref_spikes, &var_spikes, max_dur);
         let cosine_dist = trace_distance(&ref_trace, &var_trace);
 
-        let ham_sep = if input_dist > 0.001 { hamming_dist / input_dist } else { 1.0 };
-        let cos_sep = if input_dist > 0.001 { cosine_dist / input_dist } else { 1.0 };
+        let ham_sep = if input_dist > 0.001 {
+            hamming_dist / input_dist
+        } else {
+            1.0
+        };
+        let cos_sep = if input_dist > 0.001 {
+            cosine_dist / input_dist
+        } else {
+            1.0
+        };
 
         if input_dist > 0.001 {
             sep_hamming.push(ham_sep);
@@ -170,7 +202,13 @@ fn main() {
 
         println!(
             "  {:>16} {:>8.3} {:>10.4} {:>10.3} {:>10.4} {:>10.3} {:>6}",
-            label, input_dist, hamming_dist, ham_sep, cosine_dist, cos_sep, var_spikes.len()
+            label,
+            input_dist,
+            hamming_dist,
+            ham_sep,
+            cosine_dist,
+            cos_sep,
+            var_spikes.len()
         );
     }
 
@@ -197,7 +235,7 @@ fn main() {
     // Full pattern: SOS = ... --- ...
     let full_sos = vec![
         false, false, false, // S
-        true, true, true,    // O
+        true, true, true, // O
         false, false, false, // S
     ];
     let full_pattern = make_pattern(&full_sos);
@@ -228,10 +266,19 @@ fn main() {
         let prefix_dur = total_duration(&prefix_pattern);
         let mut full_train = vec![false; full_dur];
         let mut prefix_train = vec![false; full_dur];
-        for &t in &full_spikes { if t < full_dur { full_train[t] = true; } }
-        for &t in &prefix_spikes { if t < full_dur { prefix_train[t] = true; } }
+        for &t in &full_spikes {
+            if t < full_dur {
+                full_train[t] = true;
+            }
+        }
+        for &t in &prefix_spikes {
+            if t < full_dur {
+                prefix_train[t] = true;
+            }
+        }
 
-        let matching = full_train.iter()
+        let matching = full_train
+            .iter()
             .zip(&prefix_train)
             .take(prefix_dur)
             .filter(|(&a, &b)| a == b)
@@ -241,7 +288,10 @@ fn main() {
 
         println!(
             "  {:>12} {:>8} {:>12.4} {:>11.0}%",
-            label, prefix_spikes.len(), correlation, completion
+            label,
+            prefix_spikes.len(),
+            correlation,
+            completion
         );
     }
 
@@ -249,7 +299,9 @@ fn main() {
     println!("\n─── Multi-Frequency Token Separation ───\n");
     println!("  Testing output orthogonality across frequency-encoded tokens.\n");
 
-    let freqs = [2000.0_f32, 3000.0, 4000.0, 4500.0, 5000.0, 6000.0, 7000.0, 8000.0];
+    let freqs = [
+        2000.0_f32, 3000.0, 4000.0, 4500.0, 5000.0, 6000.0, 7000.0, 8000.0,
+    ];
     let mut spike_trains: Vec<Vec<usize>> = Vec::new();
     let steps = 100;
 
@@ -258,17 +310,23 @@ fn main() {
         let mut spikes = Vec::new();
         for t in 0..steps {
             let out = brain.step(freq);
-            if out > 0.0 { spikes.push(t); }
+            if out > 0.0 {
+                spikes.push(t);
+            }
         }
         spike_trains.push(spikes);
     }
 
     // Print pairwise distance matrix
     print!("  {:>6}", "Hz");
-    for &f in &freqs { print!(" {:>6.0}", f); }
+    for &f in &freqs {
+        print!(" {:>6.0}", f);
+    }
     println!();
     print!("  {:>6}", "──────");
-    for _ in &freqs { print!(" {:>6}", "──────"); }
+    for _ in &freqs {
+        print!(" {:>6}", "──────");
+    }
     println!();
 
     for (i, &fi) in freqs.iter().enumerate() {

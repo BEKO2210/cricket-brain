@@ -26,7 +26,7 @@
 use cricket_brain::brain::CricketBrain;
 
 const CARRIER_FREQ: f32 = 4500.0;
-const PRE_GAP_DURATION: usize = 50;  // Build up resonance
+const PRE_GAP_DURATION: usize = 50; // Build up resonance
 const POST_GAP_DURATION: usize = 80; // Check recovery
 const N_TRIALS_PER_GAP: usize = 10;
 
@@ -113,7 +113,9 @@ fn main() {
 
         for _ in 0..N_TRIALS_PER_GAP {
             let (det, rec, pre, during, post) = run_gap_trial(&mut brain, gap);
-            if det { n_detected += 1; }
+            if det {
+                n_detected += 1;
+            }
             total_recovery += rec as f64;
             total_pre += pre as f64;
             total_gap += during as f64;
@@ -142,7 +144,10 @@ fn main() {
             gap,
             if detected { "YES" } else { "NO" },
             rate * 100.0,
-            avg_pre, avg_gap, avg_post, avg_rec
+            avg_pre,
+            avg_gap,
+            avg_post,
+            avg_rec
         );
     }
 
@@ -156,7 +161,11 @@ fn main() {
     for r in &results {
         let bar_len = (r.detection_rate * 30.0) as usize;
         let bar: String = "#".repeat(bar_len);
-        println!("  {:>5} ms │     {:>5.1}%     │ {bar}", r.gap_ms, r.detection_rate * 100.0);
+        println!(
+            "  {:>5} ms │     {:>5.1}%     │ {bar}",
+            r.gap_ms,
+            r.detection_rate * 100.0
+        );
     }
 
     // Recovery time analysis
@@ -167,7 +176,10 @@ fn main() {
         if r.gap_ms > 0 {
             let bar_len = (r.recovery_time / 2.0).min(30.0) as usize;
             let bar: String = "=".repeat(bar_len);
-            println!("  {:>5} ms │   {:>7.1} ms  │ {bar}", r.gap_ms, r.recovery_time);
+            println!(
+                "  {:>5} ms │   {:>7.1} ms  │ {bar}",
+                r.gap_ms, r.recovery_time
+            );
         }
     }
 

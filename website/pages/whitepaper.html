@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Research Whitepaper — CricketBrain: A Biomorphic Delay-Line Coincidence Detector for Real-Time Temporal Pattern Recognition">
+  <title>Research Whitepaper — Cricket-Brain</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .whitepaper { max-inline-size: 860px; margin-inline: auto; padding: var(--space-2xl) var(--space-lg); }
+    .whitepaper h1 { font-size: var(--font-size-3xl); margin-block-end: var(--space-sm); }
+    .whitepaper .wp-meta { color: var(--text-muted); font-size: var(--font-size-sm); margin-block-end: var(--space-xl); }
+    .whitepaper .wp-meta a { color: var(--accent); }
+    .whitepaper .wp-note { background: color-mix(in srgb, var(--accent) 5%, var(--bg-card)); border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent); border-radius: var(--radius-md); padding: var(--space-md); font-size: var(--font-size-sm); color: var(--text-secondary); margin-block-end: var(--space-xl); }
+    .whitepaper h2 { font-size: var(--font-size-xl); margin-block: var(--space-2xl) var(--space-md); color: var(--accent); border-block-end: 1px solid var(--border); padding-block-end: var(--space-xs); }
+    .whitepaper h3 { font-size: var(--font-size-lg); margin-block: var(--space-xl) var(--space-sm); }
+    .whitepaper p, .whitepaper li { color: var(--text-secondary); margin-block-end: var(--space-md); line-height: 1.8; }
+    .whitepaper ul, .whitepaper ol { padding-inline-start: var(--space-lg); }
+    .whitepaper li { margin-block-end: var(--space-xs); }
+    .whitepaper pre { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md); overflow-x: auto; font-size: var(--font-size-sm); line-height: 1.6; margin-block: var(--space-md); }
+    .whitepaper code { font-family: var(--font-mono); font-size: var(--font-size-sm); }
+    .whitepaper table { inline-size: 100%; border-collapse: collapse; margin-block: var(--space-md); font-size: var(--font-size-sm); }
+    .whitepaper th, .whitepaper td { padding: var(--space-xs) var(--space-sm); border: 1px solid var(--border); text-align: start; }
+    .whitepaper th { background: var(--bg-secondary); font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; font-size: var(--font-size-xs); }
+    .whitepaper td { color: var(--text-secondary); }
+    .whitepaper .formula-block { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-md) var(--space-lg); font-family: var(--font-mono); font-size: var(--font-size-base); text-align: center; margin-block: var(--space-md); color: var(--text-primary); }
+    .whitepaper .circuit-diagram { text-align: center; }
+    .whitepaper .circuit-diagram pre { display: inline-block; text-align: left; }
+    .whitepaper .abstract { font-size: var(--font-size-lg); line-height: 1.8; color: var(--text-primary); border-inline-start: 3px solid var(--accent); padding-inline-start: var(--space-lg); margin-block: var(--space-lg); }
+    .whitepaper .ref-list p { font-size: var(--font-size-sm); margin-block-end: var(--space-sm); padding-inline-start: 2em; text-indent: -2em; }
+    @media (max-width: 640px) { .whitepaper { padding: var(--space-lg) var(--space-md); } .whitepaper h1 { font-size: var(--font-size-2xl); } .whitepaper table { font-size: var(--font-size-xs); } }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="../index.html" class="logo" aria-label="Cricket-Brain Home">Cricket<span>Brain</span></a>
+      <nav class="main-nav" id="main-nav" role="navigation" aria-label="Main navigation">
+        <a href="../index.html">Home</a>
+        <a href="../index.html#simulation">Simulation</a>
+        <a href="../index.html#architecture">Architecture</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark/light theme">
+          <span aria-hidden="true" id="theme-icon">&#9790;</span>
+        </button>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
+          <span aria-hidden="true">&#9776;</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="whitepaper">
+    <h1>CricketBrain: A Biomorphic Delay-Line Coincidence Detector for Real-Time Temporal Pattern Recognition</h1>
+    <div class="wp-meta">
+      <strong>Author:</strong> Belkis Aslani &nbsp;|&nbsp;
+      <strong>Version:</strong> 1.0.0 &nbsp;|&nbsp;
+      <strong>Date:</strong> 2026-04-06 &nbsp;|&nbsp;
+      <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">Repository</a> &nbsp;|&nbsp;
+      <a href="https://github.com/BEKO2210/cricket-brain/blob/main/RESEARCH_WHITEPAPER.md" target="_blank" rel="noopener">Source (Markdown)</a>
+    </div>
+
+    <div class="wp-note">
+      <strong>AI-Assisted Development:</strong> This project was developed with systematic use of AI coding assistants (Claude Code, ChatGPT/Codex, Kimi, Gemini). See
+      <a href="https://github.com/BEKO2210/cricket-brain/blob/main/AI_DEVELOPMENT_STATEMENT.md" target="_blank" rel="noopener">AI_DEVELOPMENT_STATEMENT.md</a> for full disclosure.
+    </div>
+
+    <h2>Abstract</h2>
+    <div class="abstract">
+      We present CricketBrain, a neuromorphic signal processor inspired by the auditory pathway of the field cricket (<em>Gryllus bimaculatus</em>). The system employs Gaussian-tuned resonators, ring-buffer delay lines, and coincidence detection gates to recognize temporal patterns in real-time with sub-microsecond latency and sub-kilobyte memory footprints. On a canonical 5-neuron circuit modeled after the cricket's AN1-LN2/LN3/LN5-ON1 pathway, we achieve 0.175 &micro;s per processing step with 928 bytes of RAM. We evaluate the system across SNR conditions from &minus;10 dB to +30 dB using a parametric sweep protocol with 120 trials per condition, and compare against three classical baselines: matched filtering, Goertzel-based spectral detection, and IIR bandpass filtering. An ablation study demonstrates that each circuit component contributes measurably to detection performance, with the coincidence gate providing the largest single improvement in false-positive rejection. The implementation is released as a Rust workspace with C, Python, and WebAssembly bindings.
+    </div>
+
+    <h2>1. Introduction</h2>
+    <p>Temporal pattern recognition in streaming signals &mdash; detecting specific rhythmic structures embedded in noise &mdash; is a fundamental problem in biomedical monitoring [1], industrial condition monitoring [2], and IoT security [3]. Conventional approaches rely on spectral analysis (FFT), matched filtering, or deep learning, each with characteristic trade-offs in latency, memory, and adaptability.</p>
+    <p>Biological auditory systems, particularly those of acoustically communicating insects, have evolved remarkably efficient solutions to this problem. The field cricket <em>Gryllus bimaculatus</em> can reliably identify conspecific calling songs (~4.5 kHz carrier, species-specific pulse patterns) in noisy environments using a neural circuit of fewer than 10 identified neurons [4, 5].</p>
+    <p>We draw direct inspiration from this circuit to build a computational model that preserves the biological principles &mdash; resonant frequency selectivity, axonal delay lines, and coincidence detection &mdash; while targeting modern embedded and edge-computing platforms.</p>
+
+    <h3>Contributions</h3>
+    <ol>
+      <li>A complete, open-source implementation of a biomorphic delay-line coincidence detector in safe Rust, with <code>no_std</code> support for embedded deployment.</li>
+      <li>Quantitative comparison against three classical baselines showing favorable false-positive rejection at equivalent true-positive rates.</li>
+      <li>A systematic ablation study demonstrating the necessity of each circuit component.</li>
+      <li>Cross-platform bindings (C FFI, Python/PyO3, WebAssembly) enabling integration into diverse research and production environments.</li>
+    </ol>
+
+    <h2>2. Related Work</h2>
+
+    <h3>2.1 Cricket Auditory Neuroscience</h3>
+    <p>The neural basis of phonotaxis in crickets has been studied extensively since Huber's early work on central pattern generators [6]. Schildberger [7] identified temporal filtering properties in the cricket brain that enable discrimination of conspecific songs based on pulse rate. Schoeneich, Kostarakos, and Hedwig [8] mapped the complete ascending auditory pathway, identifying the AN1 receptor neuron, local brain neurons (LN2-LN5), and the descending ON1 output neuron as the core circuit for song recognition.</p>
+
+    <h3>2.2 Neuromorphic Engineering</h3>
+    <p>Mead's foundational work on analog VLSI [10] established the field of neuromorphic engineering. The SpiNNaker [13] and Loihi [14] platforms have shown that spiking neural networks can be executed with orders-of-magnitude improvements in energy efficiency compared to conventional processors, particularly for temporal pattern tasks.</p>
+
+    <h3>2.3 Classical Signal Detection</h3>
+    <p>Matched filtering is the optimal linear detector under additive white Gaussian noise [15] but requires exact template knowledge. The Goertzel algorithm [16] provides efficient single-frequency spectral analysis but lacks temporal structure sensitivity. IIR bandpass filters offer continuous frequency selection but produce sustained output during any in-band energy, yielding high false-positive rates for pattern discrimination tasks.</p>
+
+    <h2>3. Biological Background</h2>
+    <p>The <em>Gryllus bimaculatus</em> male calling song consists of chirps at approximately 4.5 kHz carrier frequency, with species-specific pulse duration (~20 ms) and inter-pulse interval (~40 ms) [4]. The neural circuit responsible for this recognition consists of:</p>
+    <ul>
+      <li><strong>AN1</strong> (Ascending Neuron 1): Auditory receptor tuned to the carrier frequency via mechanical resonance of the tympanic membrane.</li>
+      <li><strong>LN2</strong> (Local Neuron 2): Inhibitory interneuron receiving AN1 input with ~3 ms axonal delay.</li>
+      <li><strong>LN3</strong> (Local Neuron 3): Excitatory interneuron receiving AN1 input with ~2 ms delay. Provides the "reference" signal for coincidence detection.</li>
+      <li><strong>LN5</strong> (Local Neuron 5): Second inhibitory interneuron with ~5 ms delay. Implements a wider temporal rejection window.</li>
+      <li><strong>ON1</strong> (Output Neuron 1): Coincidence detector that fires only when excitatory input from LN3 arrives simultaneously with a gap in inhibition from LN2 and LN5.</li>
+    </ul>
+
+    <div class="circuit-diagram">
+      <pre>       AN1 (Receptor, 4500 Hz)
+      / | \
+     /  |  \
+    v   v   v
+  LN2  LN3  LN5
+ (inh) (exc) (inh)
+ 3ms   2ms   5ms
+    \   |   /
+     \  |  /
+      v v v
+   ON1 (Output Gate)</pre>
+    </div>
+
+    <h2>4. Mathematical Model</h2>
+
+    <h3>4.1 Gaussian Frequency Selectivity</h3>
+    <p>Each neuron <em>i</em> has an eigenfrequency <em>f<sub>0</sub></em> and responds to input frequency <em>f<sub>in</sub></em> according to a Gaussian tuning curve:</p>
+    <div class="formula-block">R(f<sub>in</sub>, f<sub>0</sub>) = exp( &minus;(|f<sub>in</sub> &minus; f<sub>0</sub>| / (f<sub>0</sub> &middot; w))<sup>2</sup> )</div>
+    <p>where <em>w</em> is the bandwidth parameter (default 0.1 = 10% relative bandwidth).</p>
+
+    <h3>4.2 Amplitude Dynamics</h3>
+    <p>When resonating (R &gt; 0.3):</p>
+    <div class="formula-block">A(t+1) = min( A(t) + R &middot; 0.3, 1.0 )</div>
+    <p>When not resonating:</p>
+    <div class="formula-block">A(t+1) = A(t) &middot; 0.95</div>
+
+    <h3>4.3 Phase Locking</h3>
+    <div class="formula-block">&phi;(t+1) = &phi;(t) + (&phi;<sub>in</sub> &minus; &phi;(t)) &middot; 0.1</div>
+
+    <h3>4.4 Synaptic Delay</h3>
+    <div class="formula-block">y(t) = x(t &minus; d) &nbsp; (excitatory) &nbsp;&nbsp; y(t) = &minus;x(t &minus; d) &nbsp; (inhibitory)</div>
+
+    <h3>4.5 Coincidence Detection Gate</h3>
+    <div class="formula-block">fire(t) = [ A(t) &gt; &theta; ] &and; [ A(t &minus; &tau;) &gt; &theta; &middot; 0.8 ]</div>
+    <p>where &theta; = 0.7 (default firing threshold) and &tau; is the delay tap length.</p>
+
+    <h3>4.6 Computational Complexity</h3>
+    <p>Per processing step: <strong>Time:</strong> O(N + S) where N = neurons, S = synapses. <strong>Space:</strong> O(N &middot; H + S &middot; D) where H = history length, D = delay length.</p>
+
+    <h2>5. Architecture and Implementation</h2>
+
+    <h3>5.1 Workspace Structure</h3>
+    <table>
+      <thead><tr><th>Crate</th><th>Purpose</th><th>no_std</th><th>LOC</th></tr></thead>
+      <tbody>
+        <tr><td><code>cricket-brain-core</code></td><td>Neuron, synapse, memory, telemetry primitives</td><td>Yes</td><td>~600</td></tr>
+        <tr><td><code>cricket-brain</code></td><td>Brain network, sequence predictor, resonator bank</td><td>Optional</td><td>~2,700</td></tr>
+        <tr><td><code>cricket-brain-ffi</code></td><td>C-compatible API</td><td>No</td><td>~165</td></tr>
+        <tr><td><code>cricket-brain-python</code></td><td>PyO3 bindings</td><td>No</td><td>~122</td></tr>
+        <tr><td><code>cricket-brain-wasm</code></td><td>wasm-bindgen bindings</td><td>No</td><td>~120</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5.2 Feature Flags</h3>
+    <table>
+      <thead><tr><th>Flag</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><code>std</code> (default)</td><td>Standard library support</td></tr>
+        <tr><td><code>no_std</code></td><td>Embedded mode (<code>alloc</code> only)</td></tr>
+        <tr><td><code>serde</code></td><td>Snapshot serialization with CRC64 checksums</td></tr>
+        <tr><td><code>parallel</code></td><td>Rayon-based resonator bank parallelism</td></tr>
+        <tr><td><code>telemetry</code></td><td>Structured event hooks</td></tr>
+        <tr><td><code>cli</code></td><td>JSON Lines telemetry sink</td></tr>
+      </tbody>
+    </table>
+
+    <h2>6. Experimental Evaluation</h2>
+
+    <h3>6.1 Performance Metrics</h3>
+    <table>
+      <thead><tr><th>Configuration</th><th>Latency</th><th>Throughput</th><th>Memory</th></tr></thead>
+      <tbody>
+        <tr><td>5-neuron canonical</td><td>0.175 &micro;s/step</td><td>5.7 M steps/sec</td><td>928 bytes</td></tr>
+        <tr><td><code>no_std</code> Arduino minimal</td><td>N/A</td><td>N/A</td><td>928 bytes (static)</td></tr>
+        <tr><td>40,960-neuron scale</td><td>N/A</td><td>3.43e7 neuron-ops/sec</td><td>13.91 MB</td></tr>
+        <tr><td>Sequence predictor (1,280 neurons)</td><td>N/A</td><td>3.32e7 neuron-ops/sec</td><td>0.30 MB</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6.2 Baseline Comparisons</h3>
+    <ol>
+      <li><strong>Matched Filter:</strong> Normalized cross-correlation with a 60-sample 4500 Hz template. Optimal under AWGN assumptions [15].</li>
+      <li><strong>Goertzel Detector:</strong> Single-frequency DFT at 4500 Hz using the Goertzel algorithm [16], with sliding-window magnitude thresholding.</li>
+      <li><strong>IIR Bandpass Filter:</strong> Second-order IIR bandpass centered at 4500 Hz (Q ~ 5), with envelope detection via exponential smoothing.</li>
+    </ol>
+
+    <h3>6.3 Ablation Study</h3>
+    <table>
+      <thead><tr><th>Configuration</th><th>Modification</th></tr></thead>
+      <tbody>
+        <tr><td>Full circuit (control)</td><td>No modification</td></tr>
+        <tr><td>Without LN2</td><td>Disable AN1&rarr;LN2 and LN2&rarr;ON1 synapses</td></tr>
+        <tr><td>Without LN3</td><td>Disable AN1&rarr;LN3 and LN3&rarr;ON1 synapses</td></tr>
+        <tr><td>Without LN5</td><td>Disable AN1&rarr;LN5 and LN5&rarr;ON1 synapses</td></tr>
+        <tr><td>Without coincidence gate</td><td>Output based on ON1 amplitude only</td></tr>
+        <tr><td>Minimal delays</td><td>All synapse delays set to 1 ms</td></tr>
+      </tbody>
+    </table>
+
+    <h3>6.4 Reproducibility</h3>
+    <pre><code># Baselines comparison
+cargo run --release --example baselines
+
+# Ablation study
+cargo run --release --example ablation_study
+
+# Full SNR sweep
+cargo run --release --example research_gen -- --output target/research --seed 1337</code></pre>
+
+    <h2>7. Discussion</h2>
+
+    <h3>7.1 Strengths</h3>
+    <ul>
+      <li><strong>Temporal selectivity:</strong> The coincidence gate inherently rejects sustained in-band noise that would trigger bandpass-based detectors.</li>
+      <li><strong>Minimal memory:</strong> The ring-buffer delay implementation requires only O(D) storage per synapse, enabling deployment on microcontrollers.</li>
+      <li><strong>Deterministic latency:</strong> Processing time is constant per step with no data-dependent branching in the hot path.</li>
+    </ul>
+
+    <h3>7.2 Limitations</h3>
+    <ul>
+      <li><strong>Fixed topology:</strong> The circuit structure (5 neurons, 6 synapses) is fixed. However, synaptic weights and thresholds can now adapt online via STDP and homeostatic plasticity.</li>
+      <li><strong>Single-carrier assumption:</strong> The Gaussian tuning curve is centered on a single eigenfrequency. Multi-frequency patterns require the ResonatorBank extension.</li>
+      <li><strong>No spike timing:</strong> The model uses rate-coded amplitudes rather than precise spike timing, limiting temporal resolution to the timestep granularity.</li>
+    </ul>
+
+    <h3>7.3 Future Work</h3>
+    <ul>
+      <li>Hardware deployment on RISC-V and ARM Cortex-M targets</li>
+      <li>Medical device certification (IEC 62304) for the ECG sentinel application</li>
+      <li>Formal verification of the delay-line coincidence logic</li>
+    </ul>
+
+    <h2>8. Conclusion</h2>
+    <p>CricketBrain demonstrates that biologically inspired delay-line coincidence detection is a viable and efficient approach to temporal pattern recognition in embedded systems. The system achieves sub-microsecond processing latency and sub-kilobyte memory footprints while providing robust detection across a wide range of SNR conditions. The open-source Rust implementation, with its <code>no_std</code> core and multi-language bindings, is intended to serve as a foundation for both research exploration and production deployment in medical monitoring, industrial IoT, and edge-computing applications.</p>
+
+    <h2>References</h2>
+    <div class="ref-list">
+      <p>[1] A. L. Goldberger et al., "PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals," <em>Circulation</em>, vol. 101, no. 23, pp. e215-e220, 2000.</p>
+      <p>[2] R. B. Randall, <em>Vibration-Based Condition Monitoring</em>, 2nd ed. Wiley, 2021.</p>
+      <p>[3] Y. Mirsky et al., "Kitsune: An ensemble of autoencoders for online network intrusion detection," in <em>Proc. NDSS</em>, 2018.</p>
+      <p>[4] R. R. Hoy, "The evolution of hearing in insects as an adaptation to predation from bats," in <em>The Evolutionary Biology of Hearing</em>, Springer, 1992, pp. 115-129.</p>
+      <p>[5] T. Weber and J. Thorson, "Phonotactic behavior of walking crickets," <em>J. Comp. Physiol. A</em>, vol. 163, pp. 495-502, 1988.</p>
+      <p>[6] F. Huber, "Neural correlates of orthopteran and cicada phonotaxis," in <em>Neuroethology and Behavioral Physiology</em>, Springer, 1983, pp. 108-135.</p>
+      <p>[7] K. Schildberger, "Temporal selectivity of identified auditory neurons in the cricket brain," <em>J. Comp. Physiol. A</em>, vol. 155, pp. 171-185, 1984.</p>
+      <p>[8] S. Schoeneich, K. Kostarakos, and B. Hedwig, "An auditory feature detection circuit for sound pattern recognition," <em>Science Advances</em>, vol. 1, no. 8, e1500325, 2015.</p>
+      <p>[9] B. Hedwig and J. F. A. Poulet, "Mechanisms underlying phonotactic steering in the cricket <em>Gryllus bimaculatus</em>," <em>J. Exp. Biol.</em>, vol. 208, pp. 915-927, 2005.</p>
+      <p>[10] C. Mead, <em>Analog VLSI and Neural Systems</em>. Addison-Wesley, 1989.</p>
+      <p>[11] G. Indiveri et al., "Neuromorphic silicon neuron circuits," <em>Frontiers in Neuroscience</em>, vol. 5, art. 73, 2011.</p>
+      <p>[12] S.-C. Liu and T. Delbruck, "Neuromorphic sensory systems," <em>Current Opinion in Neurobiology</em>, vol. 20, no. 3, pp. 288-295, 2010.</p>
+      <p>[13] S. B. Furber et al., "The SpiNNaker project," <em>Proc. IEEE</em>, vol. 102, no. 5, pp. 652-665, 2014.</p>
+      <p>[14] M. Davies et al., "Loihi: A neuromorphic manycore processor with on-chip learning," <em>IEEE Micro</em>, vol. 38, no. 1, pp. 82-99, 2018.</p>
+      <p>[15] D. O. North, "An analysis of the factors which determine signal/noise discrimination in pulsed-carrier systems," <em>Proc. IEEE</em>, vol. 51, no. 7, pp. 1016-1027, 1963.</p>
+      <p>[16] G. Goertzel, "An algorithm for the evaluation of finite trigonometric series," <em>The American Mathematical Monthly</em>, vol. 65, no. 1, pp. 34-35, 1958.</p>
+    </div>
+
+    <h2>Appendix A: Notation Summary</h2>
+    <table>
+      <thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>f<sub>0</sub></td><td>Neuron eigenfrequency (Hz)</td></tr>
+        <tr><td>f<sub>in</sub></td><td>Input frequency (Hz)</td></tr>
+        <tr><td>w</td><td>Bandwidth parameter (default 0.1 = 10%)</td></tr>
+        <tr><td>R</td><td>Resonance response (0-1)</td></tr>
+        <tr><td>A(t)</td><td>Neuron amplitude at timestep t</td></tr>
+        <tr><td>&phi;(t)</td><td>Neuron phase at timestep t</td></tr>
+        <tr><td>&theta;</td><td>Firing threshold (default 0.7)</td></tr>
+        <tr><td>&tau;</td><td>Delay tap length (ms)</td></tr>
+        <tr><td>d</td><td>Synaptic propagation delay (ms)</td></tr>
+        <tr><td>C</td><td>Confidence score (0-1)</td></tr>
+        <tr><td>SNR</td><td>Signal-to-noise ratio</td></tr>
+      </tbody>
+    </table>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-bottom">
+      <span>&copy; 2026 Belkis Aslani. All rights reserved.</span>
+      <span><a href="../index.html">Home</a> &middot; <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a> &middot; <a href="impressum.html">Impressum</a></span>
+    </div>
+  </footer>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>
