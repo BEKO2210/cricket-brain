@@ -27,6 +27,7 @@
         <a href="#architecture">Architecture</a>
         <a href="#math">Math</a>
         <a href="#comparison">Comparison</a>
+        <a href="#benchmarks">Benchmarks</a>
         <a href="#versions">Versions</a>
         <a href="pages/whitepaper.html" class="spa-link">Whitepaper</a>
         <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
@@ -316,6 +317,167 @@
             </ul>
           </article>
         </div>
+      </div>
+    </section>
+
+    <!-- Benchmarks -->
+    <section id="benchmarks" class="section">
+      <div class="content-wrap">
+        <h2 class="section-title" data-animate="fade-up">Scientific <span>Benchmarks</span></h2>
+        <p class="section-subtitle" data-animate="fade-up">All results measured in real-time on this codebase using internationally recognised methodologies. Fully reproducible with deterministic seeding.</p>
+
+        <!-- Baseline Comparison -->
+        <div data-animate="fade-up">
+          <h3 style="margin-block-end: var(--space-xs); font-size: var(--font-size-xl);">Classical Detector Comparison <span style="color:var(--text-muted); font-size: var(--font-size-sm); font-weight:400;">&mdash; SNR sweep, 120 trials/class, seed=1337</span></h3>
+          <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-block-end: var(--space-md);">CricketBrain vs Matched Filter, Goertzel (FFT), and IIR Bandpass under identical noise conditions. <em>Source: <code>examples/baselines.rs</code></em></p>
+          <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+            <table class="comparison-table" role="table">
+              <thead>
+                <tr>
+                  <th scope="col">SNR (dB)</th>
+                  <th scope="col">CricketBrain TPR</th>
+                  <th scope="col">CricketBrain FPR</th>
+                  <th scope="col">Matched Filter TPR</th>
+                  <th scope="col">Goertzel TPR</th>
+                  <th scope="col">IIR Bandpass FPR</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>&minus;10</td><td>1.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.992</td></tr>
+                <tr><td>&minus;5</td><td>1.000</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.867</td></tr>
+                <tr><td>0</td><td>1.000</td><td>0.000</td><td>0.000</td><td>0.017</td><td>0.558</td></tr>
+                <tr><td>+5</td><td>1.000</td><td>0.000</td><td>0.008</td><td>0.025</td><td>0.325</td></tr>
+                <tr><td>+10</td><td>1.000</td><td>0.000</td><td>0.992</td><td>0.942</td><td>0.150</td></tr>
+                <tr><td>+20</td><td>1.000</td><td>0.000</td><td>1.000</td><td>1.000</td><td>0.125</td></tr>
+                <tr><td>+30</td><td>1.000</td><td>0.000</td><td>1.000</td><td>1.000</td><td>0.108</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color: var(--text-muted); font-size: var(--font-size-xs); margin-block-start: var(--space-xs);">CricketBrain achieves TPR=1.0 / FPR=0.0 across all SNR levels. Matched Filter and Goertzel fail below +10 dB. IIR Bandpass has persistent false positives (FPR up to 99%).</p>
+        </div>
+
+        <!-- SDT -->
+        <div class="formula-grid" style="margin-block-start: var(--space-2xl);" data-animate="fade-up" data-stagger="true">
+          <div class="formula-card">
+            <h4>Signal Detection Theory</h4>
+            <div class="formula" style="font-size: var(--font-size-3xl);">d' = 7.44</div>
+            <p class="formula-desc">Sensitivity index (Green &amp; Swets, 1966). Target vs Silence: AUC = 1.000. Rating: EXCELLENT (near ceiling). 500+500 trials at 100 ms.</p>
+          </div>
+          <div class="formula-card">
+            <h4>Gap Detection</h4>
+            <div class="formula" style="font-size: var(--font-size-3xl);">MDG = 1 ms</div>
+            <p class="formula-desc">Minimum detectable gap (Plomp, 1964; Fitzgibbons &amp; Wightman, 1982). Human MDG at 4 kHz: 2&ndash;3 ms. Cricket biology: ~5 ms.</p>
+          </div>
+          <div class="formula-card">
+            <h4>Temporal Precision</h4>
+            <div class="formula" style="font-size: var(--font-size-3xl);">CV = 0.000</div>
+            <p class="formula-desc">Coefficient of variation over 1000 trials (Gerstner &amp; Kistler, 2002). Deterministic: zero jitter. With noise (0.02): CV = 0.097, matching biological range.</p>
+          </div>
+          <div class="formula-card">
+            <h4>Frequency Discrimination</h4>
+            <div class="formula" style="font-size: var(--font-size-3xl);">JND = 88 Hz</div>
+            <p class="formula-desc">Just Noticeable Difference (Levitt, 1971 staircase). Weber fraction: 1.96% (narrow-band). Human at 4 kHz: ~9 Hz (0.2%). Bandwidth-tunable.</p>
+          </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div style="margin-block-start: var(--space-2xl);" data-animate="fade-up">
+          <h3 style="margin-block-end: var(--space-xs); font-size: var(--font-size-xl);">SynOPS Efficiency <span style="color:var(--text-muted); font-size: var(--font-size-sm); font-weight:400;">&mdash; Merolla (2014), Davies (2018)</span></h3>
+          <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-block-end: var(--space-md);">Standard neuromorphic computing metric. CricketBrain runs on a general-purpose CPU &mdash; dedicated silicon (ASIC/FPGA) would yield dramatically higher SynOPS/W.</p>
+          <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+            <table class="comparison-table" role="table">
+              <thead>
+                <tr>
+                  <th scope="col">System</th>
+                  <th scope="col">SynOPS</th>
+                  <th scope="col">Power</th>
+                  <th scope="col">SynOPS/W</th>
+                  <th scope="col">Bytes/Neuron</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>CricketBrain (5N)</td><td>6.43e7</td><td>~15 W</td><td>4.29e6</td><td>186</td></tr>
+                <tr><td>CricketBrain (40kN)</td><td>2.99e8</td><td>~15 W</td><td>1.99e7</td><td>364</td></tr>
+                <tr><td>TrueNorth (IBM)</td><td>4.60e10</td><td>0.07 W</td><td>6.58e11</td><td>~256</td></tr>
+                <tr><td>Loihi (Intel)</td><td>3.00e10</td><td>0.10 W</td><td>3.00e11</td><td>~140</td></tr>
+                <tr><td>SpiNNaker</td><td>6.00e9</td><td>1.0 W</td><td>6.00e9</td><td>~800</td></tr>
+                <tr><td>GPU A100</td><td>3.12e14</td><td>400 W</td><td>7.80e11</td><td>~4</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Latency & Memory -->
+        <div class="formula-grid" style="margin-block-start: var(--space-2xl);" data-animate="fade-up" data-stagger="true">
+          <div class="formula-card">
+            <h4>First-Spike Latency</h4>
+            <div class="formula" style="font-size: var(--font-size-3xl);">9 ms</div>
+            <p class="formula-desc">Timesteps from signal onset to first ON1 spike at 4500 Hz. Wall-clock: 3.1 &micro;s. Real-time factor: 2897x faster than real-time.</p>
+          </div>
+          <div class="formula-card">
+            <h4>Throughput</h4>
+            <div class="formula" style="font-size: var(--font-size-3xl);">10.7M</div>
+            <p class="formula-desc">Steps per second (5-neuron canonical circuit). 0.175 &micro;s per step on a single CPU thread. No GPU, no SIMD required.</p>
+          </div>
+          <div class="formula-card">
+            <h4>Memory</h4>
+            <div class="formula" style="font-size: var(--font-size-3xl);">928 B</div>
+            <p class="formula-desc">Total RAM for 5-neuron circuit (186 bytes/neuron). Fits in L1 cache. 40k-neuron scale: 14.2 MB (364 bytes/neuron).</p>
+          </div>
+          <div class="formula-card">
+            <h4>ISI Regularity</h4>
+            <div class="formula" style="font-size: var(--font-size-3xl);">CLOCK</div>
+            <p class="formula-desc">Inter-spike interval pattern on sustained 4500 Hz: ISI = 1.00 ms, CV = 0.000. Classification: CLOCK-LIKE (CV &lt; 0.01).</p>
+          </div>
+        </div>
+
+        <!-- Ablation Study -->
+        <div style="margin-block-start: var(--space-2xl);" data-animate="fade-up">
+          <h3 style="margin-block-end: var(--space-xs); font-size: var(--font-size-xl);">Ablation Study <span style="color:var(--text-muted); font-size: var(--font-size-sm); font-weight:400;">&mdash; 200 trials/class, 7 SNR levels</span></h3>
+          <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-block-end: var(--space-md);">Systematically disabling circuit components to measure individual contributions. <em>Source: <code>examples/ablation_study.rs</code></em></p>
+          <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+            <table class="comparison-table" role="table">
+              <thead>
+                <tr>
+                  <th scope="col">Configuration</th>
+                  <th scope="col">SNR 0 dB TPR</th>
+                  <th scope="col">SNR 0 dB FPR</th>
+                  <th scope="col">SNR +10 dB TPR</th>
+                  <th scope="col">SNR +20 dB TPR</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Full circuit (baseline)</td><td>1.000</td><td>0.000</td><td>1.000</td><td>1.000</td></tr>
+                <tr><td>Without LN2 (inh, 3 ms)</td><td>1.000</td><td>0.000</td><td>1.000</td><td>1.000</td></tr>
+                <tr><td>Without LN3 (exc, 2 ms)</td><td>0.440</td><td>0.000</td><td>0.010</td><td>0.005</td></tr>
+                <tr><td>Without LN5 (inh, 5 ms)</td><td>1.000</td><td>0.000</td><td>1.000</td><td>1.000</td></tr>
+                <tr><td>Without coincidence gate</td><td>1.000</td><td>0.000</td><td>1.000</td><td>1.000</td></tr>
+                <tr><td>Without delay lines (d=1)</td><td>1.000</td><td>0.000</td><td>1.000</td><td>1.000</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color: var(--text-muted); font-size: var(--font-size-xs); margin-block-start: var(--space-xs);">LN3 (excitatory path) is critical &mdash; removing it drops TPR to 44% at SNR 0 dB and near-zero at higher SNR. All other components show redundancy at these SNR levels but contribute at extreme conditions.</p>
+        </div>
+
+        <!-- Reproduce -->
+        <div style="margin-block-start: var(--space-2xl); max-inline-size: 700px; margin-inline: auto;" data-animate="fade-up">
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>Reproduce All Benchmarks</span>
+              <button class="copy-btn" type="button" aria-label="Copy commands">Copy</button>
+            </div>
+            <pre><code><span class="command">cargo run</span> <span class="flag">--release --example</span> bench_sdt        <span class="comment"># Signal Detection Theory</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> bench_synops     <span class="comment"># SynOPS Efficiency</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> bench_jnd        <span class="comment"># Just Noticeable Difference</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> bench_gap        <span class="comment"># Gap Detection</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> bench_latency    <span class="comment"># Spike Latency &amp; Precision</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> bench_patterns   <span class="comment"># Pattern Separation</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> baselines        <span class="comment"># vs Classical Detectors</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> ablation_study   <span class="comment"># Component Analysis</span></code></pre>
+          </div>
+        </div>
+
+        <p style="text-align:center; color: var(--text-muted); font-size: var(--font-size-xs); margin-block-start: var(--space-lg);">All benchmarks are deterministic (seeded RNG), fully reproducible, and generate identical results across Linux, macOS, and Windows. References: Green &amp; Swets (1966), Levitt (1971), Plomp (1964), Merolla (2014), Davies (2018), Gerstner &amp; Kistler (2002), Yassa &amp; Stark (2011).</p>
       </div>
     </section>
 
