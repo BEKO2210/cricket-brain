@@ -1,0 +1,53 @@
+---
+import { sortProvenanceEntries, summarizeProvenanceSources } from '@/components/sections/provenance-utils';
+import type { LandingMetrics } from '@/types/metrics';
+
+interface Props {
+  metrics: LandingMetrics;
+  title: string;
+  emptyText: string;
+  summaryLabel: string;
+}
+
+const { metrics, title, emptyText, summaryLabel } = Astro.props;
+const traceEntries = sortProvenanceEntries(
+  Object.entries(metrics.traces).map(([metricId, trace]) => ({
+    metricId,
+    trace
+  }))
+);
+const sourceSummary = summarizeProvenanceSources(traceEntries);
+---
+
+<article class="provenance-panel">
+  <h3>{title}</h3>
+  {traceEntries.length ? (
+    <>
+      <p class="provenance-summary-label">{summaryLabel}</p>
+      <div class="provenance-source-summary">
+        {sourceSummary.map((item) => (
+          <span>{`${item.source}: ${item.count}`}</span>
+        ))}
+      </div>
+      <ul>
+        {traceEntries.map(({ metricId, trace }) => (
+          <li>
+            <details>
+              <summary>
+                <span class="trace-title-wrap">
+                  <span class="trace-title">{metricId}</span>
+                  <span class="trace-source">{trace.source}</span>
+                </span>
+                <span class="trace-chevron" aria-hidden="true">▾</span>
+              </summary>
+              <p>{trace.rule}</p>
+              <p class="trace-path">{trace.paths[0] ?? 'no-path'}</p>
+            </details>
+          </li>
+        ))}
+      </ul>
+    </>
+  ) : (
+    <p>{emptyText}</p>
+  )}
+</article>

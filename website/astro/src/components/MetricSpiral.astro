@@ -1,0 +1,61 @@
+---
+import { PHI } from '@/lib/phi';
+import type { DisplayMetricCard } from '@/types/metrics';
+
+interface Props {
+  cards: DisplayMetricCard[];
+}
+
+const { cards } = Astro.props;
+
+const positioned = cards.map((card, index) => {
+  const step = index + 1;
+  const radius = Math.pow(PHI, step * 0.55) * 10;
+  const angle = step * ((2 * Math.PI) / PHI);
+  const x = Math.cos(angle) * radius;
+  const y = Math.sin(angle) * radius;
+  return { ...card, x, y };
+});
+---
+
+<section class="spiral-wrap" data-overlap-status>
+  {positioned.map((card) => (
+    <article class="metric-card" style={`--x:${card.x}rem;--y:${card.y}rem;`}>
+      <p class="metric-label">{card.label}</p>
+      <p class="metric-value">
+        {card.value} <span>{card.unit}</span>
+      </p>
+      <p class="metric-detail">{card.detail}</p>
+      {card.traceHint ? <p class="metric-trace">{card.traceHint}</p> : null}
+    </article>
+  ))}
+</section>
+
+<script>
+  const cards = Array.from(document.querySelectorAll<HTMLElement>('.metric-card'));
+  const offsetStep = 1.5;
+  const maxAttempts = 6;
+
+  const intersects = (a: HTMLElement, b: HTMLElement): boolean => {
+    const ra = a.getBoundingClientRect();
+    const rb = b.getBoundingClientRect();
+    return !(ra.right < rb.left || ra.left > rb.right || ra.bottom < rb.top || ra.top > rb.bottom);
+  };
+
+  let overlapAdjustments = 0;
+  cards.forEach((card, index) => {
+    cards.slice(index + 1).forEach((other) => {
+      let attempt = 0;
+      while (intersects(card, other) && attempt < maxAttempts) {
+        attempt += 1;
+        overlapAdjustments += 1;
+        const shift = offsetStep * attempt;
+        other.style.transform = `translate(calc(var(--x) + ${shift}rem), calc(var(--y) + ${shift}rem))`;
+      }
+    });
+  });
+
+  const status = document.querySelector('[data-overlap-status]');
+  status?.setAttribute('data-overlap', overlapAdjustments > 0 ? 'adjusted' : 'clean');
+  status?.setAttribute('data-overlap-adjustments', String(overlapAdjustments));
+</script>
