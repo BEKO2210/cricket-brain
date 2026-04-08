@@ -188,6 +188,86 @@ cd crates/wasm && wasm-pack build --target web     # WASM   →  npm package
 
 ---
 
+---
+
+## Verified Results
+
+The following results were reproduced locally on Windows using the public examples and benchmark commands in this repository.
+
+### Local verification highlights
+
+| Scenario | Result | What it shows |
+|----------|--------|---------------|
+| **Live roundtrip** | `"HELLO WORLD"` → **EXACT MATCH** | End-to-end encoding, spike processing, and decoding work correctly |
+| **Frequency discrimination** | Strong response at **4200–4800 Hz**, peak at **4500 Hz** | Tight frequency selectivity around the cricket carrier band |
+| **Morse alphabet** | All **A–Z** produce stable spike signatures | Reliable temporal-symbol encoding |
+| **Multi-frequency tokens** | `"RUST"` detected at **100% accuracy** | Parallel token discrimination across frequency bands |
+| **Sequence prediction** | Correct prefix-based next-token prediction | Topology-based temporal memory without gradient training |
+| **Scale predictor** | **1,280 neurons**, **0.31 MB RAM**, **1.12e8 neuron-ops/sec** | Efficient scaling for structured sequence tasks |
+| **Large scale test** | **40,960 neurons**, **14.22 MB RAM**, **8.02e7 neuron-ops/sec** | High throughput on commodity CPU hardware |
+| **ECG sentinel demo** | **0.141615 us/step**, performance gate **PASS** | Real-time suitability for edge monitoring workloads |
+| **Latency profile** | **0.103475 us/step** baseline | Extremely low per-step overhead in optimized mode |
+
+### Classical baseline comparison
+
+Under the included synthetic benchmark suite, CricketBrain achieved:
+
+- **TPR = 1.000**
+- **FPR = 0.000**
+- across **all tested SNR levels from -10 dB to +30 dB**
+
+Compared methods:
+- Matched Filter
+- Goertzel
+- IIR Bandpass
+- CricketBrain
+
+This indicates that CricketBrain is especially strong on **noise-robust temporal pattern detection** in the benchmark conditions defined by this repository.
+
+### Circuit ablation findings
+
+The ablation study shows an important architectural result:
+
+- **LN3 removal causes a major performance collapse**
+- LN2 and LN5 removal had little effect in the tested setup
+- delay-line / coincidence-related ablations did **not** reduce performance in the same benchmark regime
+
+This suggests:
+
+- **LN3 is currently the dominant functional component in the tested task**
+- some biologically inspired mechanisms may require **harder or more targeted benchmarks** to fully demonstrate their contribution
+
+### Interpretation
+
+These results support the claim that CricketBrain is:
+
+- **fast**
+- **memory-efficient**
+- **deterministic**
+- **effective for temporal pattern recognition on edge-class hardware**
+
+They do **not yet** prove universal superiority over all classical or learned methods on all datasets.  
+What they do show is that CricketBrain is a serious and reproducible **neuromorphic signal-processing architecture** with unusually strong efficiency and very promising benchmark behavior.
+
+### Reproduce locally
+
+```bash
+cargo run --example live_demo -- "HELLO WORLD"
+cargo run --example frequency_discrimination
+cargo run --example morse_alphabet
+cargo run --example multi_freq_demo -- "RUST"
+cargo run --example sequence_predict
+cargo run --release --example scale_predict
+cargo run --release --example sentinel_ecg_monitor
+cargo run --release --example baselines
+cargo run --release --example ablation_study
+cargo run --release --example research_gen -- --seed 1337
+cargo run --release --example scale_test
+cargo run --release --example profile_speed
+cargo bench
+```
+---
+
 ## Benchmarks
 
 <table>
