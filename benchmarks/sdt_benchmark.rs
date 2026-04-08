@@ -79,11 +79,13 @@ fn compute_roc(signal_outputs: &[f32], noise_outputs: &[f32], n_points: usize) -
     }
 
     roc.push((0.0, 0.0)); // threshold = 1.0+
-    // Sort by FPR ascending, then TPR ascending (so highest TPR at each FPR level comes last)
+    // Sort by FPR ascending, then TPR DESCENDING so dedup keeps the
+    // highest TPR at each FPR level (dedup retains the first of equals).
     roc.sort_by(|a, b| {
-        a.0.partial_cmp(&b.0).unwrap().then(a.1.partial_cmp(&b.1).unwrap())
+        a.0.partial_cmp(&b.0)
+            .unwrap()
+            .then(b.1.partial_cmp(&a.1).unwrap()) // TPR descending
     });
-    // Deduplicate: keep only the highest TPR at each unique FPR
     roc.dedup_by(|a, b| (a.0 - b.0).abs() < 1e-9);
     roc
 }

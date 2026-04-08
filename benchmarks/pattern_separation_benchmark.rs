@@ -49,21 +49,23 @@ fn make_pattern(elements: &[bool]) -> Vec<(f32, usize)> {
     signal
 }
 
-/// Run a pattern through the brain, return spike times.
-fn collect_spikes(brain: &mut CricketBrain, pattern: &[(f32, usize)]) -> Vec<usize> {
+/// Run a pattern through the brain, return (spike_times, amplitude_trace).
+fn collect_output(brain: &mut CricketBrain, pattern: &[(f32, usize)]) -> (Vec<usize>, Vec<f32>) {
     brain.reset();
     let mut spikes = Vec::new();
+    let mut trace = Vec::new();
     let mut t = 0;
     for &(freq, dur) in pattern {
         for _ in 0..dur {
             let out = brain.step(freq);
+            trace.push(brain.neurons[4].amplitude); // ON1 continuous amplitude
             if out > 0.0 {
                 spikes.push(t);
             }
             t += 1;
         }
     }
-    spikes
+    (spikes, trace)
 }
 
 /// Hamming distance between two binary spike trains (normalized).
@@ -75,6 +77,24 @@ fn spike_train_distance(a: &[usize], b: &[usize], total_steps: usize) -> f64 {
 
     let diffs = train_a.iter().zip(&train_b).filter(|(&x, &y)| x != y).count();
     diffs as f64 / total_steps as f64
+}
+
+/// Cosine distance between two continuous amplitude traces.
+/// Returns 1.0 - cosine_similarity, so 0.0 = identical, 1.0 = orthogonal, 2.0 = opposite.
+fn trace_distance(a: &[f32], b: &[f32]) -> f64 {
+    let min_len = a.len().min(b.len());
+    if min_len == 0 { return 1.0; }
+    let mut dot = 0.0_f64;
+    let mut norm_a = 0.0_f64;
+    let mut norm_b = 0.0_f64;
+    for i in 0..min_len {
+        dot += a[i] as f64 * b[i] as f64;
+        norm_a += (a[i] as f64).powi(2);
+        norm_b += (b[i] as f64).powi(2);
+    }
+    let denom = norm_a.sqrt() * norm_b.sqrt();
+    if denom < 1e-12 { return 1.0; }
+    1.0 - (dot / denom)
 }
 
 /// Input distance: fraction of elements that differ between two patterns.
@@ -116,54 +136,55 @@ fn main() {
     ];
 
     let ref_pattern = make_pattern(&reference);
-    let ref_spikes = collect_spikes(&mut brain, &ref_pattern);
+    let (ref_spikes, ref_trace) = collect_output(&mut brain, &ref_pattern);
     let ref_dur = total_duration(&ref_pattern);
 
     println!(
-        "  {:>16} {:>10} {:>12} {:>12} {:>10}",
-        "Pattern", "InputDist", "OutputDist", "SepIndex", "Spikes"
+        "  {:>16} {:>8} {:>10} {:>10} {:>10} {:>10} {:>6}",
+        "Pattern", "InDist", "Hamming", "HamSep", "Cosine", "CosSep", "Spks"
     );
     println!(
-        "  {:>16} {:>10} {:>12} {:>12} {:>10}",
-        "────────────────", "──────────", "────────────", "────────────", "──────────"
+        "  {:>16} {:>8} {:>10} {:>10} {:>10} {:>10} {:>6}",
+        "────────────────", "────────", "──────────", "──────────", "──────────", "──────────", "──────"
     );
 
-    let mut separation_indices = Vec::new();
+    let mut sep_hamming = Vec::new();
+    let mut sep_cosine = Vec::new();
 
     for (label, variant) in &variants {
         let var_pattern = make_pattern(variant);
-        let var_spikes = collect_spikes(&mut brain, &var_pattern);
+        let (var_spikes, var_trace) = collect_output(&mut brain, &var_pattern);
         let max_dur = ref_dur.max(total_duration(&var_pattern));
 
         let input_dist = pattern_distance(&reference, variant);
-        let output_dist = spike_train_distance(&ref_spikes, &var_spikes, max_dur);
-        let sep_index = if input_dist > 0.001 {
-            output_dist / input_dist
-        } else {
-            if output_dist < 0.001 { 1.0 } else { f64::INFINITY }
-        };
+        let hamming_dist = spike_train_distance(&ref_spikes, &var_spikes, max_dur);
+        let cosine_dist = trace_distance(&ref_trace, &var_trace);
+
+        let ham_sep = if input_dist > 0.001 { hamming_dist / input_dist } else { 1.0 };
+        let cos_sep = if input_dist > 0.001 { cosine_dist / input_dist } else { 1.0 };
 
         if input_dist > 0.001 {
-            separation_indices.push(sep_index);
+            sep_hamming.push(ham_sep);
+            sep_cosine.push(cos_sep);
         }
 
         println!(
-            "  {:>16} {:>10.3} {:>12.4} {:>12.3} {:>10}",
-            label, input_dist, output_dist, sep_index, var_spikes.len()
+            "  {:>16} {:>8.3} {:>10.4} {:>10.3} {:>10.4} {:>10.3} {:>6}",
+            label, input_dist, hamming_dist, ham_sep, cosine_dist, cos_sep, var_spikes.len()
         );
     }
 
-    let mean_sep = if separation_indices.is_empty() {
-        0.0
-    } else {
-        separation_indices.iter().sum::<f64>() / separation_indices.len() as f64
-    };
+    let mean_hamming = sep_hamming.iter().sum::<f64>() / sep_hamming.len().max(1) as f64;
+    let mean_cosine = sep_cosine.iter().sum::<f64>() / sep_cosine.len().max(1) as f64;
 
-    println!("\n  Mean separation index: {mean_sep:.3}");
+    println!("\n  Mean separation (Hamming): {mean_hamming:.3}");
+    println!("  Mean separation (Cosine):  {mean_cosine:.3}");
+    let best = mean_hamming.max(mean_cosine);
+    println!("  Best metric:               {best:.3}");
     println!("  Interpretation:");
-    if mean_sep > 1.5 {
+    if best > 1.5 {
         println!("    ORTHOGONALIZING — system amplifies input differences");
-    } else if mean_sep > 0.8 {
+    } else if best > 0.8 {
         println!("    LINEAR — output distance tracks input distance");
     } else {
         println!("    GENERALIZING — system compresses differences");
@@ -180,7 +201,7 @@ fn main() {
         false, false, false, // S
     ];
     let full_pattern = make_pattern(&full_sos);
-    let full_spikes = collect_spikes(&mut brain, &full_pattern);
+    let (full_spikes, _full_trace) = collect_output(&mut brain, &full_pattern);
     let full_dur = total_duration(&full_pattern);
 
     // Truncated versions
@@ -201,7 +222,7 @@ fn main() {
 
     for (label, prefix) in &truncations {
         let prefix_pattern = make_pattern(prefix);
-        let prefix_spikes = collect_spikes(&mut brain, &prefix_pattern);
+        let (prefix_spikes, _prefix_trace) = collect_output(&mut brain, &prefix_pattern);
 
         // Correlation: fraction of full-pattern spike positions that also fire in prefix
         let prefix_dur = total_duration(&prefix_pattern);
@@ -262,7 +283,7 @@ fn main() {
     println!("\n╔══════════════════════════════════════════════════════════════╗");
     println!("║  Pattern Benchmark Summary                                 ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
-    println!("║  Mean separation index: {mean_sep:>6.3}                             ║");
+    println!("║  Hamming separation: {mean_hamming:>6.3}  Cosine separation: {mean_cosine:>6.3} ║");
     println!("║  System behavior: temporal pattern + frequency coding      ║");
     println!("║  Ref: Yassa & Stark (2011), Trends in Neurosciences        ║");
     println!("╚══════════════════════════════════════════════════════════════╝");

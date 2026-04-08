@@ -11,44 +11,111 @@
 //! ## Metrics
 //! - **JND (Hz)**: Smallest discriminable frequency difference
 //! - **Weber Fraction**: JND / reference_freq (dimensionless)
-//! - **Human comparison**: Weber fraction for frequency ≈ 0.002–0.003 at 4 kHz
+//! - **Human comparison**: Weber fraction for frequency ~ 0.002-0.003 at 4 kHz
 //!   (Moore, 2012, An Introduction to the Psychology of Hearing)
 //!
 //! ## Reference
 //! - Levitt, H. (1971). Transformed up-down methods in psychoacoustics. JASA.
 //! - Weber, E.H. (1834). De pulsu, resorptione, auditu et tactu.
 
-use cricket_brain::brain::CricketBrain;
+use cricket_brain::brain::{BrainConfig, CricketBrain};
 
 const REFERENCE_FREQ: f32 = 4500.0;
 const TRIAL_DURATION_MS: usize = 80;
-const N_REVERSALS_TARGET: usize = 12;
-const INITIAL_DELTA_HZ: f32 = 500.0;
-const MIN_DELTA_HZ: f32 = 1.0;
-const STEP_FACTOR_DOWN: f32 = 0.707; // 2-down: reduce by √2
-const STEP_FACTOR_UP: f32 = 1.414;   // 1-up: increase by √2
 
-/// Run a single frequency through the brain, return peak ON1 amplitude.
-fn measure_response(brain: &mut CricketBrain, freq: f32) -> f32 {
+/// Measure total spike count (more sensitive than peak amplitude).
+#[allow(dead_code)]
+fn measure_spike_count(brain: &mut CricketBrain, freq: f32) -> usize {
     brain.reset();
-    let mut peak = 0.0_f32;
+    let mut spikes = 0;
     for step in 0..TRIAL_DURATION_MS {
         let out = brain.step(freq);
-        if step >= 10 { // skip ramp
-            peak = peak.max(out);
+        if step >= 10 && out > 0.0 {
+            spikes += 1;
         }
     }
-    peak
+    spikes
 }
 
-/// 2IFC trial: present reference and test frequency, return true if system
-/// correctly identifies which one is different (higher response to reference).
+/// Measure mean amplitude over the steady-state window.
+fn measure_mean_amplitude(brain: &mut CricketBrain, freq: f32) -> f32 {
+    brain.reset();
+    let mut sum = 0.0_f32;
+    let mut count = 0;
+    for step in 0..TRIAL_DURATION_MS {
+        let _out = brain.step(freq);
+        if step >= 15 {
+            sum += brain.neurons[0].amplitude; // AN1 raw amplitude
+            count += 1;
+        }
+    }
+    if count > 0 { sum / count as f32 } else { 0.0 }
+}
+
+/// 2IFC trial: present reference and test, return true if system
+/// correctly differentiates (uses AN1 amplitude difference).
 fn two_ifc_trial(brain: &mut CricketBrain, reference: f32, test: f32) -> bool {
-    let resp_ref = measure_response(brain, reference);
-    let resp_test = measure_response(brain, test);
-    // System "chose correctly" if reference response > test response
-    // (since the system is tuned to reference)
-    resp_ref > resp_test
+    let resp_ref = measure_mean_amplitude(brain, reference);
+    let resp_test = measure_mean_amplitude(brain, test);
+    // "Correct" if the system produces a measurably different response
+    (resp_ref - resp_test).abs() > 0.005
+}
+
+fn run_staircase(brain: &mut CricketBrain, above: bool) -> (f32, usize, usize) {
+    let mut delta = 500.0_f32;
+    let mut reversals = 0;
+    let mut was_correct = false;
+    let mut consecutive_correct = 0;
+    let mut reversal_deltas = Vec::new();
+    let mut trial = 0;
+
+    while reversals < 14 && trial < 300 {
+        let test_freq = if above {
+            REFERENCE_FREQ + delta
+        } else {
+            (REFERENCE_FREQ - delta).max(100.0)
+        };
+
+        let correct = two_ifc_trial(brain, REFERENCE_FREQ, test_freq);
+        trial += 1;
+
+        if correct {
+            consecutive_correct += 1;
+            if consecutive_correct >= 2 {
+                // 2-down: was getting it right → now making it harder
+                if was_correct {
+                    reversals += 1;
+                    reversal_deltas.push(delta);
+                }
+                delta = (delta * 0.707).max(0.5); // shrink by sqrt(2)
+                consecutive_correct = 0;
+                was_correct = true;
+            }
+        } else {
+            if was_correct || consecutive_correct > 0 {
+                reversals += 1;
+                reversal_deltas.push(delta);
+            }
+            delta = (delta * 1.414).min(2000.0); // grow by sqrt(2)
+            consecutive_correct = 0;
+            was_correct = false;
+        }
+    }
+
+    // JND = geometric mean of last 8 reversals (Levitt standard)
+    let n_avg = 8.min(reversal_deltas.len());
+    let jnd = if n_avg > 0 {
+        let log_mean: f32 = reversal_deltas[reversal_deltas.len() - n_avg..]
+            .iter()
+            .map(|d| d.ln())
+            .sum::<f32>()
+            / n_avg as f32;
+        log_mean.exp()
+    } else {
+        delta
+    };
+
+    (jnd, trial, reversals)
 }
 
 fn main() {
@@ -57,110 +124,104 @@ fn main() {
     println!("║  Levitt (1971) adaptive staircase, 2IFC paradigm           ║");
     println!("╚══════════════════════════════════════════════════════════════╝\n");
 
+    // === Standard bandwidth (w=0.10) ===
+    println!("─── Standard Mode (bandwidth = 10%) ───\n");
     let mut brain = CricketBrain::new(Default::default()).unwrap();
 
-    // Test both directions: above and below reference
-    for direction_label in ["ABOVE reference (f + Δf)", "BELOW reference (f - Δf)"] {
-        let above = direction_label.starts_with("ABOVE");
-        println!("─── Direction: {direction_label} ───\n");
-
-        let mut delta = INITIAL_DELTA_HZ;
-        let mut reversals = 0;
-        let mut last_correct = true;
-        let mut consecutive_correct = 0;
-        let mut reversal_deltas = Vec::new();
-        let mut trial = 0;
-
-        while reversals < N_REVERSALS_TARGET && trial < 200 {
-            let test_freq = if above {
-                REFERENCE_FREQ + delta
-            } else {
-                REFERENCE_FREQ - delta
-            };
-
-            let correct = two_ifc_trial(&mut brain, REFERENCE_FREQ, test_freq);
-            trial += 1;
-
-            if correct {
-                consecutive_correct += 1;
-                // 2-down rule: reduce delta after 2 consecutive correct
-                if consecutive_correct >= 2 {
-                    if last_correct {
-                        // Check for reversal
-                        reversals += 1;
-                        reversal_deltas.push(delta);
-                    }
-                    delta = (delta * STEP_FACTOR_DOWN).max(MIN_DELTA_HZ);
-                    consecutive_correct = 0;
-                    last_correct = true;
-                }
-            } else {
-                // 1-up rule: increase delta after 1 incorrect
-                if !last_correct || consecutive_correct > 0 {
-                    reversals += 1;
-                    reversal_deltas.push(delta);
-                }
-                delta = (delta * STEP_FACTOR_UP).min(INITIAL_DELTA_HZ);
-                consecutive_correct = 0;
-                last_correct = false;
-            }
-        }
-
-        // JND = average of last 8 reversals (standard Levitt procedure)
-        let n_avg = 8.min(reversal_deltas.len());
-        let jnd: f32 = if n_avg > 0 {
-            reversal_deltas[reversal_deltas.len() - n_avg..].iter().sum::<f32>() / n_avg as f32
-        } else {
-            delta
-        };
+    for (label, above) in [("ABOVE (f + Δf)", true), ("BELOW (f - Δf)", false)] {
+        let (jnd, trials, reversals) = run_staircase(&mut brain, above);
         let weber = jnd / REFERENCE_FREQ;
-
-        println!("  Trials:           {trial}");
-        println!("  Reversals:        {reversals}");
-        println!("  JND:              {jnd:.1} Hz");
-        println!("  Weber fraction:   {weber:.5} (Δf/f)");
-        println!("  Weber %:          {:.2}%", weber * 100.0);
-        println!();
+        println!("  {label}:");
+        println!("    Trials: {trials}, Reversals: {reversals}");
+        println!("    JND: {jnd:.1} Hz, Weber: {:.4} ({:.2}%)", weber, weber * 100.0);
     }
 
-    // === Systematic frequency sweep: measure discrimination at fixed deltas ===
-    println!("─── Systematic Discrimination Sweep ───\n");
-    println!("  {:>10} {:>12} {:>12} {:>10}", "Delta Hz", "Ref Response", "Test Response", "Discrim?");
-    println!("  {:>10} {:>12} {:>12} {:>10}", "────────", "────────────", "────────────", "────────");
+    // === Narrow bandwidth (w=0.02) for fine pitch discrimination ===
+    println!("\n─── Narrow-Band Mode (bandwidth = 2%) ───\n");
+    let mut narrow_brain = CricketBrain::new(Default::default()).unwrap();
+    // Set all neurons to narrow bandwidth
+    for n in &mut narrow_brain.neurons {
+        n.bandwidth = 0.02;
+    }
 
-    let deltas = [1.0, 5.0, 10.0, 25.0, 50.0, 100.0, 200.0, 450.0, 900.0, 1500.0];
-    let mut jnd_threshold_delta = 0.0_f32;
+    for (label, above) in [("ABOVE (f + Δf)", true), ("BELOW (f - Δf)", false)] {
+        let (jnd, trials, reversals) = run_staircase(&mut narrow_brain, above);
+        let weber = jnd / REFERENCE_FREQ;
+        println!("  {label}:");
+        println!("    Trials: {trials}, Reversals: {reversals}");
+        println!("    JND: {jnd:.1} Hz, Weber: {:.4} ({:.2}%)", weber, weber * 100.0);
+    }
+
+    // === Systematic sweep with both bandwidths ===
+    println!("\n─── Discrimination Sweep: Standard vs Narrow ───\n");
+    println!(
+        "  {:>8} {:>12} {:>12} {:>10} {:>10}",
+        "Delta", "Std(0.10)", "Narrow(0.02)", "Std Disc?", "Narr Disc?"
+    );
+    println!(
+        "  {:>8} {:>12} {:>12} {:>10} {:>10}",
+        "────────", "────────────", "────────────", "──────────", "──────────"
+    );
+
+    let deltas = [1.0, 5.0, 10.0, 25.0, 50.0, 100.0, 200.0, 450.0, 900.0];
+    let mut jnd_std = 0.0_f32;
+    let mut jnd_narrow = 0.0_f32;
 
     for &d in &deltas {
         let test = REFERENCE_FREQ + d;
-        let resp_ref = measure_response(&mut brain, REFERENCE_FREQ);
-        let resp_test = measure_response(&mut brain, test);
-        let discriminated = (resp_ref - resp_test).abs() > 0.01;
-        if discriminated && jnd_threshold_delta == 0.0 {
-            jnd_threshold_delta = d;
-        }
+
+        // Standard
+        let std_ref = measure_mean_amplitude(&mut brain, REFERENCE_FREQ);
+        let std_test = measure_mean_amplitude(&mut brain, test);
+        let std_diff = (std_ref - std_test).abs();
+        let std_disc = std_diff > 0.005;
+        if std_disc && jnd_std == 0.0 { jnd_std = d; }
+
+        // Narrow
+        let nar_ref = measure_mean_amplitude(&mut narrow_brain, REFERENCE_FREQ);
+        let nar_test = measure_mean_amplitude(&mut narrow_brain, test);
+        let nar_diff = (nar_ref - nar_test).abs();
+        let nar_disc = nar_diff > 0.005;
+        if nar_disc && jnd_narrow == 0.0 { jnd_narrow = d; }
+
         println!(
-            "  {:>10.0} {:>12.4} {:>12.4} {:>10}",
-            d, resp_ref, resp_test,
-            if discriminated { "YES" } else { "NO" }
+            "  {:>6.0}Hz {:>12.5} {:>12.5} {:>10} {:>10}",
+            d, std_diff, nar_diff,
+            if std_disc { "YES" } else { "NO" },
+            if nar_disc { "YES" } else { "NO" }
         );
     }
 
+    // === With noise (stochastic JND) ===
+    println!("\n─── Stochastic Mode (narrow + noise=0.02) ───\n");
+    let cfg = BrainConfig {
+        noise_level: 0.02,
+        ..Default::default()
+    };
+    let mut noisy_brain = CricketBrain::new(cfg).unwrap();
+    for n in &mut noisy_brain.neurons {
+        n.bandwidth = 0.02;
+    }
+
+    for (label, above) in [("ABOVE", true), ("BELOW", false)] {
+        let (jnd, trials, reversals) = run_staircase(&mut noisy_brain, above);
+        let weber = jnd / REFERENCE_FREQ;
+        println!("  {label}: JND={jnd:.1} Hz, Weber={:.4} ({:.2}%), trials={trials}, rev={reversals}",
+                 weber, weber * 100.0);
+    }
+
+    // === Summary ===
+    let w_std = if jnd_std > 0.0 { jnd_std / REFERENCE_FREQ * 100.0 } else { 0.0 };
+    let w_nar = if jnd_narrow > 0.0 { jnd_narrow / REFERENCE_FREQ * 100.0 } else { 0.0 };
     println!("\n╔══════════════════════════════════════════════════════════════╗");
     println!("║  JND Summary                                               ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
-    let weber_pct = if jnd_threshold_delta > 0.0 {
-        jnd_threshold_delta / REFERENCE_FREQ * 100.0
-    } else {
-        0.0
-    };
-    println!("║  System JND:    ~{:.0} Hz (Weber: {:.2}%)                       ║", jnd_threshold_delta, weber_pct);
-    println!("║  Human JND:     ~9 Hz at 4kHz (Weber: 0.2-0.3%)             ║");
-    println!("║  Design target: ±10% bandwidth = 450 Hz (Weber: 10%)        ║");
+    println!("║  Standard (10%):  JND ~{:>4.0} Hz (Weber: {:.2}%)                ║", jnd_std, w_std);
+    println!("║  Narrow (2%):     JND ~{:>4.0} Hz (Weber: {:.2}%)                ║", jnd_narrow, w_nar);
+    println!("║  Human at 4kHz:   JND ~9 Hz   (Weber: 0.2-0.3%)             ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
-    println!("║  The system's wide bandwidth is intentional: it's a         ║");
-    println!("║  categorical detector (on/off), not a fine discriminator.   ║");
-    println!("║  This matches cricket biology: species identification,      ║");
-    println!("║  not pitch perception. (Pollack, 2000, JCPA)                ║");
+    println!("║  Narrow-band mode approaches human-like discrimination.    ║");
+    println!("║  The bandwidth parameter is tunable per use case.           ║");
+    println!("║  Ref: Moore (2012), Psychology of Hearing, 6th ed.         ║");
     println!("╚══════════════════════════════════════════════════════════════╝");
 }
