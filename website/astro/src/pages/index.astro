@@ -1,0 +1,233 @@
+---
+import MetricSpiral from '@/components/MetricSpiral.astro';
+import SectionBlock from '@/components/primitives/SectionBlock.astro';
+import ProvenancePanel from '@/components/sections/ProvenancePanel.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getLandingMetrics } from '@/data/metrics';
+import { getDictionary, t } from '@/i18n';
+
+const dict = getDictionary('en');
+const metrics = getLandingMetrics();
+const localizedCards = metrics.cards.map((card) => ({
+  ...card,
+  label: t(dict, card.labelKey),
+  detail: t(dict, card.detailKey),
+  unit: t(dict, card.unitKey),
+  traceHint: card.trace.paths[0] ? `${card.providerId} · ${card.trace.paths[0]}` : `${card.providerId} · no-path`
+}));
+
+const proofCards = localizedCards.slice(0, 4);
+---
+
+<BaseLayout title={dict.meta.title} description={dict.meta.description} lang="en">
+  <a class="skip-link" href="#main-content">{dict.accessibility.skipToMain}</a>
+  <main id="main-content" class="page-shell narrative" tabindex="-1">
+    <header class="hero glass">
+      <p class="kicker">{dict.hero.kicker}</p>
+      <h1>{dict.hero.title}</h1>
+      <p class="subtitle">{dict.hero.subtitle}</p>
+      <div class="hero-proof-pill">
+        <span>{dict.hero.pillSource}</span>
+        <span>{dict.hero.pillTyped}</span>
+        <span>{dict.hero.pillReadonly}</span>
+      </div>
+      <nav class="hero-nav" aria-label={dict.accessibility.sectionNavLabel}>
+        <a class="hero-nav-link" href="#proof">{dict.nav.proof}</a>
+        <a class="hero-nav-link" href="#highlights">{dict.nav.highlights}</a>
+        <a class="hero-nav-link" href="#visualization">{dict.nav.visualization}</a>
+        <a class="hero-nav-link" href="#evidence">{dict.nav.evidence}</a>
+      </nav>
+      <div class="cta-row">
+        <a href="#proof" class="btn btn-primary">{dict.hero.ctaPrimary}</a>
+        <a href="#trust" class="btn btn-secondary">{dict.hero.ctaSecondary}</a>
+      </div>
+    </header>
+
+    <SectionBlock
+      id="proof"
+      kicker={dict.sections.proofKicker}
+      title={dict.sections.proofTitle}
+      summary={dict.sections.proofSummary}
+      tone="proof"
+    >
+      <p class="updated">
+        {dict.status.updatedAt}: {new Date(metrics.updatedAt).toLocaleString('en-US', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' })}
+        UTC
+      </p>
+      <div class="proof-grid">
+        {proofCards.map((card) => (
+          <article class="proof-card">
+            <p>{card.label}</p>
+            <p class="proof-value">
+              {card.value} <span>{card.unit}</span>
+            </p>
+            <p>{card.detail}</p>
+          </article>
+        ))}
+      </div>
+    </SectionBlock>
+
+    <SectionBlock
+      id="highlights"
+      kicker={dict.sections.highlightsKicker}
+      title={dict.sections.highlightsTitle}
+      summary={dict.sections.highlightsSummary}
+      compact
+    >
+      <ul class="bullet-grid">
+        <li>{dict.bullets.highlight1}</li>
+        <li>{dict.bullets.highlight2}</li>
+        <li>{dict.bullets.highlight3}</li>
+      </ul>
+    </SectionBlock>
+
+    <SectionBlock
+      id="visualization"
+      kicker={dict.sections.visualizationKicker}
+      title={dict.sections.visualizationTitle}
+      summary={dict.sections.visualizationSummary}
+      tone="visual"
+    >
+      <MetricSpiral cards={localizedCards} />
+      <p class="status-line">
+        {dict.status.overlapSafety}: <span id="overlap-indicator" data-adjusted-text={dict.status.overlapAdjusted}>{dict.status.overlapPass}</span>
+      </p>
+    </SectionBlock>
+
+    <SectionBlock
+      id="principles"
+      kicker={dict.sections.principlesKicker}
+      title={dict.sections.principlesTitle}
+      summary={dict.sections.principlesSummary}
+      compact
+    >
+      <ul class="bullet-grid">
+        <li>{dict.bullets.principle1}</li>
+        <li>{dict.bullets.principle2}</li>
+        <li>{dict.bullets.principle3}</li>
+      </ul>
+    </SectionBlock>
+
+    <SectionBlock
+      id="evidence"
+      kicker={dict.sections.evidenceKicker}
+      title={dict.sections.evidenceTitle}
+      summary={dict.sections.evidenceSummary}
+    >
+      <div class="split-grid">
+        <article>
+          <h3>{dict.sections.benchmarkList}</h3>
+          {metrics.benchmarkNames.length ? (
+            <ul class="mono-list">
+              {metrics.benchmarkNames.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>{dict.fallback.noEntries}</p>
+          )}
+        </article>
+        <article>
+          <h3>{dict.sections.testList}</h3>
+          {metrics.testNames.length ? (
+            <ul class="mono-list">
+              {metrics.testNames.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>{dict.fallback.noEntries}</p>
+          )}
+        </article>
+      </div>
+    </SectionBlock>
+
+    <SectionBlock
+      id="extensibility"
+      kicker={dict.sections.extensibilityKicker}
+      title={dict.sections.extensibilityTitle}
+      summary={dict.sections.extensibilitySummary}
+      compact
+      tone="future"
+    >
+      <ul class="bullet-grid">
+        <li>{dict.bullets.extensibility1}</li>
+        <li>{dict.bullets.extensibility2}</li>
+        <li>{dict.bullets.extensibility3}</li>
+      </ul>
+    </SectionBlock>
+
+    <SectionBlock
+      id="trust"
+      kicker={dict.sections.trustKicker}
+      title={dict.sections.trustTitle}
+      summary={dict.sections.trustSummary}
+      tone="trust"
+    >
+      <div class="split-grid">
+        <ProvenancePanel metrics={metrics} title={dict.provenance.title} emptyText={dict.provenance.empty} summaryLabel={dict.provenance.summaryLabel} />
+        <article class="warnings-panel">
+          <h3>{dict.sections.warningsTitle}</h3>
+          <p class="warnings-summary" role="status" aria-live="polite">{dict.sections.warningsSummary.replace('{count}', String(metrics.issues.length))}</p>
+          {metrics.issues.length ? (
+            <ul>
+              {metrics.issues.map((issue) => (
+                <li>{`${issue.level.toUpperCase()}: ${issue.message}${issue.context ? ` (${issue.context})` : ''}`}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>{dict.fallback.noWarnings}</p>
+          )}
+        </article>
+      </div>
+    </SectionBlock>
+
+    <footer>
+      <p>{dict.footer.text}</p>
+    </footer>
+  </main>
+
+  <script>
+    const indicator = document.getElementById('overlap-indicator');
+    const container = document.querySelector('[data-overlap-status]');
+    if (indicator && container?.getAttribute('data-overlap') === 'adjusted') {
+      indicator.textContent = indicator.getAttribute('data-adjusted-text') ?? indicator.textContent;
+    }
+
+    const navLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('.hero-nav-link'));
+    const sections = navLinks
+      .map((link) => {
+        const id = link.getAttribute('href')?.replace('#', '');
+        return id ? document.getElementById(id) : null;
+      })
+      .filter((section): section is HTMLElement => Boolean(section));
+
+    const setActiveLink = (id: string) => {
+      navLinks.forEach((link) => {
+        const active = link.getAttribute('href') === `#${id}`;
+        if (active) {
+          link.setAttribute('aria-current', 'location');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible?.target?.id) {
+          setActiveLink(visible.target.id);
+        }
+      },
+      {
+        rootMargin: '-30% 0px -50% 0px',
+        threshold: [0.1, 0.25, 0.5]
+      }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+  </script>
+</BaseLayout>

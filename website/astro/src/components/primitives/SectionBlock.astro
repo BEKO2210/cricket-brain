@@ -1,0 +1,22 @@
+---
+import SectionHeader from '@/components/primitives/SectionHeader.astro';
+
+interface Props {
+  id?: string;
+  kicker?: string;
+  title: string;
+  summary?: string;
+  compact?: boolean;
+  tone?: 'default' | 'proof' | 'visual' | 'trust' | 'future';
+}
+
+const { id, kicker, title, summary, compact = false, tone = 'default' } = Astro.props;
+const headingId = `${id ?? 'section'}-title`;
+---
+
+<section id={id} class={`section-block glass ${compact ? 'compact' : ''}`} data-tone={tone} aria-labelledby={headingId}>
+  <SectionHeader kicker={kicker} title={title} summary={summary} headingId={headingId} />
+  <div class="section-content">
+    <slot />
+  </div>
+</section>
