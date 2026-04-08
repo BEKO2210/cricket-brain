@@ -188,8 +188,6 @@ cd crates/wasm && wasm-pack build --target web     # WASM   →  npm package
 
 ---
 
----
-
 ## Verified Results
 
 The following results were reproduced locally on Windows using the public examples and benchmark commands in this repository.
