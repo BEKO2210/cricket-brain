@@ -39,6 +39,7 @@ proptest! {
             agc_rate,
             seed,
             privacy_mode,
+            noise_level: 0.0,
         };
         let _ = cfg.validate();
     }

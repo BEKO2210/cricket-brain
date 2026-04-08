@@ -97,3 +97,27 @@ required-features = ["cli"]
 [[example]]
 name = "baselines"
 path = "examples/baselines.rs"
+
+[[example]]
+name = "bench_sdt"
+path = "benchmarks/sdt_benchmark.rs"
+
+[[example]]
+name = "bench_synops"
+path = "benchmarks/synops_benchmark.rs"
+
+[[example]]
+name = "bench_jnd"
+path = "benchmarks/jnd_benchmark.rs"
+
+[[example]]
+name = "bench_gap"
+path = "benchmarks/gap_detection_benchmark.rs"
+
+[[example]]
+name = "bench_latency"
+path = "benchmarks/spike_latency_benchmark.rs"
+
+[[example]]
+name = "bench_patterns"
+path = "benchmarks/pattern_separation_benchmark.rs"

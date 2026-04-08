@@ -37,6 +37,11 @@ pub struct BrainConfig {
     pub seed: u64,
     /// Privacy-preserving telemetry mode (HIPAA/GDPR-friendly).
     pub privacy_mode: bool,
+    /// Stochastic noise amplitude injected into each neuron per timestep.
+    /// Models biological channel noise / synaptic noise.
+    /// Default: 0.0 (deterministic). Realistic: 0.01–0.05.
+    /// Reference: Faisal, Selen & Wolpert (2008), Nature Reviews Neuroscience.
+    pub noise_level: f32,
 }
 
 impl BrainConfig {
@@ -58,6 +63,7 @@ impl BrainConfig {
             agc_rate: 0.01,
             seed: 0xC0DEC0DE5EEDu64,
             privacy_mode: false,
+            noise_level: 0.0,
         }
     }
 
@@ -150,6 +156,7 @@ impl Default for BrainConfig {
             agc_rate: 0.01,
             seed: 0xC0DEC0DE5EEDu64,
             privacy_mode: false,
+            noise_level: 0.0,
         }
     }
 }
@@ -197,6 +204,8 @@ pub struct CricketBrain {
     initial_seed: u64,
     /// Privacy-preserving telemetry toggle.
     privacy_mode: bool,
+    /// Stochastic noise amplitude (0.0 = deterministic).
+    noise_level: f32,
     /// Last telemetry step for relative timestamp deltas.
     last_telemetry_step: usize,
     /// Optional STDP configuration. When `Some`, plasticity is applied
@@ -329,6 +338,7 @@ impl CricketBrain {
                 rng_state: config.seed,
                 initial_seed: config.seed,
                 privacy_mode: config.privacy_mode,
+                noise_level: config.noise_level,
                 last_telemetry_step: 0,
                 stdp_config: None,
                 homeostasis_config: None,
@@ -369,6 +379,7 @@ impl CricketBrain {
             rng_state: config.seed,
             initial_seed: config.seed,
             privacy_mode: config.privacy_mode,
+            noise_level: config.noise_level,
             last_telemetry_step: 0,
             stdp_config: None,
             homeostasis_config: None,
@@ -472,6 +483,25 @@ impl CricketBrain {
             }
         }
 
+        // Step 3b: Inject stochastic noise (biological channel noise model).
+        // Adds zero-mean uniform noise to each neuron's amplitude.
+        // Reference: Faisal, Selen & Wolpert (2008), Nature Reviews Neuroscience.
+        if self.noise_level > 0.0 {
+            let nl = self.noise_level;
+            for neuron in &mut self.neurons {
+                // Inline xorshift64* to avoid borrow conflict
+                let mut x = self.rng_state;
+                x ^= x >> 12;
+                x ^= x << 25;
+                x ^= x >> 27;
+                self.rng_state = x;
+                let mixed = x.wrapping_mul(2685821657736338717);
+                let unit = (mixed as f64) / (u64::MAX as f64) * 2.0 - 1.0;
+                let noise = (unit as f32) * nl;
+                neuron.amplitude = (neuron.amplitude + noise).clamp(0.0, 1.0);
+            }
+        }
+
         self.time_step += 1;
         let ts = self.time_step as u32;
 
@@ -527,6 +557,7 @@ impl CricketBrain {
         let unit = (mixed as f64) / (u64::MAX as f64);
         (unit as f32) * 0.001
     }
+
 
     /// Step with telemetry emission.
     pub fn step_with_telemetry<T: Telemetry + ?Sized>(
