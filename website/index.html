@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cricket-Brain: A biomorphic AI inference engine using delay-line coincidence detection. No weights, no GPU, no training. Live interactive simulation.">
+  <meta name="theme-color" content="#0a0f1c" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
+  <meta property="og:title" content="Cricket-Brain — Neuromorphic AI Engine">
+  <meta property="og:description" content="5 neurons, 6 synapses, 848 bytes. A biomorphic AI that runs on an Arduino.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://beko2210.github.io/cricket-brain/">
+  <title>Cricket-Brain — Neuromorphic AI Engine</title>
+  <link rel="stylesheet" href="css/style.css">
+  <noscript><style>[data-animate]{opacity:1;transform:none;}</style></noscript>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+  <!-- Header -->
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="#" class="logo" aria-label="Cricket-Brain Home">Cricket<span>Brain</span></a>
+      <nav class="main-nav" id="main-nav" role="navigation" aria-label="Main navigation">
+        <a href="#simulation">Simulation</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#math">Math</a>
+        <a href="#comparison">Comparison</a>
+        <a href="#versions">Versions</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark/light theme" title="Toggle theme">
+          <span aria-hidden="true" id="theme-icon">&#9790;</span>
+        </button>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
+          <span aria-hidden="true">&#9776;</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main id="main-content">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-badge">
+        <span aria-hidden="true">&#9881;</span> v0.3 — Sequence Prediction
+      </div>
+      <h1>Cricket<span class="text-accent">Brain</span></h1>
+      <p class="hero-subtitle">A biomorphic AI inference engine — no weights, no GPU, no training. Inspired by how crickets hear.</p>
+      <div class="hero-actions">
+        <a href="#simulation" class="btn btn-primary">Live Simulation</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" class="btn btn-secondary" target="_blank" rel="noopener">View Source</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value" data-count-to="5">0</div>
+          <div class="hero-stat-label">Neurons</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" data-count-to="848">0</div>
+          <div class="hero-stat-label">Bytes RAM</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" data-count-to="0">0</div>
+          <div class="hero-stat-label">GPU Required</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" data-count-to="60">0</div>
+          <div class="hero-stat-label">Tests Passing</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Simulation -->
+    <section id="simulation" class="section">
+      <div class="content-wrap">
+        <h2 class="section-title" data-animate="fade-up">Live <span>Simulation</span></h2>
+        <p class="section-subtitle" data-animate="fade-up">Watch 5 neurons process signals in real-time. The network only fires when it detects sustained 4500 Hz — the cricket's carrier frequency.</p>
+
+        <div class="sim-container" data-animate="scale-in">
+          <div class="sim-canvas-wrap">
+            <canvas id="neuron-canvas" role="img" aria-label="Interactive visualization of the 5-neuron cricket brain network. Neurons are shown as circles with connections between them. Active neurons glow teal, firing neurons glow amber."></canvas>
+          </div>
+
+          <div class="sim-panel">
+            <div class="sim-controls">
+              <div class="sim-control-group">
+                <label for="freq-slider">Frequency <output id="freq-display">0 Hz</output></label>
+                <input type="range" id="freq-slider" min="0" max="9000" value="0" step="100" aria-label="Input frequency in Hz">
+              </div>
+              <div class="sim-control-group">
+                <label for="speed-slider">Speed <output id="speed-display">3x</output></label>
+                <input type="range" id="speed-slider" min="1" max="20" value="3" step="1" aria-label="Simulation speed multiplier">
+              </div>
+            </div>
+
+            <div class="sim-presets" role="group" aria-label="Signal presets">
+              <button class="preset-btn active" data-preset="silence" type="button">Silence</button>
+              <button class="preset-btn" data-preset="cricket" type="button">4500 Hz</button>
+              <button class="preset-btn" data-preset="off-freq" type="button">2000 Hz</button>
+              <button class="preset-btn" data-preset="morse-sos" type="button">SOS Morse</button>
+              <button class="preset-btn" data-preset="morse-hello" type="button">HELLO Morse</button>
+            </div>
+
+            <div class="sim-btn-row">
+              <button class="btn btn-primary" id="play-btn" type="button" aria-label="Start simulation">Play</button>
+              <button class="btn btn-secondary" id="reset-btn" type="button" aria-label="Reset simulation">Reset</button>
+            </div>
+
+            <div class="sim-readout" aria-live="polite" role="status">
+              <div class="readout-row"><span class="readout-label">Input</span> <span class="readout-value" id="ro-freq">Silence</span></div>
+              <div class="readout-row"><span class="readout-label">AN1 Amp</span> <span class="readout-value" id="ro-an1">0.000</span></div>
+              <div class="readout-row"><span class="readout-label">ON1 Out</span> <span class="readout-value" id="ro-on1">0.000</span></div>
+              <div class="readout-row"><span class="readout-label">Spikes</span> <span class="readout-value" id="ro-spikes">0</span></div>
+              <div class="readout-row"><span class="readout-label">Timestep</span> <span class="readout-value" id="ro-step">0</span></div>
+            </div>
+
+            <div class="sim-explanation" id="sim-explanation" aria-live="polite">
+              Press <strong>Play</strong> to start. Use presets or the frequency slider to feed signals into the 5-neuron network. Watch how only 4500 Hz triggers resonance.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture -->
+    <section id="architecture" class="section">
+      <div class="content-wrap">
+        <h2 class="section-title" data-animate="fade-up">Neural <span>Architecture</span></h2>
+        <p class="section-subtitle" data-animate="fade-up">Five neurons connected by six delay synapses. Inhibitory paths (red) suppress noise, the excitatory path (green) drives the output.</p>
+
+        <div class="arch-diagram" data-animate="scale-in">
+          <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Architecture diagram showing AN1 connected to LN2, LN3, LN5 which connect to ON1">
+            <!-- Connections -->
+            <line x1="140" y1="150" x2="310" y2="60" class="arch-path inhibitory" stroke-width="2"/>
+            <line x1="140" y1="150" x2="310" y2="150" class="arch-path excitatory" stroke-width="2"/>
+            <line x1="140" y1="150" x2="310" y2="240" class="arch-path inhibitory" stroke-width="2"/>
+            <line x1="370" y1="60" x2="540" y2="150" class="arch-path inhibitory" stroke-width="2"/>
+            <line x1="370" y1="150" x2="540" y2="150" class="arch-path excitatory" stroke-width="2"/>
+            <line x1="370" y1="240" x2="540" y2="150" class="arch-path inhibitory" stroke-width="2"/>
+
+            <!-- Delay labels -->
+            <text x="210" y="92" fill="#94a3b8" font-size="11" text-anchor="middle">3ms inh</text>
+            <text x="210" y="140" fill="#94a3b8" font-size="11" text-anchor="middle">2ms exc</text>
+            <text x="210" y="210" fill="#94a3b8" font-size="11" text-anchor="middle">5ms inh</text>
+            <text x="460" y="94" fill="#94a3b8" font-size="11" text-anchor="middle">1ms</text>
+            <text x="460" y="140" fill="#94a3b8" font-size="11" text-anchor="middle">1ms</text>
+            <text x="460" y="210" fill="#94a3b8" font-size="11" text-anchor="middle">1ms</text>
+
+            <!-- Input arrow -->
+            <line x1="20" y1="150" x2="90" y2="150" stroke="#00d4aa" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="50" y="138" fill="#94a3b8" font-size="10" text-anchor="middle">Sound</text>
+
+            <!-- Output arrow -->
+            <line x1="590" y1="150" x2="660" y2="150" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow-out)"/>
+            <text x="630" y="138" fill="#94a3b8" font-size="10" text-anchor="middle">Spike</text>
+
+            <!-- Neurons -->
+            <g class="arch-node">
+              <circle cx="120" cy="150" r="30" fill="rgba(0,212,170,0.15)" stroke="#00d4aa" stroke-width="2"/>
+              <text x="120" y="146" fill="#00d4aa" font-size="13" font-weight="bold" text-anchor="middle">AN1</text>
+              <text x="120" y="162" fill="#94a3b8" font-size="9" text-anchor="middle">4500 Hz</text>
+            </g>
+            <g class="arch-node">
+              <circle cx="340" cy="60" r="28" fill="rgba(239,68,68,0.1)" stroke="#ef4444" stroke-width="1.5"/>
+              <text x="340" y="56" fill="#ef4444" font-size="12" font-weight="bold" text-anchor="middle">LN2</text>
+              <text x="340" y="72" fill="#94a3b8" font-size="9" text-anchor="middle">Inhibitory</text>
+            </g>
+            <g class="arch-node">
+              <circle cx="340" cy="150" r="28" fill="rgba(34,197,94,0.1)" stroke="#22c55e" stroke-width="1.5"/>
+              <text x="340" y="146" fill="#22c55e" font-size="12" font-weight="bold" text-anchor="middle">LN3</text>
+              <text x="340" y="162" fill="#94a3b8" font-size="9" text-anchor="middle">Excitatory</text>
+            </g>
+            <g class="arch-node">
+              <circle cx="340" cy="240" r="28" fill="rgba(239,68,68,0.1)" stroke="#ef4444" stroke-width="1.5"/>
+              <text x="340" y="236" fill="#ef4444" font-size="12" font-weight="bold" text-anchor="middle">LN5</text>
+              <text x="340" y="252" fill="#94a3b8" font-size="9" text-anchor="middle">Inhibitory</text>
+            </g>
+            <g class="arch-node">
+              <circle cx="570" cy="150" r="32" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="2"/>
+              <text x="570" y="146" fill="#f59e0b" font-size="14" font-weight="bold" text-anchor="middle">ON1</text>
+              <text x="570" y="164" fill="#94a3b8" font-size="9" text-anchor="middle">Output</text>
+            </g>
+
+            <!-- Arrow markers -->
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#00d4aa"/>
+              </marker>
+              <marker id="arrow-out" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Math -->
+    <section id="math" class="section math-section">
+      <div class="content-wrap">
+        <h2 class="section-title" data-animate="fade-up">Mathematical <span>Foundation</span></h2>
+        <p class="section-subtitle" data-animate="fade-up">The entire engine is built on four equations. No learned weights — just physics.</p>
+
+        <div class="formula-grid" data-animate="fade-up" data-stagger="true">
+          <div class="formula-card">
+            <h4>Gaussian Tuning</h4>
+            <div class="formula">match = e<sup>-(&#916;f / f&#8320; / w)&sup2;</sup></div>
+            <p class="formula-desc">Frequency selectivity. w = 0.1 gives &#xb1;10% bandwidth. At 20% deviation, match &lt; 0.02.</p>
+          </div>
+          <div class="formula-card">
+            <h4>Amplitude Update</h4>
+            <div class="formula">A(t+1) = min(A + m&middot;0.3, 1.0)</div>
+            <p class="formula-desc">When resonating: amplitude grows proportionally to match strength, capped at 1.0.</p>
+          </div>
+          <div class="formula-card">
+            <h4>Phase Locking</h4>
+            <div class="formula">&phi;(t+1) = &phi; + (&phi;<sub>in</sub> - &phi;)&middot;0.1</div>
+            <p class="formula-desc">Exponential moving average locks the neuron's phase to the input signal.</p>
+          </div>
+          <div class="formula-card">
+            <h4>Coincidence Detection</h4>
+            <div class="formula">fire = (A > &theta;) &and; (A<sub>t-&tau;</sub> > &theta;&middot;0.8)</div>
+            <p class="formula-desc">Output fires only when BOTH current and delayed amplitude exceed threshold. Prevents false positives.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison -->
+    <section id="comparison" class="section">
+      <div class="content-wrap">
+        <h2 class="section-title" data-animate="fade-up">How It <span>Compares</span></h2>
+        <p class="section-subtitle" data-animate="fade-up">Cricket-Brain is not competing with GPT-4. It's proving that useful inference is possible at a fundamentally different scale.</p>
+
+        <div data-animate="fade-up">
+          <table class="comparison-table" role="table">
+            <thead>
+              <tr>
+                <th scope="col">Property</th>
+                <th scope="col">Cricket-Brain</th>
+                <th scope="col">GPT-4</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Parameters</td><td>5 neurons, 6 synapses</td><td>~1.8 trillion</td></tr>
+              <tr><td>RAM</td><td>848 bytes</td><td>~800 GB</td></tr>
+              <tr><td>FLOPS per step</td><td>~30</td><td>~3.1 &#xd7; 10&#xb9;&#x2077;</td></tr>
+              <tr><td>GPU required</td><td>No</td><td>8&#xd7; A100</td></tr>
+              <tr><td>Training time</td><td>0 (hardwired)</td><td>Months on cluster</td></tr>
+              <tr><td>no_std compatible</td><td>Yes</td><td>No</td></tr>
+              <tr><td>Runs on Arduino</td><td>Yes (944 bytes)</td><td>No</td></tr>
+              <tr><td>False positives in silence</td><td>0</td><td>N/A</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Versions -->
+    <section id="versions" class="section">
+      <div class="content-wrap">
+        <h2 class="section-title" data-animate="fade-up">Version <span>History</span></h2>
+
+        <div class="version-grid" data-animate="fade-up" data-stagger="true">
+          <article class="version-card">
+            <span class="version-badge">v0.1</span>
+            <h3>Morse Code Recognition</h3>
+            <p>Single-frequency detection with full encode/decode roundtrip.</p>
+            <ul>
+              <li>5-neuron Muenster model</li>
+              <li>"HELLO WORLD" exact roundtrip</li>
+              <li>0 false positives during silence</li>
+              <li>Arduino-compatible (944 bytes)</li>
+            </ul>
+          </article>
+
+          <article class="version-card">
+            <span class="version-badge">v0.2</span>
+            <h3>Multi-Frequency Tokens</h3>
+            <p>Parallel resonator banks — each symbol gets its own frequency.</p>
+            <ul>
+              <li>27-token alphabet (A-Z + space)</li>
+              <li>100% discrimination accuracy</li>
+              <li>135 neurons, 162 synapses</li>
+              <li>Real-time token detection</li>
+            </ul>
+          </article>
+
+          <article class="version-card">
+            <span class="version-badge">v0.3</span>
+            <h3>Sequence Prediction</h3>
+            <p>Predict the next token from partial input — no training required.</p>
+            <ul>
+              <li>Pattern registration (not learning)</li>
+              <li>Competing pattern tracking</li>
+              <li>Confidence increases with context</li>
+              <li>168M neuron-ops/sec benchmark</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section id="quickstart" class="section">
+      <div class="content-wrap">
+        <h2 class="section-title" data-animate="fade-up">Quick <span>Start</span></h2>
+
+        <div data-animate="fade-up" style="max-inline-size: 700px; margin-inline: auto;">
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>Terminal</span>
+              <button class="copy-btn" type="button" aria-label="Copy commands">Copy</button>
+            </div>
+            <pre><code><span class="comment"># Clone and run</span>
+<span class="command">git clone</span> https://github.com/BEKO2210/cricket-brain.git
+<span class="command">cd</span> cricket-brain
+<span class="command">cargo run</span>
+
+<span class="comment"># Full roundtrip demo</span>
+<span class="command">cargo run</span> <span class="flag">--example</span> live_demo <span class="flag">--</span> "HELLO WORLD"
+
+<span class="comment"># Sequence prediction</span>
+<span class="command">cargo run</span> <span class="flag">--example</span> sequence_predict
+
+<span class="comment"># 40k neuron benchmark</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> scale_test
+
+<span class="comment"># Run all 60 tests</span>
+<span class="command">cargo test</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>Project</h4>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub Repository</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+        <a href="https://github.com/BEKO2210/cricket-brain/blob/main/docs/architecture.md" target="_blank" rel="noopener">Architecture Docs</a>
+      </div>
+      <div class="footer-col">
+        <h4>Demos</h4>
+        <a href="#simulation">Live Simulation</a>
+        <a href="#comparison">Comparison</a>
+        <a href="#quickstart">Quick Start</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="pages/impressum.html" class="spa-link">Impressum</a>
+        <a href="pages/datenschutz.html" class="spa-link">Datenschutz</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Belkis Aslani. All rights reserved.</span>
+      <span>Built with Rust &amp; neuromorphic principles.</span>
+    </div>
+  </footer>
+
+  <script src="js/simulation.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
