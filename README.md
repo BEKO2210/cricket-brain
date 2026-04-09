@@ -25,7 +25,6 @@
 
 *Hardwired core + adaptive plasticity. Inspired by 200 million years of cricket evolution.*
 
-[Quick Start](#-quick-start) | [Benchmarks](#-benchmarks) | [Science](#-scientific-validation) | [Docs](https://docs.rs/cricket-brain) | [Deutsch](#-auf-deutsch)
 
 </div>
 
