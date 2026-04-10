@@ -238,13 +238,13 @@ Jeder `CricketBrain::step(input_freq)` Aufruf:
 
 | Bereich | Dateien | Zeilen |
 |---------|---------|--------|
-| Core (crates/core/src) | 6 | 617 |
-| Brain (src/) | 8 | 2.673 |
-| FFI (crates/ffi) | 1 | 164 |
-| Python (crates/python) | 1 | 121 |
-| WASM (crates/wasm) | 1 | 130 |
-| **Gesamt Produktionscode** | **17** | **3.705** |
-| Beispiele | 14 | ~2.500+ |
+| Core (crates/core/src) | 7 | 849 |
+| Brain (src/) | 8 | 2.795 |
+| FFI (crates/ffi) | 1 | 165 |
+| Python (crates/python) | 1 | 126 |
+| WASM (crates/wasm) | 1 | 131 |
+| **Gesamt Produktionscode** | **18** | **4.066** |
+| Beispiele | 14 | ~2.555 |
 
 ---
 
