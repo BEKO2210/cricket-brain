@@ -260,7 +260,7 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 | 0 | DONE | — | Scaffold directories, SOURCES.md, CLAUDE.md |
 | 1 | DONE | — | Cargo.toml, src/, README, 7/7 tests pass, BPM correct |
 | 2 | DONE | — | Data pipeline: Python download/preprocess, CSV I/O, 9/9 tests |
-| 3 | PENDING | — | Core detector |
+| 3 | DONE | 2026-04-10 | CSV integration, confusion matrix, 11/11 tests, 92.5% accuracy |
 | 4 | PENDING | — | Benchmarks |
 | 5 | PENDING | — | Python analysis |
 | 6 | PENDING | — | Stress test |
@@ -276,31 +276,32 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 --- NEXT PROMPT START ---
 Lies use_cases/01_cardiac_arrhythmia/CLAUDE.md und fuehre Run 3 aus.
 
-Run 3 Deliverables — Core Detector mit CSV-Integration:
+Run 4 Deliverables — Benchmark Suite:
 
-1. Erweitere use_cases/01_cardiac_arrhythmia/src/main.rs:
-   - Neues Subcommand: cargo run -- --csv data/processed/sample_record.csv
-   - Liest BeatRecord-CSV, konvertiert zu Frequenz-Stream, fuettert Detector
-   - Gibt pro-Beat Klassifikation aus + Gesamt-Confusion-Matrix
-   - Behaelt synthetische Demo als Default (ohne Argumente)
+1. Erstelle use_cases/01_cardiac_arrhythmia/benchmarks/cardiac_sdt.rs:
+   - Signal Detection Theory (d', AUC) auf sample_record.csv
+   - Normal vs Tachy, Normal vs Brady als separate Conditions
+   - Wilson 95% CI fuer TPR/FPR
 
-2. Erweitere use_cases/01_cardiac_arrhythmia/src/detector.rs:
-   - pub fn classify_stream(beats: &[BeatRecord]) -> Vec<(RhythmClass, f32)>
-     Batch-Verarbeitung: Reset, kompletten Stream durchlaufen, alle
-     Klassifikationen sammeln
-   - pub fn confusion_matrix(predictions: &[(RhythmClass, f32)], truths: &[&str])
-     Zaehlt TP/FP/TN/FN pro Klasse, gibt Tabelle aus
+2. Erstelle use_cases/01_cardiac_arrhythmia/benchmarks/cardiac_latency.rs:
+   - First-classification latency per Rhythmus-Typ
+   - Mean, SD, Min, Max ueber mehrere Laeufe
+   - us/step Messung im Release-Modus
 
-3. Fuege Tests hinzu:
-   - test_classify_stream_synthetic — sample_record.csv durchlaufen
-   - test_confusion_matrix — Handberechnetes Beispiel
+3. Erstelle use_cases/01_cardiac_arrhythmia/benchmarks/cardiac_memory.rs:
+   - memory_usage_bytes() Messung
+   - Vergleich mit metrics.json global.ram_bytes
 
-4. Verifiziere:
-   - cargo test (alle Tests pass)
-   - cargo run (synthetische Demo)
-   - cargo run -- --csv data/processed/sample_record.csv (CSV-Modus)
+4. Erweitere benches/cardiac_bench.rs:
+   - Criterion-Benchmark fuer step() Throughput
+   - Criterion-Benchmark fuer classify_stream() auf 150 Beats
 
-5. Update CLAUDE.md: Run 3 = DONE, NEXT PROMPT fuer Run 4
+5. Verifiziere:
+   - Alle Benchmarks laufen
+   - Criterion-Bench laeuft (cargo bench)
+   - Ergebnisse sind plausibel
+
+6. Update CLAUDE.md: Run 4 = DONE, NEXT PROMPT fuer Run 5
 
 REGELN:
 - Aendere NICHTS ausserhalb von use_cases/
