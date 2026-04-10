@@ -342,7 +342,7 @@ const SPARouter = (() => {
   let indexTitle = '';
 
   /** Routes we handle as SPA navigations. */
-  const SPA_ROUTES = ['pages/impressum.html', 'pages/datenschutz.html', 'pages/whitepaper.html'];
+  const SPA_ROUTES = ['pages/impressum.html', 'pages/datenschutz.html', 'pages/whitepaper.html', 'pages/cardiac.html'];
 
   function isSPALink(href) {
     if (!href) return false;

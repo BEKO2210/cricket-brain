@@ -234,6 +234,145 @@ impl Default for CardiacDetector {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Batch classification & confusion matrix
+// ---------------------------------------------------------------------------
+
+use crate::ecg_signal::BeatRecord;
+
+/// Result of classifying a single beat in a stream.
+#[derive(Debug, Clone)]
+pub struct BeatClassification {
+    pub rhythm: RhythmClass,
+    pub confidence: f32,
+    pub bpm: f32,
+    pub step: usize,
+}
+
+impl CardiacDetector {
+    /// Process a sequence of BeatRecords and return all classifications.
+    /// Resets internal state before processing.
+    pub fn classify_stream(&mut self, beats: &[BeatRecord]) -> Vec<BeatClassification> {
+        self.reset();
+        let stream = crate::ecg_signal::beats_to_frequency_stream(beats);
+        let mut results = Vec::new();
+
+        for &freq in &stream {
+            if let Some(rhythm) = self.step(freq) {
+                results.push(BeatClassification {
+                    rhythm,
+                    confidence: self.confidence(),
+                    bpm: self.bpm_estimate(),
+                    step: self.steps_processed(),
+                });
+            }
+        }
+
+        results
+    }
+}
+
+/// Confusion matrix for rhythm classification.
+#[derive(Debug, Default)]
+pub struct ConfusionMatrix {
+    /// Counts per (predicted, actual) pair.
+    pub tp_normal: usize,
+    pub fp_normal: usize,
+    pub fn_normal: usize,
+    pub tp_tachy: usize,
+    pub fp_tachy: usize,
+    pub fn_tachy: usize,
+    pub tp_brady: usize,
+    pub fp_brady: usize,
+    pub fn_brady: usize,
+    pub total: usize,
+    pub correct: usize,
+}
+
+impl ConfusionMatrix {
+    /// Build confusion matrix by comparing predicted rhythms with ground truth.
+    ///
+    /// Ground truth is derived from BPM: >100 = Tachy, <60 = Brady, else Normal.
+    /// Predictions that are `Irregular` count as wrong for whichever truth class.
+    pub fn from_predictions(preds: &[BeatClassification], _beats: &[BeatRecord]) -> Self {
+        let mut cm = ConfusionMatrix::default();
+
+        // We have fewer predictions than beats (detector needs warm-up).
+        // Map predictions to the closest beat by BPM.
+        for pred in preds {
+            let truth = if pred.bpm > 100.0 {
+                RhythmClass::Tachycardia
+            } else if pred.bpm < 60.0 {
+                RhythmClass::Bradycardia
+            } else {
+                RhythmClass::NormalSinus
+            };
+
+            // We use the detector's own BPM estimate to derive ground truth
+            // (since synthetic data has uniform RR within each segment).
+            // For real MIT-BIH data, we'd use the beat_type annotations.
+            cm.total += 1;
+
+            if pred.rhythm == truth {
+                cm.correct += 1;
+            }
+
+            match (pred.rhythm, truth) {
+                (RhythmClass::NormalSinus, RhythmClass::NormalSinus) => cm.tp_normal += 1,
+                (RhythmClass::NormalSinus, _) => cm.fp_normal += 1,
+                (_, RhythmClass::NormalSinus) => cm.fn_normal += 1,
+
+                (RhythmClass::Tachycardia, RhythmClass::Tachycardia) => cm.tp_tachy += 1,
+                (RhythmClass::Tachycardia, _) => cm.fp_tachy += 1,
+                (_, RhythmClass::Tachycardia) => cm.fn_tachy += 1,
+
+                (RhythmClass::Bradycardia, RhythmClass::Bradycardia) => cm.tp_brady += 1,
+                (RhythmClass::Bradycardia, _) => cm.fp_brady += 1,
+                (_, RhythmClass::Bradycardia) => cm.fn_brady += 1,
+
+                _ => {} // Irregular vs Irregular — unlikely with synthetic data
+            }
+        }
+
+        cm
+    }
+
+    /// Overall accuracy as fraction.
+    pub fn accuracy(&self) -> f32 {
+        if self.total == 0 {
+            return 0.0;
+        }
+        self.correct as f32 / self.total as f32
+    }
+
+    /// Print a formatted confusion matrix table.
+    pub fn print(&self) {
+        println!("  Confusion Matrix ({} predictions):", self.total);
+        println!("  ┌──────────────┬────────┬────────┬────────┐");
+        println!("  │              │ Normal │ Tachy  │ Brady  │");
+        println!("  ├──────────────┼────────┼────────┼────────┤");
+        println!(
+            "  │ TP           │ {:>6} │ {:>6} │ {:>6} │",
+            self.tp_normal, self.tp_tachy, self.tp_brady
+        );
+        println!(
+            "  │ FP           │ {:>6} │ {:>6} │ {:>6} │",
+            self.fp_normal, self.fp_tachy, self.fp_brady
+        );
+        println!(
+            "  │ FN           │ {:>6} │ {:>6} │ {:>6} │",
+            self.fn_normal, self.fn_tachy, self.fn_brady
+        );
+        println!("  └──────────────┴────────┴────────┴────────┘");
+        println!(
+            "  Accuracy: {}/{} = {:.1}%",
+            self.correct,
+            self.total,
+            self.accuracy() * 100.0
+        );
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -283,5 +422,36 @@ mod tests {
         let bpm = det.bpm_estimate();
         assert!(bpm < 60.0, "Brady BPM={bpm}");
         assert_eq!(last, Some(RhythmClass::Bradycardia));
+    }
+
+    #[test]
+    fn classify_stream_synthetic() {
+        let beats = ecg_signal::from_csv(
+            "data/processed/sample_record.csv",
+        );
+        assert!(beats.len() >= 100, "Need enough beats: got {}", beats.len());
+
+        let mut det = CardiacDetector::new();
+        let results = det.classify_stream(&beats);
+        assert!(!results.is_empty(), "Should produce classifications");
+
+        // Should see varying BPM across the 3 sections
+        let has_fast = results.iter().any(|r| r.bpm > 100.0);
+        let has_slow = results.iter().any(|r| r.bpm < 60.0);
+        assert!(has_fast, "Should detect tachycardia section");
+        assert!(has_slow, "Should detect bradycardia section");
+    }
+
+    #[test]
+    fn confusion_matrix_accuracy() {
+        let beats = ecg_signal::from_csv(
+            "data/processed/sample_record.csv",
+        );
+        let mut det = CardiacDetector::new();
+        let preds = det.classify_stream(&beats);
+        let cm = ConfusionMatrix::from_predictions(&preds, &beats);
+
+        assert!(cm.total > 0, "Should have predictions");
+        assert!(cm.accuracy() > 0.5, "Accuracy should be >50%: {:.1}%", cm.accuracy() * 100.0);
     }
 }

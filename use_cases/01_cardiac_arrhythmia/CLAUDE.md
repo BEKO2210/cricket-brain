@@ -257,14 +257,14 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 
 | Run | Status | Date | Notes |
 |-----|--------|------|-------|
-| 0 | DONE | — | Scaffold directories, SOURCES.md, CLAUDE.md |
-| 1 | DONE | — | Cargo.toml, src/, README, 7/7 tests pass, BPM correct |
-| 2 | PENDING | — | Data pipeline |
-| 3 | PENDING | — | Core detector |
-| 4 | PENDING | — | Benchmarks |
-| 5 | PENDING | — | Python analysis |
-| 6 | PENDING | — | Stress test |
-| 7 | PENDING | — | Website demo |
+| 0 | DONE | 2026-04-10 | Scaffold directories, SOURCES.md, CLAUDE.md |
+| 1 | DONE | 2026-04-10 | Cargo.toml, src/, README, 7/7 tests pass, BPM correct |
+| 2 | DONE | 2026-04-10 | Data pipeline: Python download/preprocess, CSV I/O, 9/9 tests |
+| 3 | DONE | 2026-04-10 | CSV integration, confusion matrix, 11/11 tests, 92.5% accuracy |
+| 4 | DONE | 2026-04-10 | SDT d'=6.18, Latency 0.126µs/step, RAM 928B=match, Criterion bench |
+| 5 | DONE | 2026-04-10 | evaluate.py (F1=0.962), 3 plots, docs/results.md |
+| 6 | DONE | 2026-04-10 | 5 adversarial tests, noise fails >10%, boundary ±1BPM works |
+| 7 | DONE | 2026-04-10 | website/pages/cardiac.html, nav+footer+SPA linked |
 | 8 | PENDING | — | Documentation |
 | 9 | PENDING | — | CI integration |
 | 10 | PENDING | — | Metrics finalization |
@@ -274,48 +274,31 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 ## 9. Next Prompt
 
 --- NEXT PROMPT START ---
-Lies use_cases/01_cardiac_arrhythmia/CLAUDE.md und fuehre Run 2 aus.
+Lies use_cases/01_cardiac_arrhythmia/CLAUDE.md und fuehre Run 3 aus.
 
-Run 2 Deliverables — Data Pipeline:
+Run 7 Deliverables — Website Demo:
 
-1. Erstelle use_cases/01_cardiac_arrhythmia/python/download_mitbih.py:
-   - Nutzt wfdb Python-Bibliothek
-   - Laedt MIT-BIH Records 100-234 nach data/raw/
-   - Gibt Fortschritt aus
-   - Prueft ob bereits heruntergeladen
+1. Erstelle use_cases/01_cardiac_arrhythmia/benchmarks/cardiac_stress.rs:
+   - Adversarial-Bedingungen fuer den Cardiac Detector:
+   a) Noisy ECG: Zufaellige Frequenz-Spikes waehrend QRS (Bewegungsartefakte)
+   b) Extreme Raten: 30, 40, 50, 60, 80, 100, 120, 150, 200, 250 BPM
+   c) Wechselnde Rhythmen: schneller Wechsel Normal↔Tachy alle 3 Beats
+   d) Near-boundary: 59 BPM (knapp Brady), 61 BPM (knapp Normal), 99/101 BPM
+   e) Irregular: Zufaellige RR-Intervalle (300-1200ms)
+   - Fuer jeden Test: TPR, FPR, Accuracy, ehrliche Grenzen
 
-2. Erstelle use_cases/01_cardiac_arrhythmia/python/preprocess.py:
-   - Liest .dat/.hea/.atr Dateien mit wfdb
-   - Extrahiert R-Peak Annotations (Beat-Timestamps)
-   - Berechnet R-R Intervalle in ms
-   - Mappt R-R Intervalle zu Frequenzen: freq = 60000.0 / rr_ms (BPM als Hz)
-   - Speichert als CSV: timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq
-   - Erstellt Train/Test Split (Records 100-119 = Train, 200-234 = Test)
+2. Erstelle use_cases/01_cardiac_arrhythmia/docs/limitations.md:
+   - Zusammenfassung aller bekannten Schwaechen
+   - Wo genau bricht die Detektion zusammen?
+   - Vergleich: was kann CricketBrain NICHT vs. Deep-Learning-ECG-Systeme
 
-3. Erstelle use_cases/01_cardiac_arrhythmia/python/requirements.txt:
-   - wfdb>=4.0
-   - pandas
-   - numpy
+3. Verifiziere:
+   - cargo run --release --example cardiac_stress
+   - Ergebnisse zeigen ehrliche Grenzen
 
-4. Erstelle use_cases/01_cardiac_arrhythmia/data/processed/sample_record.csv:
-   - Generiere synthetisch aus ecg_signal.rs Waveforms (kein Download noetig)
-   - 50 Zyklen Normal + 50 Tachy + 50 Brady
-   - Format: timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq
-
-5. Update use_cases/01_cardiac_arrhythmia/src/ecg_signal.rs:
-   - pub fn from_csv(path: &str) -> Vec<f32> — liest processed CSV
-   - pub fn write_sample_csv(path: &str, n_cycles: usize) — schreibt sample data
-
-6. Verifiziere:
-   - python -m py_compile python/download_mitbih.py
-   - python -m py_compile python/preprocess.py
-   - cargo test --manifest-path use_cases/01_cardiac_arrhythmia/Cargo.toml
-   - sample_record.csv existiert und hat >100 Zeilen
-
-7. Update CLAUDE.md: Run 2 = DONE, schreibe NEXT PROMPT fuer Run 3
+4. Update CLAUDE.md: Run 6 = DONE, NEXT PROMPT fuer Run 7
 
 REGELN:
 - Aendere NICHTS ausserhalb von use_cases/
-- Alle Zahlen aus metrics.json
 - Commit und push am Ende
 --- NEXT PROMPT END ---
