@@ -266,7 +266,7 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 | 6 | DONE | 2026-04-10 | 5 adversarial tests, noise fails >10%, boundary ±1BPM works |
 | 7 | DONE | 2026-04-10 | website/pages/cardiac.html, nav+footer+SPA linked |
 | 8 | DONE | 2026-04-10 | Full README with real results, docs/api.md reference |
-| 9 | PENDING | — | CI integration |
+| 9 | DONE | 2026-04-10 | CI workflow uc01-cardiac.yml, all steps verified locally |
 | 10 | PENDING | — | Metrics finalization |
 
 ---

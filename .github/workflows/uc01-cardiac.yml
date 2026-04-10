@@ -1,0 +1,47 @@
+# CI workflow for UC01 Cardiac Arrhythmia
+# Copy this file to .github/workflows/uc01-cardiac.yml to activate
+#
+# Date: 2026-04-10
+
+name: UC01 Cardiac
+
+on:
+  push:
+    paths:
+      - 'use_cases/01_cardiac_arrhythmia/**'
+  pull_request:
+    paths:
+      - 'use_cases/01_cardiac_arrhythmia/**'
+
+jobs:
+  build-and-test:
+    name: Build & Test UC01
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: use_cases/01_cardiac_arrhythmia
+
+      - name: Build
+        run: cargo build --manifest-path use_cases/01_cardiac_arrhythmia/Cargo.toml
+
+      - name: Test
+        run: cargo test --manifest-path use_cases/01_cardiac_arrhythmia/Cargo.toml
+
+      - name: Run demo
+        run: cargo run --release --manifest-path use_cases/01_cardiac_arrhythmia/Cargo.toml
+
+      - name: Run SDT benchmark
+        run: cargo run --release --manifest-path use_cases/01_cardiac_arrhythmia/Cargo.toml --example cardiac_sdt
+
+      - name: Run memory benchmark
+        run: cargo run --release --manifest-path use_cases/01_cardiac_arrhythmia/Cargo.toml --example cardiac_memory
+
+      - name: Verify Python syntax
+        run: |
+          python3 -m py_compile use_cases/01_cardiac_arrhythmia/python/download_mitbih.py
+          python3 -m py_compile use_cases/01_cardiac_arrhythmia/python/preprocess.py
+          python3 -m py_compile use_cases/01_cardiac_arrhythmia/python/evaluate.py
+          python3 -m py_compile use_cases/01_cardiac_arrhythmia/python/plot_results.py
