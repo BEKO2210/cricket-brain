@@ -67,7 +67,7 @@ let outputs = bank.step(input_freq);
 | 3 | DONE | 2026-04-10 | CSV integration, ConfusionMatrix, 12/12 tests, 93.0% accuracy |
 | 4 | DONE | 2026-04-10 | SDT d'=6.18 all EXCELLENT, 0.129-0.264 µs/step, 3712B/20N |
 | 5 | DONE | 2026-04-10 | evaluate.py (F1=0.932), 3 plots, docs/results.md |
-| 6 | DONE | 2026-04-10 | 100% noise-robust, speed-dep is critical weakness |
+| 6 | DONE | 2026-04-10 | 100% noise-robust, speed-comp FIXED (6/6 RPMs) |
 | 7 | Website demo page | PENDING |
 | 8 | Documentation: README, API, limitations | PENDING |
 | 9 | CI integration | PENDING |
