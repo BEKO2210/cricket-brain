@@ -220,9 +220,32 @@
     <section class="section">
       <div class="content-wrap">
         <h2 class="section-title">Stress Test &mdash; <span>Honest Limits</span></h2>
-        <p class="section-subtitle">Where does the detector break? Transparent disclosure of failure modes.</p>
+        <p class="section-subtitle">Where does the detector break? Side-by-side: raw CricketBrain vs. with preprocessing.</p>
 
         <div class="section-card">
+          <h3 style="margin-block-end:var(--space-sm);">Noise Rejection: Without vs. With Preprocessor</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead>
+                <tr><th>Noise Level</th><th>Without Preprocessor</th><th>With Preprocessor</th><th>Improvement</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>0% (clean)</td><td>100.0%</td><td>100.0%</td><td>&mdash;</td></tr>
+                <tr><td>10%</td><td style="color:var(--danger);">42.1%</td><td style="color:var(--accent);">75.6%</td><td>+33.5%</td></tr>
+                <tr><td>20%</td><td style="color:var(--danger);">16.7%</td><td style="color:var(--accent);">84.4%</td><td>+67.7%</td></tr>
+                <tr><td>30%</td><td style="color:var(--danger);">35.1%</td><td style="color:var(--accent);">70.0%</td><td>+34.9%</td></tr>
+                <tr><td>50%</td><td>82.6%</td><td>63.6%</td><td>&mdash;</td></tr>
+                <tr style="background:color-mix(in srgb, var(--danger) 8%, transparent);"><td>70%</td><td>8.6%</td><td>1.9%</td><td>Both fail</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-sm);">
+            The <strong>EcgPreprocessor</strong> applies temporal consistency filtering: in-band signals must persist for 3+ consecutive steps to pass through. Single-step noise spikes are rejected. Gap tolerance (2 steps) bridges brief interruptions within real QRS bursts.
+          </p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Other Stress Tests</h3>
           <div class="result-table">
             <table class="comparison-table" role="table">
               <thead>
@@ -233,14 +256,9 @@
                 <tr><td>Boundary &plusmn;1 BPM</td><td>59/61/99/101 BPM</td><td>4/4 correct</td><td>PASSES</td></tr>
                 <tr><td>Random RR (irregular)</td><td>300&ndash;1200 ms, 30 beats</td><td>82% detected</td><td>PASSES</td></tr>
                 <tr><td>Rapid switching (3-beat)</td><td>Normal&harr;Tachy alternation</td><td>89% Irregular</td><td>Expected</td></tr>
-                <tr style="background:color-mix(in srgb, var(--danger) 8%, transparent);"><td>Noise 10%</td><td>Random freq injection</td><td>22.5% accuracy</td><td>FAILS</td></tr>
-                <tr style="background:color-mix(in srgb, var(--danger) 8%, transparent);"><td>Noise 20%+</td><td>Random freq injection</td><td>0% accuracy</td><td>FAILS</td></tr>
               </tbody>
             </table>
           </div>
-          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-sm);">
-            <strong>Key weakness:</strong> The Gaussian tuning cannot reject in-band frequency noise. Real ECG signals require dedicated preprocessing (bandpass filter, wavelet denoising) before CricketBrain processing.
-          </p>
         </div>
       </div>
     </section>

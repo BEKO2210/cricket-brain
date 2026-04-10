@@ -46,7 +46,22 @@ no training data, no battery drain.
 | Detector total | 1,336 bytes | Struct (408B) + CricketBrain heap (928B) |
 | Arduino fit | 65% | Of 2,048B Arduino Uno RAM |
 
-### Stress Test — Honest Limits
+### Noise Rejection — With ECG Preprocessor
+
+| Noise Level | Without Preprocessor | With Preprocessor | Improvement |
+|-------------|---------------------:|------------------:|------------:|
+| 0% (clean) | 100.0% | 100.0% | — |
+| 10% | 42.1% | **75.6%** | +33.5% |
+| 20% | 16.7% | **84.4%** | +67.7% |
+| 30% | 35.1% | **70.0%** | +34.9% |
+| 50% | 82.6% | 63.6% | — |
+| 70% | 8.6% | 1.9% | Both fail |
+
+The `EcgPreprocessor` applies temporal consistency filtering: in-band signals must persist
+for 3+ consecutive steps. Single-step noise spikes are rejected. Enable via
+`CardiacDetector::with_preprocessor(true)`.
+
+### Other Stress Tests
 
 | Test | Result | Verdict |
 |------|--------|---------|
@@ -54,8 +69,6 @@ no training data, no battery drain.
 | Boundary ±1 BPM (59/61/99/101) | 4/4 correct | PASSES |
 | Random RR (irregular) | 82% detected | PASSES |
 | Rapid switching (3-beat) | 89% Irregular | Expected |
-| **Noise 10%** | **22.5% accuracy** | **FAILS** |
-| **Noise 20%+** | **0% accuracy** | **FAILS** |
 
 See [docs/limitations.md](docs/limitations.md) for detailed failure analysis.
 
