@@ -62,7 +62,7 @@ let outputs = bank.step(input_freq);
 
 | Run | Deliverable | Status |
 |-----|-------------|--------|
-| 1 | Scaffold: Cargo.toml, src/, README | PENDING |
+| 1 | DONE | 2026-04-10 | Scaffold, 9/9 tests, 4 fault types detected, 0.127-0.285 µs/step |
 | 2 | Data pipeline: MATLAB→CSV, frequency extraction | PENDING |
 | 3 | Core detector: BearingDetector with ResonatorBank | PENDING |
 | 4 | Benchmark suite: SDT, latency, memory | PENDING |

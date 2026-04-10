@@ -1,0 +1,13 @@
+[package]
+name = "cricket-brain-bearings"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Predictive bearing fault detection using CricketBrain resonator bank"
+license = "AGPL-3.0-only"
+publish = false
+
+[workspace]
+
+[dependencies]
+cricket-brain = { path = "../.." }
