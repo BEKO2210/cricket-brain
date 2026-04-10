@@ -106,7 +106,7 @@ Each use case follows the same 10-run progression:
 
 | UC | Dataset | License | Signal Hz | Status |
 |----|---------|---------|-----------|--------|
-| 01 Cardiac | MIT-BIH Arrhythmia | ODC-By | 360 | **ACTIVE** |
+| 01 Cardiac | MIT-BIH Arrhythmia | ODC-By | 360 | **COMPLETE** (10/10) |
 | 02 Bearings | CWRU Bearing | Public Domain | 12,000 | Planned |
 | 03 Marine | MBARI MARS | CC BY 4.0 | 256,000 | Planned |
 | 04 Grid | EPFL Smart Grid | CC BY 4.0 | 50 | Planned |
@@ -141,15 +141,29 @@ Each use case follows the same 10-run progression:
 - [x] README.template.md and page.template.html
 - [x] UC01 SOURCES.md (MIT-BIH dataset)
 - [x] MASTER_PLAN.md (this file)
-
-### In Progress
-- [ ] UC01 CLAUDE.md (local build plan)
-- [ ] UC01 Run 1: Scaffold
+- [x] **UC01 Cardiac Arrhythmia — ALL 10 RUNS COMPLETE** (2026-04-10)
+  - Run 1: Scaffold (Cargo.toml, src/, 7 tests)
+  - Run 2: Data pipeline (Python download/preprocess, CSV I/O, 9 tests)
+  - Run 3: CSV classification + confusion matrix (11 tests, 92.5% accuracy)
+  - Run 4: Benchmark suite (SDT d'=6.18, latency 0.126µs, memory 928B)
+  - Run 5: Python evaluation (F1=0.962, 3 PNG plots)
+  - Run 6: Stress test (noise fails >10%, boundary ±1BPM works)
+  - Run 7: Website demo page (cardiac.html on main site)
+  - Run 8: Full documentation (README, API reference)
+  - Run 9: CI workflow (uc01-cardiac.yml, all steps verified)
+  - Run 10: Metrics finalization (metrics.json updated with real values)
 
 ### Planned
-- [ ] UC01 Runs 2-10
-- [ ] UC02-10: Everything
+- [ ] UC02 Predictive Maintenance: Runs 1-10
+- [ ] UC03 Marine Acoustic: Runs 1-10
+- [ ] UC04 Power Grid: Runs 1-10
+- [ ] UC05 Network Intrusion: Runs 1-10
+- [ ] UC06 Precision Agriculture: Runs 1-10
+- [ ] UC07 Autonomous Vehicle: Runs 1-10
+- [ ] UC08 Hearing Aid: Runs 1-10
+- [ ] UC09 Quality Control: Runs 1-10
+- [ ] UC10 Space Systems: Runs 1-10
 
 ---
 
-*Last updated: Run 0 (scaffold phase)*
+*Last updated: 2026-04-10 — UC01 complete (10/10 runs)*
