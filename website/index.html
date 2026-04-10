@@ -30,6 +30,7 @@
         <a href="#architecture">Architecture</a>
         <a href="#math">Math</a>
         <a href="#comparison">Comparison</a>
+        <a href="#use-cases">Use Cases</a>
         <a href="#benchmarks">Benchmarks</a>
         <a href="pages/cardiac.html">Cardiac Demo</a>
         <a href="#versions">Versions</a>
@@ -321,6 +322,87 @@
             </ul>
           </article>
         </div>
+      </div>
+    </section>
+
+    <!-- Use Cases -->
+    <section id="use-cases" class="section">
+      <div class="content-wrap">
+        <h2 class="section-title" data-animate="fade-up">Use <span>Cases</span></h2>
+        <p class="section-subtitle" data-animate="fade-up">Real-world applications built on CricketBrain. Each case includes benchmarks, source code, and honest limitations.</p>
+
+        <div class="version-grid" data-animate="fade-up" data-stagger="true">
+          <a href="pages/cardiac.html" class="uc-card" style="text-decoration:none; color:inherit;">
+            <article class="version-card" style="cursor:pointer;">
+              <span class="version-badge" style="background:color-mix(in srgb, var(--danger) 15%, transparent); color:var(--danger);">Live</span>
+              <h3>Cardiac Arrhythmia</h3>
+              <p>ECG rhythm classification — tachycardia, bradycardia, irregular.</p>
+              <ul>
+                <li>92.5% accuracy, d' = 6.18 (SDT)</li>
+                <li>0.126 &micro;s/step, 928 bytes RAM</li>
+                <li>11 tests, stress-tested, honest limits</li>
+                <li>$50B wearable health market</li>
+              </ul>
+            </article>
+          </a>
+
+          <article class="version-card" style="opacity:0.6;">
+            <span class="version-badge">Planned</span>
+            <h3>Predictive Maintenance</h3>
+            <p>Bearing fault detection via vibration frequency analysis.</p>
+            <ul>
+              <li>CWRU Bearing Dataset (Public Domain)</li>
+              <li>$0.50 BOM per sensor node</li>
+              <li>$15B market</li>
+            </ul>
+          </article>
+
+          <article class="version-card" style="opacity:0.6;">
+            <span class="version-badge">Planned</span>
+            <h3>Marine Acoustics</h3>
+            <p>Whale and dolphin species identification on ocean buoys.</p>
+            <ul>
+              <li>MBARI MARS Hydrophone (CC BY 4.0)</li>
+              <li>no_std, battery-powered, no connectivity</li>
+              <li>$4B conservation market</li>
+            </ul>
+          </article>
+
+          <article class="version-card" style="opacity:0.6;">
+            <span class="version-badge">Planned</span>
+            <h3>Smart Grid</h3>
+            <p>50/60 Hz power grid frequency monitoring at scale.</p>
+            <ul>
+              <li>JND 88 Hz, Gap Detection 1 ms</li>
+              <li>Millions of nodes, near-zero cost</li>
+              <li>$100B smart grid market</li>
+            </ul>
+          </article>
+
+          <article class="version-card" style="opacity:0.6;">
+            <span class="version-badge">Planned</span>
+            <h3>Network Intrusion</h3>
+            <p>DDoS and C2 beaconing detection at line rate.</p>
+            <ul>
+              <li>93 ns/packet, FPGA-deployable</li>
+              <li>Temporal pattern detection</li>
+              <li>$25B network security market</li>
+            </ul>
+          </article>
+
+          <article class="version-card" style="opacity:0.6;">
+            <span class="version-badge">Planned</span>
+            <h3>Precision Agriculture</h3>
+            <p>Pest detection via acoustic monitoring on coin-cell sensors.</p>
+            <ul>
+              <li>BioAcoustica Dataset (CC BY 4.0)</li>
+              <li>&lt; 1 &micro;W inference, years on battery</li>
+              <li>$8B precision ag market</li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="text-align:center; margin-block-start:var(--space-lg);"><a href="https://github.com/BEKO2210/cricket-brain/blob/main/USE_CASES.md" target="_blank" rel="noopener" style="color:var(--text-muted); font-size:var(--font-size-sm);">View all 10 use cases &rarr;</a></p>
       </div>
     </section>
 
