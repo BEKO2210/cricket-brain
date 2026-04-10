@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CricketBrain Predictive Bearing Maintenance — 3712 bytes RAM, 4-channel ResonatorBank, 93% accuracy. CWRU SKF 6205-2RS fault detection.">
+  <meta name="theme-color" content="#0a0f1c" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
+  <meta property="og:title" content="Predictive Bearing Maintenance — CricketBrain">
+  <meta property="og:description" content="4-channel neuromorphic fault detection in 3712 bytes. Outer race, inner race, ball defects at 0.2 µs/step.">
+  <title>Bearing Fault Detection — CricketBrain</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="stylesheet" href="../css/style.css?v=3.0.0">
+  <style>
+    .bearing-hero {
+      min-block-size: 50vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: var(--space-2xl) var(--space-lg); position: relative; overflow: hidden;
+    }
+    .bearing-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(59,130,246,0.06) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 40% at 80% 80%, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .bearing-hero h1 { font-size: var(--font-size-hero); margin-block-end: var(--space-md); }
+    .bearing-hero h1 span { color: #3b82f6; }
+    .bearing-hero .subtitle { font-size: clamp(var(--font-size-base), 2vw, var(--font-size-xl)); color: var(--text-secondary); max-inline-size: 700px; margin-block-end: var(--space-xl); }
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-md); max-inline-size: 900px; margin-inline: auto; }
+    .metric-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-lg); text-align: center; transition: all var(--transition-base); }
+    .metric-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+    .metric-card .value { font-size: var(--font-size-3xl); font-weight: 800; color: var(--accent); font-family: var(--font-mono); }
+    .metric-card .label { font-size: var(--font-size-xs); color: var(--text-muted); margin-block-start: var(--space-2xs); }
+    .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-xl); margin-block-end: var(--space-xl); }
+    .result-table { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-block: var(--space-lg); }
+    .license-note { background: color-mix(in srgb, var(--highlight) 8%, var(--bg-card)); border: 1px solid color-mix(in srgb, var(--highlight) 25%, transparent); border-radius: var(--radius-md); padding: var(--space-md); font-size: var(--font-size-sm); color: var(--text-secondary); }
+    .license-note strong { color: var(--highlight); }
+    .speed-fix { background: color-mix(in srgb, var(--success) 8%, var(--bg-card)); border: 1px solid color-mix(in srgb, var(--success) 25%, transparent); border-radius: var(--radius-md); padding: var(--space-md); font-size: var(--font-size-sm); color: var(--text-secondary); margin-block-start: var(--space-md); }
+    .speed-fix strong { color: var(--success); }
+    @media (max-width: 640px) { .bearing-hero h1 { font-size: var(--font-size-3xl); } .metric-grid { grid-template-columns: repeat(2, 1fr); } .metric-card .value { font-size: var(--font-size-2xl); } }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="../index.html" class="logo" aria-label="CricketBrain Home">Cricket<span>Brain</span></a>
+      <nav class="main-nav" id="main-nav" role="navigation" aria-label="Navigation">
+        <a href="../index.html">Home</a>
+        <a href="../index.html#benchmarks">Benchmarks</a>
+        <a href="cardiac.html">Cardiac</a>
+        <a href="whitepaper.html">Whitepaper</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme"><span aria-hidden="true" id="theme-icon">&#9790;</span></button>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false"><span aria-hidden="true">&#9776;</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- Hero -->
+    <section class="bearing-hero">
+      <h1>Bearing <span>Fault</span> Detection</h1>
+      <p class="subtitle">4-channel ResonatorBank detects outer race, inner race, and ball defects from vibration frequencies. 20 neurons in 3,712 bytes — runs on a $2 STM32.</p>
+      <div style="display:flex; flex-wrap:wrap; gap:var(--space-md); justify-content:center;">
+        <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/02_predictive_maintenance" class="btn btn-primary" target="_blank" rel="noopener">View Source</a>
+        <a href="../index.html#use-cases" class="btn btn-secondary">All Use Cases</a>
+      </div>
+    </section>
+
+    <!-- Key Metrics -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Key <span>Metrics</span></h2>
+        <p class="section-subtitle">Measured 2026-04-10 on synthetic SKF 6205-2RS vibration signals. CWRU bearing characteristic frequencies.</p>
+        <div class="metric-grid">
+          <div class="metric-card"><div class="value">93.0%</div><div class="label">Accuracy (200 windows)</div></div>
+          <div class="metric-card"><div class="value">6.18</div><div class="label">d' Sensitivity (SDT)</div></div>
+          <div class="metric-card"><div class="value">0.932</div><div class="label">Macro F1 Score</div></div>
+          <div class="metric-card"><div class="value">3,712</div><div class="label">Bytes RAM (20 neurons)</div></div>
+          <div class="metric-card"><div class="value">0.22</div><div class="label">&micro;s / step (avg)</div></div>
+          <div class="metric-card"><div class="value">4</div><div class="label">Fault Channels</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Per-Class Results -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Classification <span>Results</span></h2>
+        <div class="section-card">
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Fault Type</th><th>Frequency</th><th>TP</th><th>FP</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+              <tbody>
+                <tr><td>Normal</td><td>&mdash;</td><td>24</td><td>1</td><td>0.960</td><td>1.000</td><td>0.980</td></tr>
+                <tr><td>Outer Race (BPFO)</td><td>107 Hz</td><td>24</td><td>3</td><td>0.889</td><td>0.960</td><td>0.923</td></tr>
+                <tr><td>Inner Race (BPFI)</td><td>162 Hz</td><td>22</td><td>3</td><td>0.880</td><td>0.880</td><td>0.880</td></tr>
+                <tr><td>Ball Defect (BSF)</td><td>69 Hz</td><td>23</td><td>0</td><td>1.000</td><td>0.885</td><td>0.939</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stress Test -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Stress Test &mdash; <span>Honest Limits</span></h2>
+
+        <div class="section-card">
+          <h3 style="margin-block-end:var(--space-sm);">Noise Resilience</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Noise Level</th><th>Accuracy</th><th>Verdict</th></tr></thead>
+              <tbody>
+                <tr><td>0%</td><td>100%</td><td>OK</td></tr>
+                <tr><td>10%</td><td>100%</td><td>OK</td></tr>
+                <tr><td>20%</td><td>100%</td><td>OK</td></tr>
+                <tr><td>30%</td><td>100%</td><td>OK</td></tr>
+                <tr><td>50%</td><td>100%</td><td>OK</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs);">The 50-step energy accumulation window provides excellent noise averaging. Single random spikes are diluted by sustained fault frequency energy.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Speed Compensation</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>RPM</th><th>BPFO (Hz)</th><th>Without Comp.</th><th>With set_rpm()</th></tr></thead>
+              <tbody>
+                <tr><td>900</td><td>53.6</td><td style="color:var(--danger);">Normal (WRONG)</td><td style="color:var(--accent);">Outer Race</td></tr>
+                <tr><td>1200</td><td>71.5</td><td style="color:var(--danger);">Ball Defect (WRONG)</td><td style="color:var(--accent);">Outer Race</td></tr>
+                <tr><td>1500</td><td>89.3</td><td style="color:var(--danger);">Normal (WRONG)</td><td style="color:var(--accent);">Outer Race</td></tr>
+                <tr><td>1797</td><td>107.0</td><td>Outer Race</td><td>Outer Race</td></tr>
+                <tr><td>2400</td><td>142.9</td><td style="color:var(--danger);">Inner Race (WRONG)</td><td style="color:var(--accent);">Outer Race</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="speed-fix"><strong>Fixed:</strong> <code>det.set_rpm(current_rpm)</code> scales input frequencies by cal_rpm/current_rpm. 6/6 RPM levels correct with compensation. Requires tachometer signal.</div>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Remaining Limitations</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Limitation</th><th>Impact</th></tr></thead>
+              <tbody>
+                <tr><td>Single-fault only</td><td>Cannot report multiple simultaneous faults</td></tr>
+                <tr><td>No severity estimation</td><td>Cannot distinguish 0.007&quot; from 0.021&quot; defects</td></tr>
+                <tr><td>Synthetic data only</td><td>Not validated on real CWRU accelerometer signals</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture SVG -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">How It <span>Works</span></h2>
+        <div class="section-card" style="padding:var(--space-lg); overflow-x:auto;">
+          <svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; min-width:500px;">
+            <defs>
+              <marker id="ba" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#00d4aa"/></marker>
+              <marker id="bb" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#3b82f6"/></marker>
+              <filter id="bg"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+
+            <!-- Input -->
+            <rect x="30" y="30" width="160" height="50" rx="10" fill="rgba(0,212,170,0.1)" stroke="#00d4aa" stroke-width="1.5"/>
+            <text x="110" y="52" fill="#00d4aa" font-size="12" font-weight="bold" text-anchor="middle">Vibration Signal</text>
+            <text x="110" y="68" fill="#94a3b8" font-size="9" text-anchor="middle">accelerometer freq</text>
+
+            <line x1="190" y1="55" x2="270" y2="55" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#ba)" stroke-dasharray="6 3">
+              <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1s" repeatCount="indefinite"/>
+            </line>
+
+            <!-- Speed Comp -->
+            <rect x="275" y="25" width="170" height="60" rx="10" fill="rgba(168,85,247,0.08)" stroke="#a855f7" stroke-width="1.5"/>
+            <text x="360" y="47" fill="#a855f7" font-size="11" font-weight="bold" text-anchor="middle">Speed Compensation</text>
+            <text x="360" y="63" fill="#94a3b8" font-size="9" text-anchor="middle">f &times; (cal_rpm / current_rpm)</text>
+            <text x="360" y="78" fill="#94a3b8" font-size="8" text-anchor="middle">set_rpm() API</text>
+
+            <line x1="445" y1="55" x2="520" y2="55" stroke="#a855f7" stroke-width="1.5" marker-end="url(#ba)" stroke-dasharray="6 3">
+              <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1s" repeatCount="indefinite"/>
+            </line>
+
+            <!-- ResonatorBank -->
+            <rect x="525" y="15" width="340" height="80" rx="16" fill="rgba(0,212,170,0.08)" stroke="#00d4aa" stroke-width="2" filter="url(#bg)"/>
+            <text x="695" y="38" fill="#00d4aa" font-size="14" font-weight="bold" text-anchor="middle">ResonatorBank</text>
+            <text x="695" y="56" fill="#f1f5f9" font-size="10" text-anchor="middle">4 channels &times; 5 neurons = 20 neurons &middot; 3,712 bytes</text>
+            <text x="695" y="72" fill="#94a3b8" font-size="9" text-anchor="middle">FTF 15 Hz &middot; BSF 69 Hz &middot; BPFO 107 Hz &middot; BPFI 162 Hz</text>
+            <rect x="525" y="15" width="340" height="80" rx="16" fill="none" stroke="#00d4aa" stroke-width="1" opacity="0.3">
+              <animate attributeName="opacity" values="0.15;0.5;0.15" dur="2s" repeatCount="indefinite"/>
+            </rect>
+
+            <!-- Down to energy -->
+            <line x1="695" y1="95" x2="695" y2="145" stroke="#f59e0b" stroke-width="2" marker-end="url(#ba)"/>
+
+            <!-- Energy Accumulator -->
+            <rect x="595" y="145" width="200" height="45" rx="10" fill="rgba(245,158,11,0.1)" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="695" y="165" fill="#f59e0b" font-size="11" font-weight="bold" text-anchor="middle">Energy Accumulator</text>
+            <text x="695" y="180" fill="#94a3b8" font-size="9" text-anchor="middle">50-step window per channel</text>
+
+            <!-- Down to classifier -->
+            <line x1="695" y1="190" x2="695" y2="235" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#ba)"/>
+
+            <!-- Max Channel -->
+            <rect x="610" y="235" width="170" height="40" rx="10" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="695" y="260" fill="#f59e0b" font-size="11" font-weight="bold" text-anchor="middle">argmax(channels)</text>
+
+            <!-- Classification outputs -->
+            <line x1="630" y1="275" x2="130" y2="340" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#ba)"/>
+            <line x1="670" y1="275" x2="370" y2="340" stroke="#ef4444" stroke-width="1.5"/>
+            <line x1="720" y1="275" x2="570" y2="340" stroke="#f59e0b" stroke-width="1.5"/>
+            <line x1="760" y1="275" x2="770" y2="340" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#bb)"/>
+
+            <rect x="50" y="340" width="150" height="45" rx="10" fill="rgba(0,212,170,0.1)" stroke="#00d4aa" stroke-width="2"/>
+            <text x="125" y="360" fill="#00d4aa" font-size="12" font-weight="bold" text-anchor="middle">Normal</text>
+            <text x="125" y="376" fill="#94a3b8" font-size="9" text-anchor="middle">no fault energy</text>
+
+            <rect x="290" y="340" width="150" height="45" rx="10" fill="rgba(239,68,68,0.1)" stroke="#ef4444" stroke-width="2"/>
+            <text x="365" y="360" fill="#ef4444" font-size="12" font-weight="bold" text-anchor="middle">Outer Race</text>
+            <text x="365" y="376" fill="#94a3b8" font-size="9" text-anchor="middle">BPFO 107 Hz</text>
+
+            <rect x="490" y="340" width="150" height="45" rx="10" fill="rgba(245,158,11,0.1)" stroke="#f59e0b" stroke-width="2"/>
+            <text x="565" y="360" fill="#f59e0b" font-size="12" font-weight="bold" text-anchor="middle">Inner Race</text>
+            <text x="565" y="376" fill="#94a3b8" font-size="9" text-anchor="middle">BPFI 162 Hz</text>
+
+            <rect x="690" y="340" width="150" height="45" rx="10" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" stroke-width="2"/>
+            <text x="765" y="360" fill="#3b82f6" font-size="12" font-weight="bold" text-anchor="middle">Ball Defect</text>
+            <text x="765" y="376" fill="#94a3b8" font-size="9" text-anchor="middle">BSF 69 Hz</text>
+
+            <!-- Animated pulse -->
+            <circle r="4" fill="#00d4aa" opacity="0.9">
+              <animateMotion dur="3s" repeatCount="indefinite" path="M110,55 L360,55 L695,55 L695,167 L695,255 L365,360"/>
+            </circle>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dataset & License -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Dataset &amp; <span>License</span></h2>
+        <div class="section-card">
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Field</th><th>Value</th></tr></thead>
+              <tbody>
+                <tr><td>Dataset</td><td>CWRU Bearing Data Center</td></tr>
+                <tr><td>License</td><td>Public Domain</td></tr>
+                <tr><td>URL</td><td><a href="https://engineering.case.edu/bearingdatacenter" target="_blank" rel="noopener">engineering.case.edu/bearingdatacenter</a></td></tr>
+                <tr><td>Bearing</td><td>SKF 6205-2RS deep groove ball bearing</td></tr>
+                <tr><td>Sampling</td><td>12,000 Hz drive-end accelerometer</td></tr>
+                <tr><td>Motor</td><td>2 HP Reliance Electric, 1797 RPM</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="license-note" style="margin-block-start:var(--space-lg);">
+            <strong>License:</strong> CricketBrain source is <strong>AGPL-3.0</strong>.
+            Commercial use requires paid license (<a href="https://github.com/BEKO2210/cricket-brain/blob/main/COMMERCIAL.md" target="_blank" rel="noopener">details</a>).
+            CWRU dataset is <strong>Public Domain</strong>. Citation: Loparo, K.A., Case Western Reserve University.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Quick <span>Start</span></h2>
+        <div style="max-inline-size:700px; margin-inline:auto;">
+          <div class="code-block">
+            <div class="code-block-header"><span>Terminal</span><button class="copy-btn" type="button" aria-label="Copy">Copy</button></div>
+            <pre><code><span class="command">cd</span> use_cases/02_predictive_maintenance
+<span class="command">cargo run</span> <span class="flag">--release</span>                                    <span class="comment"># Synthetic demo</span>
+<span class="command">cargo run</span> <span class="flag">--release --</span> --csv data/processed/sample_bearing.csv  <span class="comment"># CSV mode</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> bearing_sdt              <span class="comment"># SDT benchmark</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> bearing_stress            <span class="comment"># Stress test</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-compact">
+      <div class="footer-links">
+        <a href="../index.html">Home</a>
+        <a href="cardiac.html">Cardiac</a>
+        <a href="whitepaper.html">Whitepaper</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <div class="footer-bottom"><span>&copy; 2026 Belkis Aslani</span></div>
+    </div>
+  </footer>
+  <script src="../js/app.js?v=3.0.0"></script>
+</body>
+</html>

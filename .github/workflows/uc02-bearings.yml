@@ -1,0 +1,45 @@
+# CI workflow for UC02 Predictive Maintenance
+# Copy to .github/workflows/uc02-bearings.yml to activate
+# Date: 2026-04-10
+
+name: UC02 Bearings
+
+on:
+  push:
+    paths:
+      - 'use_cases/02_predictive_maintenance/**'
+  pull_request:
+    paths:
+      - 'use_cases/02_predictive_maintenance/**'
+
+jobs:
+  build-and-test:
+    name: Build & Test UC02
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: use_cases/02_predictive_maintenance
+
+      - name: Build
+        run: cargo build --manifest-path use_cases/02_predictive_maintenance/Cargo.toml
+
+      - name: Test
+        run: cargo test --manifest-path use_cases/02_predictive_maintenance/Cargo.toml
+
+      - name: Run demo
+        run: cargo run --release --manifest-path use_cases/02_predictive_maintenance/Cargo.toml
+
+      - name: Run SDT benchmark
+        run: cargo run --release --manifest-path use_cases/02_predictive_maintenance/Cargo.toml --example bearing_sdt
+
+      - name: Run memory benchmark
+        run: cargo run --release --manifest-path use_cases/02_predictive_maintenance/Cargo.toml --example bearing_memory
+
+      - name: Verify Python syntax
+        run: |
+          python3 -m py_compile use_cases/02_predictive_maintenance/python/preprocess.py
+          python3 -m py_compile use_cases/02_predictive_maintenance/python/evaluate.py
+          python3 -m py_compile use_cases/02_predictive_maintenance/python/plot_results.py

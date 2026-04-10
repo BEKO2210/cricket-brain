@@ -19,7 +19,20 @@
 
 **Impact:** The detector only works within ±20% of the calibration speed. Real machines vary speed continuously (variable frequency drives, load changes).
 
-**Mitigation:** Re-calculate fault frequencies from measured shaft speed and dynamically adjust the ResonatorBank eigenfrequencies. This requires a tachometer signal or speed estimation from the vibration spectrum.
+**Mitigation (IMPLEMENTED):** `BearingDetector::set_rpm(rpm)` applies speed compensation by scaling input frequencies: `f_compensated = f_input × (cal_rpm / current_rpm)`. This maps fault frequencies at any shaft speed back to the calibration frequencies.
+
+**Result with compensation:**
+
+| RPM | Without Compensation | With Compensation |
+|----:|:--------------------:|:-----------------:|
+| 900 | Normal (WRONG) | **Outer Race (CORRECT)** |
+| 1200 | Ball Defect (WRONG) | **Outer Race (CORRECT)** |
+| 1500 | Normal (WRONG) | **Outer Race (CORRECT)** |
+| 1797 | Outer Race | Outer Race |
+| 2100 | Outer Race | Outer Race |
+| 2400 | Inner Race (WRONG) | **Outer Race (CORRECT)** |
+
+**6/6 correct with compensation** (vs 2/6 without). Requires a tachometer signal or speed estimation.
 
 ---
 

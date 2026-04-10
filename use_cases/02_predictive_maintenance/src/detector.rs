@@ -42,7 +42,15 @@ pub struct BearingDetector {
     last_confidence: f32,
     /// Total steps processed.
     step_count: usize,
+    /// Calibration RPM (fault frequencies are calculated at this speed).
+    cal_rpm: f32,
+    /// Current operating RPM (for speed compensation).
+    /// If None, no compensation is applied.
+    current_rpm: Option<f32>,
 }
+
+/// Reference RPM for SKF 6205-2RS fault frequency calculations.
+const CAL_RPM: f32 = 1797.0;
 
 impl BearingDetector {
     /// Create a new detector with channels for BPFO, BPFI, BSF, FTF.
@@ -65,18 +73,48 @@ impl BearingDetector {
         Self {
             bank,
             channel_energy: [0.0; 4],
-            window_size: 50, // 50-step detection window
+            window_size: 50,
             window_step: 0,
             last_fault: FaultType::Normal,
             last_confidence: 0.0,
             step_count: 0,
+            cal_rpm: CAL_RPM,
+            current_rpm: None,
         }
+    }
+
+    /// Set operating RPM for speed compensation.
+    ///
+    /// When set, input frequencies are scaled by `cal_rpm / current_rpm`
+    /// before entering the ResonatorBank. This maps fault frequencies at
+    /// any shaft speed back to the calibration frequencies.
+    ///
+    /// Example: At 900 RPM, BPFO = 53.6 Hz. With compensation,
+    /// 53.6 × (1797/900) = 107 Hz → matches the calibrated channel.
+    pub fn set_rpm(&mut self, rpm: f32) {
+        if rpm > 0.0 {
+            self.current_rpm = Some(rpm);
+        } else {
+            self.current_rpm = None;
+        }
+    }
+
+    /// Clear RPM compensation (no scaling applied).
+    pub fn clear_rpm(&mut self) {
+        self.current_rpm = None;
     }
 
     /// Feed one vibration frequency sample.
     /// Returns a fault classification at the end of each detection window.
     pub fn step(&mut self, input_freq: f32) -> Option<FaultType> {
-        let outputs = self.bank.step(input_freq);
+        // Speed compensation: scale frequency to calibration RPM
+        let compensated = match self.current_rpm {
+            Some(rpm) if rpm > 0.0 && input_freq > 0.0 => {
+                input_freq * (self.cal_rpm / rpm)
+            }
+            _ => input_freq,
+        };
+        let outputs = self.bank.step(compensated);
         self.step_count += 1;
         self.window_step += 1;
 
