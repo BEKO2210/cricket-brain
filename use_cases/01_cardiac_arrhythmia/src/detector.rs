@@ -9,6 +9,8 @@ use std::collections::VecDeque;
 use cricket_brain::brain::{BrainConfig, CricketBrain};
 use cricket_brain::logger::{Telemetry, TelemetryEvent};
 
+use crate::preprocess::EcgPreprocessor;
+
 /// Rhythm classification output.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RhythmClass {
@@ -60,6 +62,8 @@ impl Telemetry for SpikeTelemetry {
 pub struct CardiacDetector {
     brain: CricketBrain,
     telemetry: SpikeTelemetry,
+    /// Optional preprocessor for noise rejection.
+    preprocessor: Option<EcgPreprocessor>,
     /// Recent RR intervals (in ms/timesteps) for rhythm analysis.
     rr_intervals: VecDeque<usize>,
     /// How many RR intervals to keep for classification.
@@ -89,8 +93,16 @@ pub struct CardiacDetector {
 }
 
 impl CardiacDetector {
-    /// Create a new detector with default CricketBrain config.
+    /// Create a new detector with default CricketBrain config (no preprocessing).
     pub fn new() -> Self {
+        Self::with_preprocessor(false)
+    }
+
+    /// Create a detector with optional noise-rejection preprocessor.
+    ///
+    /// When `enable_preprocess` is true, a temporal consistency filter
+    /// rejects single-step in-band noise spikes before they reach CricketBrain.
+    pub fn with_preprocessor(enable_preprocess: bool) -> Self {
         let config = BrainConfig::default()
             .with_seed(42)
             .with_adaptive_sensitivity(true)
@@ -99,6 +111,11 @@ impl CardiacDetector {
         Self {
             brain,
             telemetry: SpikeTelemetry::new(),
+            preprocessor: if enable_preprocess {
+                Some(EcgPreprocessor::cardiac_default())
+            } else {
+                None
+            },
             rr_intervals: VecDeque::with_capacity(16),
             rr_window: 8,
             step_count: 0,
@@ -118,7 +135,12 @@ impl CardiacDetector {
     /// Feed one frequency sample (1 ms timestep).
     /// Returns a classification when a new RR interval is measured.
     pub fn step(&mut self, input_freq: f32) -> Option<RhythmClass> {
-        let output = self.brain.step_with_telemetry(input_freq, &mut self.telemetry);
+        // Preprocessing: filter noise before CricketBrain sees it
+        let clean_freq = match &mut self.preprocessor {
+            Some(pp) => pp.filter(input_freq),
+            None => input_freq,
+        };
+        let output = self.brain.step_with_telemetry(clean_freq, &mut self.telemetry);
         self.step_count += 1;
         self.steps_since_spike += 1;
 
@@ -260,6 +282,9 @@ impl CardiacDetector {
     pub fn reset(&mut self) {
         self.brain.reset();
         self.telemetry = SpikeTelemetry::new();
+        if let Some(pp) = &mut self.preprocessor {
+            pp.reset();
+        }
         self.rr_intervals.clear();
         self.step_count = 0;
         self.steps_since_spike = 0;

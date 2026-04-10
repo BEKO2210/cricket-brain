@@ -111,6 +111,43 @@ fn main() {
         println!("  {:>9.0}% {:>10} {:>8} {:>8.1}%  {}", noise_pct * 100.0, correct, total, acc, verdict);
     }
 
+    // A2) Same test WITH preprocessor
+    print_header("A2) Noisy ECG WITH Preprocessor (temporal consistency filter)");
+
+    let mut det_pp = CardiacDetector::with_preprocessor(true);
+    println!("  {:>10} {:>10} {:>8} {:>10}", "Noise%", "Correct", "Total", "Accuracy");
+    println!("  {:─>10} {:─>10} {:─>8} {:─>10}", "", "", "", "");
+
+    for &noise_pct in &noise_levels {
+        let mut rng = Rng::new(42 + (noise_pct * 1000.0) as u64);
+        det_pp.reset();
+
+        let base_cycle = make_cycle_with_rr(820);
+        let mut correct = 0;
+        let mut total = 0;
+
+        for _ in 0..50 {
+            let mut stream = base_cycle.to_frequency_stream(1);
+            for s in &mut stream {
+                if rng.next() < noise_pct {
+                    *s = 1000.0 + rng.next() * 8000.0;
+                }
+            }
+            for &f in &stream {
+                if let Some(cls) = det_pp.step(f) {
+                    total += 1;
+                    if cls == RhythmClass::NormalSinus {
+                        correct += 1;
+                    }
+                }
+            }
+        }
+
+        let acc = if total > 0 { correct as f32 / total as f32 * 100.0 } else { 0.0 };
+        let verdict = if acc > 90.0 { "OK" } else if acc > 50.0 { "DEGRADED" } else { "FAILS" };
+        println!("  {:>9.0}% {:>10} {:>8} {:>8.1}%  {}", noise_pct * 100.0, correct, total, acc, verdict);
+    }
+
     // ===================================================================
     // B) Extreme heart rates
     // ===================================================================
