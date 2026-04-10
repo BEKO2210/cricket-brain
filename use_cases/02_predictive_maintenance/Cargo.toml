@@ -23,3 +23,7 @@ path = "benchmarks/bearing_latency.rs"
 [[example]]
 name = "bearing_memory"
 path = "benchmarks/bearing_memory.rs"
+
+[[example]]
+name = "bearing_stress"
+path = "benchmarks/bearing_stress.rs"
