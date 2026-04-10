@@ -28,7 +28,10 @@
     "false_positive_rate": 0.0,
     "ram_bytes_detector": 1336,
     "tests_passing": 11,
-    "noise_tolerance_pct": 10,
+    "noise_tolerance_pct": 30,
+    "noise_tolerance_with_pp_10": 75.6,
+    "noise_tolerance_with_pp_20": 84.4,
+    "noise_tolerance_with_pp_30": 70.0,
     "bpm_range": "30-250",
     "date_measured": "2026-04-10",
     "key_advantage": "928 bytes RAM, Privacy-first, 0.126 µs/step, d'=6.18"

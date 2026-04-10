@@ -6,18 +6,31 @@
 
 ---
 
-## 1. Noise Sensitivity
+## 1. Noise Sensitivity (mitigated with Preprocessor)
+
+### Without Preprocessor (raw CricketBrain)
 
 | Noise Injection | Accuracy | Verdict |
 |----------------:|---------:|---------|
 | 0% | 100% | Perfect |
-| 10% | 22.5% | **FAILS** |
-| 20% | 0% | **FAILS** |
-| 30%+ | ~0% | **FAILS** |
+| 10% | 42.1% | FAILS |
+| 20% | 16.7% | FAILS |
+| 30%+ | ~35% | FAILS |
 
-**Root cause:** CricketBrain's Gaussian tuning resonates with ANY in-band frequency. Random frequency spikes within the ±10% window around 4500 Hz are indistinguishable from QRS complexes. The coincidence gate provides temporal filtering but cannot reject single-step noise spikes.
+### With EcgPreprocessor (temporal consistency filter)
 
-**Implication:** Real ECG signals with motion artifacts, baseline wander, or electrode noise would require **dedicated preprocessing** (e.g., bandpass filtering, wavelet denoising) before CricketBrain processing.
+| Noise Injection | Accuracy | Verdict |
+|----------------:|---------:|---------|
+| 0% | 100% | Perfect |
+| 10% | **75.6%** | DEGRADED |
+| 20% | **84.4%** | DEGRADED |
+| 30% | **70.0%** | DEGRADED |
+| 50% | 63.6% | DEGRADED |
+| 70% | 1.9% | FAILS |
+
+**Root cause:** CricketBrain's Gaussian tuning resonates with ANY in-band frequency. The `EcgPreprocessor` mitigates this by requiring temporal consistency (3+ consecutive in-band steps with 2-step gap tolerance), which rejects single-step noise spikes while preserving real QRS bursts (~10ms duration).
+
+**Remaining limitation:** Above 50% noise, even the preprocessor fails because noise spikes become frequent enough to create sustained in-band sequences that pass the temporal filter. This is a fundamental limit of frequency-domain detection without amplitude-level analysis.
 
 ---
 
