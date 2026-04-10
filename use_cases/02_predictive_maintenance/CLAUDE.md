@@ -69,7 +69,7 @@ let outputs = bank.step(input_freq);
 | 5 | DONE | 2026-04-10 | evaluate.py (F1=0.932), 3 plots, docs/results.md |
 | 6 | DONE | 2026-04-10 | 100% noise-robust, speed-comp FIXED (6/6 RPMs) |
 | 7 | DONE | 2026-04-10 | website/pages/bearings.html, nav dropdown+card linked |
-| 8 | Documentation: README, API, limitations | PENDING |
+| 8 | DONE | 2026-04-10 | Full README with real results, docs/api.md reference |
 | 9 | CI integration | PENDING |
 | 10 | Metrics finalization | PENDING |
 
