@@ -88,6 +88,92 @@ pub fn bradycardia() -> EcgCycle {
     make_cycle(1500 - WAVE_DUR) // 1456 ms diastolic gap
 }
 
+// ---------------------------------------------------------------------------
+// CSV I/O for preprocessed data
+// ---------------------------------------------------------------------------
+
+use std::fs;
+use std::io::{BufRead, BufReader, Write};
+use std::path::Path;
+
+/// A single preprocessed beat record from CSV.
+#[derive(Debug, Clone)]
+pub struct BeatRecord {
+    pub timestamp_ms: f32,
+    pub rr_interval_ms: f32,
+    pub beat_type: String,
+    pub bpm: f32,
+    pub mapped_freq: f32,
+}
+
+/// Read preprocessed CSV (timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq).
+/// Returns a list of beat records and a frequency stream for CricketBrain input.
+pub fn from_csv(path: &str) -> Vec<BeatRecord> {
+    let file = fs::File::open(path).expect("cannot open CSV");
+    let reader = BufReader::new(file);
+    let mut records = Vec::new();
+
+    for (i, line) in reader.lines().enumerate() {
+        let line = line.expect("cannot read line");
+        if i == 0 {
+            continue; // Skip header
+        }
+        let cols: Vec<&str> = line.split(',').collect();
+        if cols.len() < 5 {
+            continue;
+        }
+        records.push(BeatRecord {
+            timestamp_ms: cols[0].parse().unwrap_or(0.0),
+            rr_interval_ms: cols[1].parse().unwrap_or(0.0),
+            beat_type: cols[2].to_string(),
+            bpm: cols[3].parse().unwrap_or(0.0),
+            mapped_freq: cols[4].parse().unwrap_or(0.0),
+        });
+    }
+
+    records
+}
+
+/// Convert beat records to a CricketBrain frequency stream.
+/// Each beat produces its mapped_freq for the RR interval duration,
+/// then a QRS burst at 4500 Hz for 10 ms.
+pub fn beats_to_frequency_stream(beats: &[BeatRecord]) -> Vec<f32> {
+    let mut stream = Vec::new();
+    for beat in beats {
+        // Diastolic gap at silence, then QRS burst
+        let gap_ms = (beat.rr_interval_ms as usize).saturating_sub(10);
+        stream.extend(std::iter::repeat(0.0f32).take(gap_ms));
+        stream.extend(std::iter::repeat(QRS_FREQ).take(10)); // QRS spike
+    }
+    stream
+}
+
+/// Write synthetic sample CSV for testing without real data.
+pub fn write_sample_csv(path: &str, n_per_class: usize) {
+    let parent = Path::new(path).parent().expect("invalid path");
+    fs::create_dir_all(parent).expect("cannot create directory");
+
+    let mut f = fs::File::create(path).expect("cannot create CSV");
+    writeln!(f, "timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq").unwrap();
+
+    let mut t = 0.0f32;
+
+    let classes: [(f32, &str); 3] = [
+        (820.0, "N"),  // Normal ~73 BPM
+        (400.0, "N"),  // Tachy ~150 BPM (still N beats, just faster)
+        (1500.0, "N"), // Brady ~40 BPM
+    ];
+
+    for &(rr, beat_type) in &classes {
+        for _ in 0..n_per_class {
+            let bpm = 60_000.0 / rr;
+            let freq = 2000.0 + (bpm - 40.0) * (3000.0 / 160.0);
+            writeln!(f, "{:.1},{:.1},{},{:.1},{:.1}", t, rr, beat_type, bpm, freq).unwrap();
+            t += rr;
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -116,5 +202,35 @@ mod tests {
         let c = normal_sinus();
         let stream = c.to_frequency_stream(3);
         assert_eq!(stream.len(), c.duration_ms() * 3);
+    }
+
+    #[test]
+    fn csv_roundtrip() {
+        let path = "/tmp/cricket_brain_test_sample.csv";
+        write_sample_csv(path, 10);
+        let records = from_csv(path);
+        assert_eq!(records.len(), 30, "10 per class × 3 classes = 30");
+        assert!(records[0].rr_interval_ms > 800.0); // Normal
+        assert!(records[10].rr_interval_ms < 500.0); // Tachy
+        assert!(records[20].rr_interval_ms > 1400.0); // Brady
+        std::fs::remove_file(path).ok();
+    }
+
+    #[test]
+    fn beats_to_stream() {
+        let records = vec![
+            BeatRecord {
+                timestamp_ms: 0.0,
+                rr_interval_ms: 820.0,
+                beat_type: "N".to_string(),
+                bpm: 73.0,
+                mapped_freq: 2618.75,
+            },
+        ];
+        let stream = beats_to_frequency_stream(&records);
+        // 810 ms silence + 10 ms QRS = 820 total
+        assert_eq!(stream.len(), 820);
+        assert_eq!(stream[0], 0.0); // Silence
+        assert_eq!(stream[819], 4500.0); // QRS
     }
 }
