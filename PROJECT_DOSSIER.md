@@ -188,7 +188,7 @@ Build: `cd crates/wasm && wasm-pack build --target web --out-dir pkg`
 |--------|---------------|
 | **Privacy Mode** | `BrainConfig::privacy_mode = true` — Anonymisierung von Zeitstempeln, Coarsening von Telemetrie-Werten (HIPAA/DSGVO) |
 | **Trust Layer** | Confidence-Scoring (`C = SNR * (1 - jitter/tolerance)`) und Ueberlastungs-Erkennung (Shannon-Entropie > 3.2 + >80% aktive Neuronen) |
-| **Persistenz** | Vollstaendiger Snapshot/Restore-Support (`BrainSnapshot`) mit CRC64-Checksummen + Versions-Hash |
+| **Persistenz** | Vollstaendiger Snapshot/Restore-Support (`BrainSnapshot`) mit FNV-1a-Checksummen + Versions-Hash |
 | **Security** | `#![deny(unsafe_code)]` im Core-Crate. Minimale Abhaengigkeiten. `cargo audit` in CI |
 | **Unsafe-Boundary** | Nur in FFI-Crate (`extern "C"` Funktionen), mit SAFETY-Kommentaren und Null-Checks |
 

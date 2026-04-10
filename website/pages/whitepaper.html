@@ -436,11 +436,11 @@
       <table>
         <thead><tr><th>Crate</th><th>Purpose</th><th>no_std</th><th>LOC</th></tr></thead>
         <tbody>
-          <tr><td><code>cricket-brain-core</code></td><td>Neuron, synapse, memory, telemetry primitives</td><td>Yes</td><td>~600</td></tr>
-          <tr><td><code>cricket-brain</code></td><td>Brain network, sequence predictor, resonator bank</td><td>Optional</td><td>~2,700</td></tr>
+          <tr><td><code>cricket-brain-core</code></td><td>Neuron, synapse, memory, telemetry primitives</td><td>Yes</td><td>~850</td></tr>
+          <tr><td><code>cricket-brain</code></td><td>Brain network, sequence predictor, resonator bank</td><td>Optional</td><td>~2,800</td></tr>
           <tr><td><code>cricket-brain-ffi</code></td><td>C-compatible API</td><td>No</td><td>~165</td></tr>
-          <tr><td><code>cricket-brain-python</code></td><td>PyO3 bindings</td><td>No</td><td>~122</td></tr>
-          <tr><td><code>cricket-brain-wasm</code></td><td>wasm-bindgen bindings</td><td>No</td><td>~120</td></tr>
+          <tr><td><code>cricket-brain-python</code></td><td>PyO3 bindings</td><td>No</td><td>~126</td></tr>
+          <tr><td><code>cricket-brain-wasm</code></td><td>wasm-bindgen bindings</td><td>No</td><td>~131</td></tr>
         </tbody>
       </table>
     </div>
@@ -452,7 +452,7 @@
         <tbody>
           <tr><td><code>std</code> (default)</td><td>Standard library support</td></tr>
           <tr><td><code>no_std</code></td><td>Embedded mode (<code>alloc</code> only)</td></tr>
-          <tr><td><code>serde</code></td><td>Snapshot serialization with CRC64 checksums</td></tr>
+          <tr><td><code>serde</code></td><td>Snapshot serialization with FNV-1a checksums</td></tr>
           <tr><td><code>parallel</code></td><td>Rayon-based resonator bank parallelism</td></tr>
           <tr><td><code>telemetry</code></td><td>Structured event hooks</td></tr>
           <tr><td><code>cli</code></td><td>JSON Lines telemetry sink</td></tr>
@@ -467,7 +467,7 @@
       <table>
         <thead><tr><th>Configuration</th><th>Latency</th><th>Throughput</th><th>Memory</th></tr></thead>
         <tbody>
-          <tr><td>5-neuron canonical</td><td>0.175 &micro;s/step</td><td>5.7 M steps/sec</td><td>928 bytes</td></tr>
+          <tr><td>5-neuron canonical</td><td>0.175 &micro;s/step</td><td>10.7 M steps/sec</td><td>928 bytes</td></tr>
           <tr><td><code>no_std</code> Arduino minimal</td><td>N/A</td><td>N/A</td><td>928 bytes (static)</td></tr>
           <tr><td>40,960-neuron scale</td><td>N/A</td><td>3.43e7 neuron-ops/sec</td><td>13.91 MB</td></tr>
           <tr><td>Sequence predictor (1,280 neurons)</td><td>N/A</td><td>3.32e7 neuron-ops/sec</td><td>0.30 MB</td></tr>
