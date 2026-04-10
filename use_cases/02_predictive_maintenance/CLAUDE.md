@@ -66,7 +66,7 @@ let outputs = bank.step(input_freq);
 | 2 | DONE | 2026-04-10 | Python FFT pipeline, CSV I/O, 10/10 tests, 200 windows |
 | 3 | DONE | 2026-04-10 | CSV integration, ConfusionMatrix, 12/12 tests, 93.0% accuracy |
 | 4 | DONE | 2026-04-10 | SDT d'=6.18 all EXCELLENT, 0.129-0.264 µs/step, 3712B/20N |
-| 5 | Python analysis: confusion matrix, plots | PENDING |
+| 5 | DONE | 2026-04-10 | evaluate.py (F1=0.932), 3 plots, docs/results.md |
 | 6 | Stress test: noise, speed variation, mixed faults | PENDING |
 | 7 | Website demo page | PENDING |
 | 8 | Documentation: README, API, limitations | PENDING |
