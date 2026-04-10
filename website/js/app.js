@@ -330,6 +330,53 @@ const MobileNav = (() => {
 })();
 
 // ---------------------------------------------------------------------------
+// 6b. NAV DROPDOWN (Use Cases submenu)
+// ---------------------------------------------------------------------------
+
+const NavDropdown = (() => {
+  function init() {
+    document.querySelectorAll('.nav-dropdown-toggle').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dropdown = btn.closest('.nav-dropdown');
+        if (!dropdown) return;
+        const isOpen = dropdown.classList.contains('open');
+        // Close all dropdowns first
+        document.querySelectorAll('.nav-dropdown.open').forEach((d) => d.classList.remove('open'));
+        if (!isOpen) {
+          dropdown.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+        } else {
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.nav-dropdown')) {
+        document.querySelectorAll('.nav-dropdown.open').forEach((d) => {
+          d.classList.remove('open');
+          d.querySelector('.nav-dropdown-toggle')?.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
+
+    // Close dropdown on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.nav-dropdown.open').forEach((d) => {
+          d.classList.remove('open');
+          d.querySelector('.nav-dropdown-toggle')?.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
+  }
+
+  return { init };
+})();
+
+// ---------------------------------------------------------------------------
 // 7. SPA-LIKE PAGE LOADING (Legal Pages)
 // ---------------------------------------------------------------------------
 
@@ -583,6 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
   CopyCodeButtons.init();
   SmoothScroll.init();
   MobileNav.init();
+  NavDropdown.init();
   SPARouter.init();
   SkipNav.init();
   ScrollProgress.init();

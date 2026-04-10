@@ -153,8 +153,10 @@ Each use case follows the same 10-run progression:
   - Run 9: CI workflow (uc01-cardiac.yml, all steps verified)
   - Run 10: Metrics finalization (metrics.json updated with real values)
 
+### In Progress
+- [ ] UC02 Predictive Maintenance: CLAUDE.md created, Run 1 pending
+
 ### Planned
-- [ ] UC02 Predictive Maintenance: Runs 1-10
 - [ ] UC03 Marine Acoustic: Runs 1-10
 - [ ] UC04 Power Grid: Runs 1-10
 - [ ] UC05 Network Intrusion: Runs 1-10
