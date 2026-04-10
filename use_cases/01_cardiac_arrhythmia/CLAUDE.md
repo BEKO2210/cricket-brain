@@ -264,7 +264,7 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 | 4 | DONE | 2026-04-10 | SDT d'=6.18, Latency 0.126µs/step, RAM 928B=match, Criterion bench |
 | 5 | DONE | 2026-04-10 | evaluate.py (F1=0.962), 3 plots, docs/results.md |
 | 6 | DONE | 2026-04-10 | 5 adversarial tests, noise fails >10%, boundary ±1BPM works |
-| 7 | PENDING | — | Website demo |
+| 7 | DONE | 2026-04-10 | website/pages/cardiac.html, nav+footer+SPA linked |
 | 8 | PENDING | — | Documentation |
 | 9 | PENDING | — | CI integration |
 | 10 | PENDING | — | Metrics finalization |

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CricketBrain Cardiac Arrhythmia Pre-Screening — 928 bytes RAM, 0.126 µs/step, d'=6.18. Research prototype for rhythm classification.">
+  <meta name="theme-color" content="#0a0f1c" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
+  <meta property="og:title" content="Cardiac Arrhythmia Pre-Screening — CricketBrain">
+  <meta property="og:description" content="Neuromorphic cardiac rhythm detection in 928 bytes. Research prototype — NOT a medical device.">
+  <title>Cardiac Arrhythmia — CricketBrain</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="stylesheet" href="../css/style.css?v=3.0.0">
+  <style>
+    .cardiac-hero {
+      min-block-size: 50vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-2xl) var(--space-lg);
+      position: relative;
+      overflow: hidden;
+    }
+    .cardiac-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(239,68,68,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(0,212,170,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cardiac-hero h1 { font-size: var(--font-size-hero); margin-block-end: var(--space-md); }
+    .cardiac-hero h1 span { color: var(--danger); }
+    .cardiac-hero .subtitle { font-size: clamp(var(--font-size-base), 2vw, var(--font-size-xl)); color: var(--text-secondary); max-inline-size: 700px; margin-block-end: var(--space-xl); }
+    .disclaimer-banner {
+      background: color-mix(in srgb, var(--danger) 10%, var(--bg-card));
+      border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md) var(--space-lg);
+      text-align: center;
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin-block-end: var(--space-xl);
+      max-inline-size: 800px;
+    }
+    .disclaimer-banner strong { color: var(--danger); }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: var(--space-md);
+      max-inline-size: 900px;
+      margin-inline: auto;
+    }
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      text-align: center;
+      transition: all var(--transition-base);
+    }
+    .metric-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+    .metric-card .value { font-size: var(--font-size-3xl); font-weight: 800; color: var(--accent); font-family: var(--font-mono); }
+    .metric-card .label { font-size: var(--font-size-xs); color: var(--text-muted); margin-block-start: var(--space-2xs); }
+    .metric-card.danger .value { color: var(--danger); }
+    .result-table { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-block: var(--space-lg); }
+    .ecg-line { display: block; max-inline-size: 100%; margin-block: var(--space-lg); }
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      margin-block-end: var(--space-xl);
+    }
+    .license-note {
+      background: color-mix(in srgb, var(--highlight) 8%, var(--bg-card));
+      border: 1px solid color-mix(in srgb, var(--highlight) 25%, transparent);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+    }
+    .license-note strong { color: var(--highlight); }
+    @media (max-width: 640px) {
+      .cardiac-hero h1 { font-size: var(--font-size-3xl); }
+      .metric-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
+      .metric-card { padding: var(--space-md); }
+      .metric-card .value { font-size: var(--font-size-2xl); }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="../index.html" class="logo" aria-label="CricketBrain Home">Cricket<span>Brain</span></a>
+      <nav class="main-nav" id="main-nav" role="navigation" aria-label="Main navigation">
+        <a href="../index.html">Home</a>
+        <a href="../index.html#simulation">Simulation</a>
+        <a href="../index.html#benchmarks">Benchmarks</a>
+        <a href="whitepaper.html">Whitepaper</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">
+          <span aria-hidden="true" id="theme-icon">&#9790;</span>
+        </button>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
+          <span aria-hidden="true">&#9776;</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+
+    <!-- Hero -->
+    <section class="cardiac-hero">
+      <div class="disclaimer-banner">
+        <strong>NOT A MEDICAL DEVICE.</strong> Research prototype only. Not validated for clinical use.
+        No regulatory clearance (FDA/CE). Do not use for diagnosis or patient monitoring.
+      </div>
+      <h1>Cardiac <span>Arrhythmia</span> Detection</h1>
+      <p class="subtitle">Neuromorphic rhythm classification in 928 bytes of RAM. Detects tachycardia, bradycardia, and irregular rhythm using delay-line coincidence detection.</p>
+      <div style="display:flex; flex-wrap:wrap; gap:var(--space-md); justify-content:center;">
+        <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/01_cardiac_arrhythmia" class="btn btn-primary" target="_blank" rel="noopener">View Source</a>
+        <a href="../index.html#simulation" class="btn btn-secondary">Live Simulation</a>
+      </div>
+    </section>
+
+    <!-- Key Metrics -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Key <span>Metrics</span></h2>
+        <p class="section-subtitle">All values measured on 2026-04-10 using synthetic P-QRS-T waveforms. Fully reproducible.</p>
+
+        <div class="metric-grid" style="margin-block-end: var(--space-xl);">
+          <div class="metric-card">
+            <div class="value">92.5%</div>
+            <div class="label">Accuracy (150 beats)</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">6.18</div>
+            <div class="label">d' Sensitivity (SDT)</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">0.962</div>
+            <div class="label">Macro F1 Score</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">928 B</div>
+            <div class="label">CricketBrain RAM</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">0.126</div>
+            <div class="label">&micro;s / step</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">7.9M</div>
+            <div class="label">Steps / sec</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Per-Class Results -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Classification <span>Results</span></h2>
+
+        <div class="section-card">
+          <h3 style="margin-block-end: var(--space-md);">Per-Class Performance</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead>
+                <tr>
+                  <th>Class</th><th>TP</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Normal Sinus</td><td>50</td><td>0</td><td>5</td><td>1.000</td><td>0.909</td><td>0.952</td></tr>
+                <tr><td>Tachycardia</td><td>43</td><td>0</td><td>4</td><td>1.000</td><td>0.915</td><td>0.956</td></tr>
+                <tr><td>Bradycardia</td><td>43</td><td>0</td><td>2</td><td>1.000</td><td>0.956</td><td>0.977</td></tr>
+                <tr><td style="color:var(--highlight);">Irregular (transitions)</td><td>0</td><td>11</td><td>0</td><td>0.000</td><td>&mdash;</td><td>&mdash;</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-sm);">
+            The 11 "Irregular" predictions occur during rhythm transitions (Normal&rarr;Tachycardia, Tachycardia&rarr;Bradycardia). The detector needs 5&ndash;7 stable beats to converge. This is expected behavior.
+          </p>
+        </div>
+
+        <!-- SDT -->
+        <div class="section-card">
+          <h3 style="margin-block-end: var(--space-md);">Signal Detection Theory (Green &amp; Swets, 1966)</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead>
+                <tr><th>Condition</th><th>d'</th><th>TPR</th><th>FPR</th><th>TPR 95% CI</th><th>Rating</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Tachycardia vs Normal</td><td>6.18</td><td>1.000</td><td>0.000</td><td>[0.981, 1.000]</td><td>EXCELLENT</td></tr>
+                <tr><td>Bradycardia vs Normal</td><td>6.18</td><td>1.000</td><td>0.000</td><td>[0.981, 1.000]</td><td>EXCELLENT</td></tr>
+                <tr><td>Normal vs Tachycardia</td><td>6.18</td><td>1.000</td><td>0.000</td><td>[0.981, 1.000]</td><td>EXCELLENT</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs);">200 signal + 200 noise trials per condition. Wilson 95% confidence intervals.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stress Test — Honest Limits -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Stress Test &mdash; <span>Honest Limits</span></h2>
+        <p class="section-subtitle">Where does the detector break? Transparent disclosure of failure modes.</p>
+
+        <div class="section-card">
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead>
+                <tr><th>Test</th><th>Conditions</th><th>Result</th><th>Verdict</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Extreme rates (30&ndash;250 BPM)</td><td>10 rates, 12 cycles each</td><td>10/10 correct</td><td>PASSES</td></tr>
+                <tr><td>Boundary &plusmn;1 BPM</td><td>59/61/99/101 BPM</td><td>4/4 correct</td><td>PASSES</td></tr>
+                <tr><td>Random RR (irregular)</td><td>300&ndash;1200 ms, 30 beats</td><td>82% detected</td><td>PASSES</td></tr>
+                <tr><td>Rapid switching (3-beat)</td><td>Normal&harr;Tachy alternation</td><td>89% Irregular</td><td>Expected</td></tr>
+                <tr style="background:color-mix(in srgb, var(--danger) 8%, transparent);"><td>Noise 10%</td><td>Random freq injection</td><td>22.5% accuracy</td><td>FAILS</td></tr>
+                <tr style="background:color-mix(in srgb, var(--danger) 8%, transparent);"><td>Noise 20%+</td><td>Random freq injection</td><td>0% accuracy</td><td>FAILS</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-sm);">
+            <strong>Key weakness:</strong> The Gaussian tuning cannot reject in-band frequency noise. Real ECG signals require dedicated preprocessing (bandpass filter, wavelet denoising) before CricketBrain processing.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">How It <span>Works</span></h2>
+        <div class="section-card">
+          <pre style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-md); padding:var(--space-lg); font-family:var(--font-mono); font-size:var(--font-size-sm); overflow-x:auto; color:var(--text-secondary); text-align:center; line-height:1.8;">
+ECG Signal ──&gt; R-Peak Extraction ──&gt; RR Intervals ──&gt; Frequency Mapping
+                                                             │
+                                              CricketBrain (5N/6S, 928 bytes)
+                                              Gaussian tuning at QRS freq
+                                              Coincidence detection gate
+                                                             │
+                                                      Spike Output
+                                                             │
+                                                    RR Interval Tracker
+                                                    (sliding window, 8 beats)
+                                                             │
+                                              ┌──────────────┼──────────────┐
+                                          &gt;100 BPM      60-100 BPM      &lt;60 BPM
+                                         Tachycardia   Normal Sinus   Bradycardia
+                                                    CV &gt; 0.3 → Irregular</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dataset & License -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Dataset &amp; <span>License</span></h2>
+        <div class="section-card">
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Field</th><th>Value</th></tr></thead>
+              <tbody>
+                <tr><td>Primary Dataset</td><td>MIT-BIH Arrhythmia Database</td></tr>
+                <tr><td>Dataset License</td><td>Open Data Commons Attribution v1.0</td></tr>
+                <tr><td>Dataset URL</td><td><a href="https://physionet.org/content/mitdb/1.0.0/" target="_blank" rel="noopener">physionet.org/content/mitdb/1.0.0/</a></td></tr>
+                <tr><td>Records</td><td>48 &times; 30 min two-channel ambulatory ECG</td></tr>
+                <tr><td>Sampling Rate</td><td>360 Hz</td></tr>
+                <tr><td>Annotations</td><td>~110,000 beat labels by 2+ cardiologists</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="license-note" style="margin-block-start: var(--space-lg);">
+            <strong>License:</strong> CricketBrain source code is <strong>AGPL-3.0</strong>.
+            Commercial use in proprietary software requires a paid license
+            (<a href="https://github.com/BEKO2210/cricket-brain/blob/main/COMMERCIAL.md" target="_blank" rel="noopener">details</a>).
+            The MIT-BIH dataset is <strong>ODC-By</strong> (attribution required).
+            Citation: Goldberger et al. (2000), Moody &amp; Mark (2001).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Quick <span>Start</span></h2>
+        <div style="max-inline-size: 700px; margin-inline: auto;">
+          <div class="code-block">
+            <div class="code-block-header">
+              <span>Terminal</span>
+              <button class="copy-btn" type="button" aria-label="Copy commands">Copy</button>
+            </div>
+            <pre><code><span class="comment"># Clone and build</span>
+<span class="command">git clone</span> https://github.com/BEKO2210/cricket-brain.git
+<span class="command">cd</span> cricket-brain/use_cases/01_cardiac_arrhythmia
+
+<span class="comment"># Run synthetic demo</span>
+<span class="command">cargo run</span> <span class="flag">--release</span>
+
+<span class="comment"># Classify CSV data</span>
+<span class="command">cargo run</span> <span class="flag">--release</span> <span class="flag">--</span> --csv data/processed/sample_record.csv
+
+<span class="comment"># Run all benchmarks</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> cardiac_sdt
+<span class="command">cargo run</span> <span class="flag">--release --example</span> cardiac_latency
+<span class="command">cargo run</span> <span class="flag">--release --example</span> cardiac_stress</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-compact">
+      <div class="footer-links">
+        <a href="../index.html">Home</a>
+        <a href="whitepaper.html">Whitepaper</a>
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 Belkis Aslani</span>
+        <span>AGPL-3.0 | NOT a medical device</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/app.js?v=3.0.0"></script>
+</body>
+</html>
