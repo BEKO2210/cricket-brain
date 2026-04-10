@@ -146,17 +146,28 @@ class SimulationRenderer {
     this.ctx = this.canvas.getContext('2d');
     this.outputHistory = [];
     this.maxHistory = 250;
+    this._lastW = 0;
     this.resize();
-    this._resizeObserver = new ResizeObserver(() => this.resize());
+    this._resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      const newW = Math.round(entry.contentRect.width);
+      // Only resize when width actually changes — prevents infinite height growth
+      if (newW !== this._lastW) {
+        this._lastW = newW;
+        this.resize();
+      }
+    });
     this._resizeObserver.observe(this.canvas.parentElement);
   }
 
   resize() {
     const parent = this.canvas.parentElement;
-    const rect = parent.getBoundingClientRect();
+    const w = parent.getBoundingClientRect().width;
+    if (w < 1) return;
     const dpr = window.devicePixelRatio || 1;
-    this.w = rect.width;
-    this.h = rect.height || 450;
+    // Fixed aspect ratio (4:3) — never read height from parent to avoid loop
+    this.w = w;
+    this.h = Math.max(320, Math.min(w * 0.75, 500));
     this.canvas.width = this.w * dpr;
     this.canvas.height = this.h * dpr;
     this.canvas.style.width = this.w + 'px';

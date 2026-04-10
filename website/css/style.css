@@ -481,18 +481,9 @@
     overflow: hidden;
     background: var(--bg-secondary);
     border: 1px solid var(--border-subtle);
-    min-block-size: 400px;
-  }
-
-  @media (max-width: 640px) {
-    .sim-canvas-wrap {
-      min-block-size: 320px;
-    }
   }
 
   .sim-canvas-wrap canvas {
-    inline-size: 100%;
-    block-size: 100%;
     display: block;
   }
 
