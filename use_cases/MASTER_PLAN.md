@@ -107,7 +107,7 @@ Each use case follows the same 10-run progression:
 | UC | Dataset | License | Signal Hz | Status |
 |----|---------|---------|-----------|--------|
 | 01 Cardiac | MIT-BIH Arrhythmia | ODC-By | 360 | **COMPLETE** (10/10) |
-| 02 Bearings | CWRU Bearing | Public Domain | 12,000 | Planned |
+| 02 Bearings | CWRU Bearing | Public Domain | 12,000 | **COMPLETE** (10/10) |
 | 03 Marine | MBARI MARS | CC BY 4.0 | 256,000 | Planned |
 | 04 Grid | EPFL Smart Grid | CC BY 4.0 | 50 | Planned |
 | 05 Network | KDD Cup 1999 | Public Domain | — | Planned |
@@ -153,8 +153,17 @@ Each use case follows the same 10-run progression:
   - Run 9: CI workflow (uc01-cardiac.yml, all steps verified)
   - Run 10: Metrics finalization (metrics.json updated with real values)
 
-### In Progress
-- [ ] UC02 Predictive Maintenance: CLAUDE.md created, Run 1 pending
+- [x] **UC02 Predictive Maintenance — ALL 10 RUNS COMPLETE** (2026-04-10)
+  - Run 1: Scaffold (Cargo.toml, ResonatorBank detector, 9 tests)
+  - Run 2: Data pipeline (Python FFT preprocess, CSV I/O, 10 tests)
+  - Run 3: CSV classification + confusion matrix (12 tests, 93% accuracy)
+  - Run 4: Benchmark suite (SDT d'=6.18, latency 0.22µs, memory 3712B)
+  - Run 5: Python evaluation (F1=0.932, 3 PNG plots)
+  - Run 6: Stress test (100% noise-robust, speed-comp FIXED 6/6 RPMs)
+  - Run 7: Website demo page (bearings.html on main site)
+  - Run 8: Full documentation (README, API reference)
+  - Run 9: CI workflow (uc02-bearings.yml, all steps verified)
+  - Run 10: Metrics finalization (metrics.json updated with real values)
 
 ### Planned
 - [ ] UC03 Marine Acoustic: Runs 1-10

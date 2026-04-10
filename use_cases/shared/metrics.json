@@ -42,9 +42,19 @@
     "dataset_license": "Public Domain",
     "dataset_url": "https://engineering.case.edu/bearingdatacenter",
     "signal_hz": 12000,
-    "accuracy_pct": null,
-    "latency_ms": 9,
-    "key_advantage": "$0.50 BOM, Resonator Bank"
+    "accuracy_pct": 93.0,
+    "d_prime": 6.18,
+    "macro_f1": 0.932,
+    "latency_us_per_step": 0.22,
+    "latency_ms": 49,
+    "ram_bytes": 3712,
+    "neurons": 20,
+    "channels": 4,
+    "noise_tolerance_pct": 50,
+    "speed_compensation": true,
+    "tests_passing": 12,
+    "date_measured": "2026-04-10",
+    "key_advantage": "3712B RAM, 4-channel, 100% noise-robust, RPM compensation"
   },
   "03_marine_acoustic": {
     "market_size_usd_bn": 4,
