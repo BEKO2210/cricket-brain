@@ -18,3 +18,15 @@ criterion = { version = "0.5", features = ["html_reports"] }
 [[bench]]
 name = "cardiac_bench"
 harness = false
+
+[[example]]
+name = "cardiac_sdt"
+path = "benchmarks/cardiac_sdt.rs"
+
+[[example]]
+name = "cardiac_latency"
+path = "benchmarks/cardiac_latency.rs"
+
+[[example]]
+name = "cardiac_memory"
+path = "benchmarks/cardiac_memory.rs"

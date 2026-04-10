@@ -257,11 +257,11 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 
 | Run | Status | Date | Notes |
 |-----|--------|------|-------|
-| 0 | DONE | — | Scaffold directories, SOURCES.md, CLAUDE.md |
-| 1 | DONE | — | Cargo.toml, src/, README, 7/7 tests pass, BPM correct |
-| 2 | DONE | — | Data pipeline: Python download/preprocess, CSV I/O, 9/9 tests |
+| 0 | DONE | 2026-04-10 | Scaffold directories, SOURCES.md, CLAUDE.md |
+| 1 | DONE | 2026-04-10 | Cargo.toml, src/, README, 7/7 tests pass, BPM correct |
+| 2 | DONE | 2026-04-10 | Data pipeline: Python download/preprocess, CSV I/O, 9/9 tests |
 | 3 | DONE | 2026-04-10 | CSV integration, confusion matrix, 11/11 tests, 92.5% accuracy |
-| 4 | PENDING | — | Benchmarks |
+| 4 | DONE | 2026-04-10 | SDT d'=6.18, Latency 0.126µs/step, RAM 928B=match, Criterion bench |
 | 5 | PENDING | — | Python analysis |
 | 6 | PENDING | — | Stress test |
 | 7 | PENDING | — | Website demo |
@@ -276,35 +276,36 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 --- NEXT PROMPT START ---
 Lies use_cases/01_cardiac_arrhythmia/CLAUDE.md und fuehre Run 3 aus.
 
-Run 4 Deliverables — Benchmark Suite:
+Run 5 Deliverables — Python Analysis:
 
-1. Erstelle use_cases/01_cardiac_arrhythmia/benchmarks/cardiac_sdt.rs:
-   - Signal Detection Theory (d', AUC) auf sample_record.csv
-   - Normal vs Tachy, Normal vs Brady als separate Conditions
-   - Wilson 95% CI fuer TPR/FPR
+1. Erstelle use_cases/01_cardiac_arrhythmia/python/evaluate.py:
+   - Liest sample_record.csv
+   - Ruft CardiacDetector via subprocess (cargo run -- --csv) auf
+   - Parsed die Ausgabe, baut Confusion Matrix in Python
+   - Berechnet: Accuracy, Precision, Recall, F1 pro Klasse
+   - Gibt alles als Markdown-Tabelle aus
 
-2. Erstelle use_cases/01_cardiac_arrhythmia/benchmarks/cardiac_latency.rs:
-   - First-classification latency per Rhythmus-Typ
-   - Mean, SD, Min, Max ueber mehrere Laeufe
-   - us/step Messung im Release-Modus
+2. Erstelle use_cases/01_cardiac_arrhythmia/python/plot_results.py:
+   - Generiert Plots mit matplotlib:
+     a) BPM-Zeitverlauf mit Klassifikations-Farben
+     b) Confusion Matrix Heatmap
+     c) Confidence-Verteilung pro Klasse
+   - Speichert als PNG in docs/
 
-3. Erstelle use_cases/01_cardiac_arrhythmia/benchmarks/cardiac_memory.rs:
-   - memory_usage_bytes() Messung
-   - Vergleich mit metrics.json global.ram_bytes
+3. Erstelle use_cases/01_cardiac_arrhythmia/docs/results.md:
+   - Benchmark-Ergebnisse Zusammenfassung
+   - Referenziert Plots
+   - SDT-Ergebnisse (d'=6.18), Latenz (0.126µs/step), RAM (928B)
+   - Ehrliche Limitationen: synthetische Daten, kein reales ECG
 
-4. Erweitere benches/cardiac_bench.rs:
-   - Criterion-Benchmark fuer step() Throughput
-   - Criterion-Benchmark fuer classify_stream() auf 150 Beats
+4. Verifiziere:
+   - python evaluate.py laeuft
+   - python plot_results.py erzeugt PNGs
+   - docs/results.md ist vollstaendig
 
-5. Verifiziere:
-   - Alle Benchmarks laufen
-   - Criterion-Bench laeuft (cargo bench)
-   - Ergebnisse sind plausibel
-
-6. Update CLAUDE.md: Run 4 = DONE, NEXT PROMPT fuer Run 5
+5. Update CLAUDE.md: Run 5 = DONE, NEXT PROMPT fuer Run 6
 
 REGELN:
 - Aendere NICHTS ausserhalb von use_cases/
-- Alle Zahlen aus metrics.json
 - Commit und push am Ende
 --- NEXT PROMPT END ---
