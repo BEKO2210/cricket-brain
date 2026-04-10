@@ -476,8 +476,41 @@
 <span class="command">cargo run</span> <span class="flag">--release --example</span> bench_latency    <span class="comment"># Spike Latency &amp; Precision</span>
 <span class="command">cargo run</span> <span class="flag">--release --example</span> bench_patterns   <span class="comment"># Pattern Separation</span>
 <span class="command">cargo run</span> <span class="flag">--release --example</span> baselines        <span class="comment"># vs Classical Detectors</span>
-<span class="command">cargo run</span> <span class="flag">--release --example</span> ablation_study   <span class="comment"># Component Analysis</span></code></pre>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> ablation_study   <span class="comment"># Component Analysis</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> bench_stress     <span class="comment"># Adversarial Stress Test</span></code></pre>
           </div>
+        </div>
+
+        <!-- Adversarial Stress Test -->
+        <div style="margin-block-start: var(--space-2xl);" data-animate="fade-up">
+          <h3 style="margin-block-end: var(--space-xs); font-size: var(--font-size-xl);">Adversarial Stress Test <span style="color:var(--text-muted); font-size: var(--font-size-sm); font-weight:400;">&mdash; honest limits</span></h3>
+          <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-block-end: var(--space-md);">Independent seeds, colored noise, in-band interferers, extended silence, and a simple-threshold baseline. Where does CricketBrain actually break? <em>Source: <code>benchmarks/stress_test_benchmark.rs</code></em></p>
+          <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+            <table class="comparison-table" role="table">
+              <thead>
+                <tr>
+                  <th scope="col">Test</th>
+                  <th scope="col">Conditions</th>
+                  <th scope="col">TPR</th>
+                  <th scope="col">FPR</th>
+                  <th scope="col">Verdict</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>10 independent RNG seeds</td><td>5000+5000 trials, SNR 0 dB</td><td>1.000</td><td>0.000</td><td>Confirmed</td></tr>
+                <tr><td>AWGN (Gaussian jitter)</td><td>500 trials, SNR &minus;10 to +20 dB</td><td>1.000</td><td>0.000</td><td>Confirmed</td></tr>
+                <tr><td>Pink noise (1/f)</td><td>500 trials, SNR 0 dB</td><td>1.000</td><td>0.002</td><td>1 false positive</td></tr>
+                <tr><td>Extended silence (1000 steps)</td><td>2000 trials</td><td>&mdash;</td><td>0.000</td><td>Zero false alarms</td></tr>
+                <tr style="background: color-mix(in srgb, var(--danger) 8%, transparent);"><td>In-band 4400 Hz (&minus;2.2%)</td><td>500 noise-only trials</td><td>&mdash;</td><td>0.790</td><td>FAILS &mdash; 79% FPR</td></tr>
+                <tr style="background: color-mix(in srgb, var(--danger) 8%, transparent);"><td>In-band 4300 Hz (&minus;4.4%)</td><td>500 noise-only trials</td><td>&mdash;</td><td>0.586</td><td>FAILS &mdash; 59% FPR</td></tr>
+                <tr><td>In-band 4050 Hz (&minus;10%)</td><td>500 noise-only trials</td><td>&mdash;</td><td>0.044</td><td>4.4% FPR (boundary)</td></tr>
+                <tr><td>Simple threshold detector</td><td>SNR &minus;10 dB</td><td>1.000</td><td>1.000</td><td>Trivially useless</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color: var(--text-muted); font-size: var(--font-size-xs); margin-block-start: var(--space-xs);">
+            <strong>Honest disclosure:</strong> CricketBrain's Gaussian tuning (w=0.1, &plusmn;10% bandwidth) makes it excellent at rejecting off-frequency noise but vulnerable to sustained in-band interferers within &plusmn;5% of the eigenfrequency. This is consistent with biological cricket hearing — the circuit is tuned for a specific calling song, not general-purpose signal classification. The simple threshold detector proves the problem is NOT trivial — frequency selectivity is genuine and necessary.
+          </p>
         </div>
 
         <p style="text-align:center; color: var(--text-muted); font-size: var(--font-size-xs); margin-block-start: var(--space-lg);">All benchmarks are deterministic (seeded RNG), fully reproducible, and generate identical results across Linux, macOS, and Windows. References: Green &amp; Swets (1966), Levitt (1971), Plomp (1964), Merolla (2014), Davies (2018), Gerstner &amp; Kistler (2002), Yassa &amp; Stark (2011).</p>
