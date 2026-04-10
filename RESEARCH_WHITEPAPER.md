@@ -20,7 +20,7 @@ employs Gaussian-tuned resonators, ring-buffer delay lines, and coincidence
 detection gates to recognize temporal patterns in real-time with sub-microsecond
 latency and sub-kilobyte memory footprints. On a canonical 5-neuron circuit
 modeled after the cricket's AN1-LN2/LN3/LN5-ON1 pathway, we achieve 0.175 us
-per processing step with 944 bytes of RAM in a `no_std` embedded configuration.
+per processing step with 928 bytes of RAM in a `no_std` embedded configuration.
 We evaluate the system across SNR conditions from -10 dB to +30 dB using a
 parametric sweep protocol with 120 trials per condition, and compare against
 three classical baselines: matched filtering, Goertzel-based spectral detection,
@@ -286,7 +286,7 @@ All experiments use a standardized trial structure:
 | Configuration | Latency | Throughput | Memory |
 |---|---|---|---|
 | 5-neuron canonical | 0.175 us/step | 5.7 M steps/sec | 348 bytes |
-| `no_std` Arduino minimal | N/A | N/A | 944 bytes (static) |
+| `no_std` Arduino minimal | N/A | N/A | 928 bytes (static) |
 | 40,960-neuron scale | N/A | 3.43e7 neuron-ops/sec | 13.91 MB |
 | Sequence predictor (1,280 neurons) | N/A | 3.32e7 neuron-ops/sec | 0.30 MB |
 

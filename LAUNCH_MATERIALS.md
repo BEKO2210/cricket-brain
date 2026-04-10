@@ -223,7 +223,7 @@ temporal selectivity online.
 **Tweet 4:**
 Performance after adding plasticity:
 
-Before: 85 ns/step, 944 bytes
+Before: 85 ns/step, 928 bytes
 After:  97 ns/step, ~1008 bytes
 
 +14% latency for fully adaptive learning. Still under 100 ns.

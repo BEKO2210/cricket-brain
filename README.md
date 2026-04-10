@@ -195,7 +195,7 @@ cd crates/wasm && wasm-pack build --target web     # WASM   →  npm package
 <tr><td><b>Canonical 5-neuron</b></td><td align="right"><code>0.175 us/step</code></td><td align="right">5.7M steps/sec</td><td align="right">348 bytes</td></tr>
 <tr><td><b>1,280-neuron predictor</b></td><td align="right">—</td><td align="right">50.1M neuron-ops/sec</td><td align="right">0.30 MB</td></tr>
 <tr><td><b>40,960-neuron scale</b></td><td align="right">—</td><td align="right">40.7M neuron-ops/sec</td><td align="right">13.91 MB</td></tr>
-<tr><td><b>Arduino no_std</b></td><td align="right">—</td><td align="right">—</td><td align="right"><code>944 bytes</code></td></tr>
+<tr><td><b>Arduino no_std</b></td><td align="right">—</td><td align="right">—</td><td align="right"><code>928 bytes</code></td></tr>
 </table>
 
 ### vs. Classical Baselines (SNR = 0 dB)
@@ -264,7 +264,7 @@ cargo build -p cricket-brain-core --no-default-features
 
 **Minimal embedded example** ([`examples/arduino_minimal.rs`](examples/arduino_minimal.rs)):
 - Fixed-size arrays (no heap allocation)
-- 944 bytes calculated RAM footprint
+- 928 bytes calculated RAM footprint
 - Designed for Arduino Uno, STM32, ESP32, any Cortex-M (host-verified)
 
 ---
