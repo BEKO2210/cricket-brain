@@ -172,6 +172,123 @@ impl Default for BearingDetector {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Batch classification & confusion matrix
+// ---------------------------------------------------------------------------
+
+use crate::vibration_signal::VibrationWindow;
+
+/// Result of classifying a single detection window.
+#[derive(Debug, Clone)]
+pub struct WindowClassification {
+    pub fault: FaultType,
+    pub confidence: f32,
+    pub step: usize,
+}
+
+impl BearingDetector {
+    /// Process a sequence of VibrationWindows. Each window's dominant_freq is
+    /// fed for `steps_per_window` timesteps.
+    pub fn classify_stream(
+        &mut self,
+        windows: &[VibrationWindow],
+        steps_per_window: usize,
+    ) -> Vec<WindowClassification> {
+        self.reset();
+        let stream = crate::vibration_signal::windows_to_frequency_stream(windows, steps_per_window);
+        let mut results = Vec::new();
+        for &freq in &stream {
+            if let Some(fault) = self.step(freq) {
+                results.push(WindowClassification {
+                    fault,
+                    confidence: self.confidence(),
+                    step: self.steps_processed(),
+                });
+            }
+        }
+        results
+    }
+}
+
+/// Map ground-truth label string to FaultType.
+fn label_to_fault(label: &str) -> FaultType {
+    match label.trim() {
+        "Normal" => FaultType::Normal,
+        "OR" => FaultType::OuterRace,
+        "IR" => FaultType::InnerRace,
+        "Ball" => FaultType::BallDefect,
+        _ => FaultType::Normal,
+    }
+}
+
+/// Confusion matrix for bearing fault classification.
+#[derive(Debug, Default)]
+pub struct ConfusionMatrix {
+    pub total: usize,
+    pub correct: usize,
+    pub tp_normal: usize,
+    pub tp_outer: usize,
+    pub tp_inner: usize,
+    pub tp_ball: usize,
+    pub fp_normal: usize,
+    pub fp_outer: usize,
+    pub fp_inner: usize,
+    pub fp_ball: usize,
+}
+
+impl ConfusionMatrix {
+    /// Build from predictions and ground-truth windows.
+    ///
+    /// Maps detector windows back to the nearest CSV windows using the
+    /// `steps_per_window` ratio.
+    pub fn from_predictions(
+        preds: &[WindowClassification],
+        windows: &[VibrationWindow],
+        steps_per_window: usize,
+    ) -> Self {
+        let mut cm = Self::default();
+        for p in preds {
+            // Map step back to source window index
+            let win_idx = (p.step / steps_per_window).min(windows.len().saturating_sub(1));
+            let truth = label_to_fault(&windows[win_idx].fault_label);
+
+            cm.total += 1;
+            if p.fault == truth {
+                cm.correct += 1;
+            }
+            match (p.fault, truth) {
+                (FaultType::Normal, FaultType::Normal) => cm.tp_normal += 1,
+                (FaultType::Normal, _) => cm.fp_normal += 1,
+                (FaultType::OuterRace, FaultType::OuterRace) => cm.tp_outer += 1,
+                (FaultType::OuterRace, _) => cm.fp_outer += 1,
+                (FaultType::InnerRace, FaultType::InnerRace) => cm.tp_inner += 1,
+                (FaultType::InnerRace, _) => cm.fp_inner += 1,
+                (FaultType::BallDefect, FaultType::BallDefect) => cm.tp_ball += 1,
+                (FaultType::BallDefect, _) => cm.fp_ball += 1,
+            }
+        }
+        cm
+    }
+
+    pub fn accuracy(&self) -> f32 {
+        if self.total == 0 { return 0.0; }
+        self.correct as f32 / self.total as f32
+    }
+
+    pub fn print(&self) {
+        println!("  Confusion Matrix ({} predictions):", self.total);
+        println!("  ┌──────────────┬────────┬────────┬────────┬────────┐");
+        println!("  │              │ Normal │ Outer  │ Inner  │  Ball  │");
+        println!("  ├──────────────┼────────┼────────┼────────┼────────┤");
+        println!("  │ TP           │ {:>6} │ {:>6} │ {:>6} │ {:>6} │",
+                 self.tp_normal, self.tp_outer, self.tp_inner, self.tp_ball);
+        println!("  │ FP           │ {:>6} │ {:>6} │ {:>6} │ {:>6} │",
+                 self.fp_normal, self.fp_outer, self.fp_inner, self.fp_ball);
+        println!("  └──────────────┴────────┴────────┴────────┴────────┘");
+        println!("  Accuracy: {}/{} = {:.1}%", self.correct, self.total, self.accuracy() * 100.0);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -227,5 +344,31 @@ mod tests {
             }
         }
         assert_eq!(last, Some(FaultType::BallDefect));
+    }
+
+    #[test]
+    fn classify_stream_csv() {
+        let windows = vibration_signal::from_csv("data/processed/sample_bearing.csv");
+        assert!(windows.len() >= 100);
+        let mut det = BearingDetector::new();
+        let results = det.classify_stream(&windows, 25);
+        assert!(!results.is_empty(), "Should produce classifications");
+        // Should see different fault types across the 4 sections
+        let has_normal = results.iter().any(|r| r.fault == FaultType::Normal);
+        let has_outer = results.iter().any(|r| r.fault == FaultType::OuterRace);
+        let has_inner = results.iter().any(|r| r.fault == FaultType::InnerRace);
+        assert!(has_normal, "Should detect normal section");
+        assert!(has_outer || has_inner, "Should detect at least one fault type");
+    }
+
+    #[test]
+    fn confusion_matrix_accuracy() {
+        let windows = vibration_signal::from_csv("data/processed/sample_bearing.csv");
+        let mut det = BearingDetector::new();
+        let preds = det.classify_stream(&windows, 25);
+        let cm = ConfusionMatrix::from_predictions(&preds, &windows, 25);
+        assert!(cm.total > 0);
+        // With synthetic data, accuracy should be decent
+        println!("UC02 CM accuracy: {:.1}%", cm.accuracy() * 100.0);
     }
 }

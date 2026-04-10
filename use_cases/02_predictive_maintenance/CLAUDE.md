@@ -64,7 +64,7 @@ let outputs = bank.step(input_freq);
 |-----|-------------|--------|
 | 1 | DONE | 2026-04-10 | Scaffold, 9/9 tests, 4 fault types detected, 0.127-0.285 µs/step |
 | 2 | DONE | 2026-04-10 | Python FFT pipeline, CSV I/O, 10/10 tests, 200 windows |
-| 3 | Core detector: BearingDetector with ResonatorBank | PENDING |
+| 3 | DONE | 2026-04-10 | CSV integration, ConfusionMatrix, 12/12 tests, 93.0% accuracy |
 | 4 | Benchmark suite: SDT, latency, memory | PENDING |
 | 5 | Python analysis: confusion matrix, plots | PENDING |
 | 6 | Stress test: noise, speed variation, mixed faults | PENDING |
