@@ -341,8 +341,10 @@ const SPARouter = (() => {
   let indexContent = null;
   let indexTitle = '';
 
-  /** Routes we handle as SPA navigations. */
-  const SPA_ROUTES = ['pages/impressum.html', 'pages/datenschutz.html', 'pages/whitepaper.html', 'pages/cardiac.html'];
+  /** Routes we handle as SPA navigations.
+   *  Only pages that use NO custom <style> in <head> — they share the main CSS.
+   *  Pages with their own styles (whitepaper, cardiac) must load as full pages. */
+  const SPA_ROUTES = ['pages/impressum.html', 'pages/datenschutz.html'];
 
   function isSPALink(href) {
     if (!href) return false;
