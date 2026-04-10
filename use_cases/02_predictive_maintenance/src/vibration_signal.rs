@@ -78,6 +78,53 @@ fn fault_signal(n_steps: usize, fault_freq: f32, seed: u64) -> Vec<f32> {
     signal
 }
 
+// ---------------------------------------------------------------------------
+// CSV I/O for preprocessed bearing data
+// ---------------------------------------------------------------------------
+
+use std::fs;
+use std::io::{BufRead, BufReader};
+
+/// A single preprocessed frequency window from CSV.
+#[derive(Debug, Clone)]
+pub struct VibrationWindow {
+    pub timestamp_ms: f32,
+    pub dominant_freq: f32,
+    pub amplitude: f32,
+    pub fault_label: String,
+}
+
+/// Read preprocessed CSV (timestamp_ms,dominant_freq,amplitude,fault_label).
+pub fn from_csv(path: &str) -> Vec<VibrationWindow> {
+    let file = fs::File::open(path).expect("cannot open CSV");
+    let reader = BufReader::new(file);
+    let mut records = Vec::new();
+
+    for (i, line) in reader.lines().enumerate() {
+        let line = line.expect("cannot read line");
+        if i == 0 { continue; } // Skip header
+        let cols: Vec<&str> = line.split(',').collect();
+        if cols.len() < 4 { continue; }
+        records.push(VibrationWindow {
+            timestamp_ms: cols[0].parse().unwrap_or(0.0),
+            dominant_freq: cols[1].parse().unwrap_or(0.0),
+            amplitude: cols[2].parse().unwrap_or(0.0),
+            fault_label: cols[3].trim().to_string(),
+        });
+    }
+    records
+}
+
+/// Convert vibration windows to a frequency stream for the BearingDetector.
+/// Each window's dominant_freq is repeated for `steps_per_window` timesteps.
+pub fn windows_to_frequency_stream(windows: &[VibrationWindow], steps_per_window: usize) -> Vec<f32> {
+    let mut stream = Vec::with_capacity(windows.len() * steps_per_window);
+    for w in windows {
+        stream.extend(std::iter::repeat(w.dominant_freq).take(steps_per_window));
+    }
+    stream
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -108,6 +155,16 @@ mod tests {
         let sig = ball_fault(200);
         let bsf_count = sig.iter().filter(|&&f| (f - BSF).abs() < BSF * 0.05).count();
         assert!(bsf_count > 100, "Should have strong BSF presence: {bsf_count}/200");
+    }
+
+    #[test]
+    fn csv_read() {
+        let records = from_csv("data/processed/sample_bearing.csv");
+        assert_eq!(records.len(), 200, "Should have 200 windows");
+        assert_eq!(records[0].fault_label, "Normal");
+        assert_eq!(records[50].fault_label, "OR");
+        assert_eq!(records[100].fault_label, "IR");
+        assert_eq!(records[150].fault_label, "Ball");
     }
 
     #[test]
