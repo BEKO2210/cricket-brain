@@ -43,11 +43,6 @@ impl Rng {
         (self.next_u64() >> 40) as f32 / ((1u64 << 24) as f32)
     }
 
-    /// Uniform in [-1, 1]
-    fn centered(&mut self) -> f32 {
-        self.next_f32() * 2.0 - 1.0
-    }
-
     /// Standard normal via Box-Muller transform
     fn gaussian(&mut self) -> f32 {
         let u1 = self.next_f32().max(1e-10);
@@ -101,7 +96,7 @@ fn noise_pink(rng: &mut Rng, pink_state: &mut f32, snr_db: i32) -> f32 {
     // Random walk with mean-reversion
     *pink_state = *pink_state * 0.95 + rng.gaussian() * 500.0 * noise_scale;
     let freq = 4500.0 + *pink_state;
-    if freq < 1000.0 || freq > 9000.0 || rng.next_f32() > 0.3 {
+    if !(1000.0..=9000.0).contains(&freq) || rng.next_f32() > 0.3 {
         0.0 // Often silent
     } else {
         freq
@@ -155,8 +150,6 @@ struct TestResult {
     description: &'static str,
     tp: usize,
     fp: usize,
-    tn: usize,
-    fnn: usize,
     n_signal: usize,
     n_noise: usize,
 }
@@ -262,8 +255,6 @@ fn main() {
             description: "10 seeds, 500 trials each, SNR=0dB, original noise",
             tp: total_tp,
             fp: total_fp,
-            tn: total_noise - total_fp,
-            fnn: total_signal - total_tp,
             n_signal: total_signal,
             n_noise: total_noise,
         });
@@ -395,8 +386,6 @@ fn main() {
             description: "Colored noise, SNR=0dB, 500 trials",
             tp,
             fp,
-            tn: trials - fp,
-            fnn: trials - tp,
             n_signal: trials,
             n_noise: trials,
         });
@@ -454,7 +443,6 @@ fn main() {
         let trials = 500;
 
         for (freq, label) in &target_freqs {
-            let mut rng = Rng::new(0xF0EE_0002_u64.wrapping_add(*freq as u64));
             let mut tp = 0;
 
             for _ in 0..trials {
@@ -530,8 +518,6 @@ fn main() {
             description: "1000-step trials, 2000 trials, pure silence",
             tp: 0,
             fp,
-            tn: trials - fp,
-            fnn: 0,
             n_signal: 0,
             n_noise: trials,
         });
