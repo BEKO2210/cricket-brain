@@ -49,13 +49,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   moving average on input energy.
 - **Chaos Detection:** Shannon entropy monitoring with overload alerting when
   entropy > 3.2 and >80% neurons active.
-- **Snapshot/Restore:** Full serializable state with CRC64 checksum and version
+- **Snapshot/Restore:** Full serializable state with FNV-1a checksum and version
   hash verification (requires `serde` feature).
 - **no_std Core:** `crates/core` runs without standard library (only `libm`),
   enforced with `#![deny(unsafe_code)]`.
 - **Examples:** 14 reference implementations including ECG sentinel monitor,
   research SNR sweep generator, CLI with config/snapshot support, Arduino
-  minimal (944 bytes RAM), and WASM browser demo.
+  minimal (928 bytes RAM), and WASM browser demo.
 - **CI Pipeline:** Cross-platform tests (Linux/macOS/Windows), rustfmt, clippy,
   WASM build verification, FFI header sync check, and security audit.
 - **Documentation:** Project dossier, research whitepaper, commercial licensing

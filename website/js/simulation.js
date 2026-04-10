@@ -1,7 +1,7 @@
 'use strict';
 
 /* ==============================================================
-   Cricket-Brain Live Simulation Engine
+   CricketBrain Live Simulation Engine
    JavaScript port of the Rust neuromorphic engine
    ============================================================== */
 

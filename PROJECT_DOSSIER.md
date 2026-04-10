@@ -15,7 +15,7 @@ CricketBrain ist ein hochperformanter, biologisch inspirierter Signalprozessor. 
 |--------|------|
 | **Performance** | ~0.175 us pro Simulationsschritt (5-Neuron kanonisch) |
 | **Throughput** | 3.43 x 10^7 Neuron-Ops/sec (40k-Neuron Skalierung) |
-| **Footprint** | `no_std` Kern, minimaler RAM-Bedarf (944 Bytes Arduino-Minimal, < 64 KB Planungslimit) |
+| **Footprint** | `no_std` Kern, minimaler RAM-Bedarf (928 Bytes Arduino-Minimal, < 64 KB Planungslimit) |
 | **Impact** | Medizinische Ueberwachung (Sentinel), industrielle Wartung, IoT-Sicherheit |
 
 ---
@@ -162,7 +162,7 @@ Build: `cd crates/wasm && wasm-pack build --target web --out-dir pkg`
 | **Betrieb/CLI** | `examples/cricket_cli.rs` (Snapshotting, Resume, Live-Streaming, TOML/JSON Config) |
 | **Morse-Demo** | `examples/morse_alphabet.rs` + `examples/live_demo.rs` (Encode->Brain->Decode Roundtrip) |
 | **Skalierungs-Test** | `examples/scale_test.rs` (40.960 Neuronen Durchsatz) |
-| **Embedded-Referenz** | `examples/arduino_minimal.rs` (no_std, Fixed-Array, 944 Bytes RAM) |
+| **Embedded-Referenz** | `examples/arduino_minimal.rs` (no_std, Fixed-Array, 928 Bytes RAM) |
 | **Sequenz-Vorhersage** | `examples/sequence_predict.rs` + `examples/scale_predict.rs` (256-Token, 1280 Neuronen) |
 | **Python-Integration** | `examples/python_sentinel.py` |
 | **WASM-Demo** | `examples/wasm_demo/` (index.html + main.ts) |
@@ -188,7 +188,7 @@ Build: `cd crates/wasm && wasm-pack build --target web --out-dir pkg`
 |--------|---------------|
 | **Privacy Mode** | `BrainConfig::privacy_mode = true` — Anonymisierung von Zeitstempeln, Coarsening von Telemetrie-Werten (HIPAA/DSGVO) |
 | **Trust Layer** | Confidence-Scoring (`C = SNR * (1 - jitter/tolerance)`) und Ueberlastungs-Erkennung (Shannon-Entropie > 3.2 + >80% aktive Neuronen) |
-| **Persistenz** | Vollstaendiger Snapshot/Restore-Support (`BrainSnapshot`) mit CRC64-Checksummen + Versions-Hash |
+| **Persistenz** | Vollstaendiger Snapshot/Restore-Support (`BrainSnapshot`) mit FNV-1a-Checksummen + Versions-Hash |
 | **Security** | `#![deny(unsafe_code)]` im Core-Crate. Minimale Abhaengigkeiten. `cargo audit` in CI |
 | **Unsafe-Boundary** | Nur in FFI-Crate (`extern "C"` Funktionen), mit SAFETY-Kommentaren und Null-Checks |
 
@@ -211,7 +211,7 @@ pub const CRICKET_ERR_INTERNAL: i32 = 255;
 |----------|--------|
 | 5-Neuron kanonisch | **0.175 us/step** |
 | 40.960-Neuron Skalierung | **3.43 x 10^7 neuron-ops/sec** |
-| Arduino-Minimal (no_std) | **944 Bytes RAM** |
+| Arduino-Minimal (no_std) | **928 Bytes RAM** |
 | 40k-Neuron Memory | **13.91 MB** |
 | Sequenz-Predictor | **0.30 MB** |
 | Zeitkomplexitaet | **O(N+S)** pro Step (N=Neuronen, S=Synapsen) |
@@ -238,13 +238,13 @@ Jeder `CricketBrain::step(input_freq)` Aufruf:
 
 | Bereich | Dateien | Zeilen |
 |---------|---------|--------|
-| Core (crates/core/src) | 6 | 617 |
-| Brain (src/) | 8 | 2.673 |
-| FFI (crates/ffi) | 1 | 164 |
-| Python (crates/python) | 1 | 121 |
-| WASM (crates/wasm) | 1 | 130 |
-| **Gesamt Produktionscode** | **17** | **3.705** |
-| Beispiele | 14 | ~2.500+ |
+| Core (crates/core/src) | 7 | 849 |
+| Brain (src/) | 8 | 2.795 |
+| FFI (crates/ffi) | 1 | 165 |
+| Python (crates/python) | 1 | 126 |
+| WASM (crates/wasm) | 1 | 131 |
+| **Gesamt Produktionscode** | **18** | **4.066** |
+| Beispiele | 14 | ~2.555 |
 
 ---
 

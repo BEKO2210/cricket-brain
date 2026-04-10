@@ -20,7 +20,7 @@ employs Gaussian-tuned resonators, ring-buffer delay lines, and coincidence
 detection gates to recognize temporal patterns in real-time with sub-microsecond
 latency and sub-kilobyte memory footprints. On a canonical 5-neuron circuit
 modeled after the cricket's AN1-LN2/LN3/LN5-ON1 pathway, we achieve 0.175 us
-per processing step with 944 bytes of RAM in a `no_std` embedded configuration.
+per processing step with 928 bytes of RAM in a `no_std` embedded configuration.
 We evaluate the system across SNR conditions from -10 dB to +30 dB using a
 parametric sweep protocol with 120 trials per condition, and compare against
 three classical baselines: matched filtering, Goertzel-based spectral detection,
@@ -243,11 +243,11 @@ The implementation is organized as a Rust workspace:
 
 | Crate | Purpose | `no_std` | LOC |
 |-------|---------|----------|-----|
-| `cricket-brain-core` | Neuron, synapse, memory, telemetry primitives | Yes | ~600 |
-| `cricket-brain` | Brain network, sequence predictor, resonator bank | Optional | ~2,700 |
+| `cricket-brain-core` | Neuron, synapse, memory, telemetry primitives | Yes | ~850 |
+| `cricket-brain` | Brain network, sequence predictor, resonator bank | Optional | ~2,800 |
 | `cricket-brain-ffi` | C-compatible API | No | ~165 |
-| `cricket-brain-python` | PyO3 bindings | No | ~122 |
-| `cricket-brain-wasm` | wasm-bindgen bindings | No | ~120 |
+| `cricket-brain-python` | PyO3 bindings | No | ~126 |
+| `cricket-brain-wasm` | wasm-bindgen bindings | No | ~131 |
 
 ### 5.2 Safety Guarantees
 
@@ -261,7 +261,7 @@ The implementation is organized as a Rust workspace:
 |------|--------|
 | `std` (default) | Standard library support |
 | `no_std` | Embedded mode (`alloc` only) |
-| `serde` | Snapshot serialization with CRC64 checksums |
+| `serde` | Snapshot serialization with FNV-1a checksums |
 | `parallel` | Rayon-based resonator bank parallelism |
 | `telemetry` | Structured event hooks |
 | `cli` | JSON Lines telemetry sink |
@@ -285,8 +285,8 @@ All experiments use a standardized trial structure:
 
 | Configuration | Latency | Throughput | Memory |
 |---|---|---|---|
-| 5-neuron canonical | 0.175 us/step | 5.7 M steps/sec | 348 bytes |
-| `no_std` Arduino minimal | N/A | N/A | 944 bytes (static) |
+| 5-neuron canonical | 0.175 us/step | 10.7 M steps/sec | 928 bytes |
+| `no_std` Arduino minimal | N/A | N/A | 928 bytes (static) |
 | 40,960-neuron scale | N/A | 3.43e7 neuron-ops/sec | 13.91 MB |
 | Sequence predictor (1,280 neurons) | N/A | 3.32e7 neuron-ops/sec | 0.30 MB |
 

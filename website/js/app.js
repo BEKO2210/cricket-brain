@@ -1,5 +1,5 @@
 /**
- * Cricket-Brain — Main Application JavaScript
+ * CricketBrain — Main Application JavaScript
  *
  * Handles: theme switching, scroll animations, SPA-like page loading,
  * animated counters, copy-code buttons, mobile nav, scroll progress,

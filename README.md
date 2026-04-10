@@ -269,10 +269,10 @@ cargo bench
 
 <table>
 <tr><th>Scenario</th><th align="right">Latency</th><th align="right">Throughput</th><th align="right">Memory</th></tr>
-<tr><td><b>Canonical 5-neuron</b></td><td align="right"><code>0.175 us/step</code></td><td align="right">5.7M steps/sec</td><td align="right">348 bytes</td></tr>
+<tr><td><b>Canonical 5-neuron</b></td><td align="right"><code>0.175 us/step</code></td><td align="right">10.7M steps/sec</td><td align="right">928 bytes</td></tr>
 <tr><td><b>1,280-neuron predictor</b></td><td align="right">—</td><td align="right">50.1M neuron-ops/sec</td><td align="right">0.30 MB</td></tr>
 <tr><td><b>40,960-neuron scale</b></td><td align="right">—</td><td align="right">40.7M neuron-ops/sec</td><td align="right">13.91 MB</td></tr>
-<tr><td><b>Arduino no_std</b></td><td align="right">—</td><td align="right">—</td><td align="right"><code>944 bytes</code></td></tr>
+<tr><td><b>Arduino no_std</b></td><td align="right">—</td><td align="right">—</td><td align="right"><code>928 bytes</code></td></tr>
 </table>
 
 ### vs. Classical Baselines (SNR = 0 dB)
@@ -308,7 +308,7 @@ Tested against 3 classical detectors under **identical conditions** ([source](ex
 | Feature | Description |
 |---------|-------------|
 | **Privacy Mode** | Timestamp anonymization + value coarsening (designed for privacy-sensitive contexts) |
-| **Snapshot/Restore** | Serialize full state with CRC64 checksums |
+| **Snapshot/Restore** | Serialize full state with FNV-1a checksums |
 | **Telemetry** | Structured event hooks + JSON Lines sink |
 | **Chaos Detection** | Shannon entropy monitoring with overload alerts |
 | **Deterministic** | Seeded RNG — bitwise identical results across platforms |
@@ -324,7 +324,7 @@ cricket-brain = { version = "1.0", features = ["serde", "parallel"] }
 |------|:-------:|-------------|
 | `std` | Yes | Standard library support |
 | `no_std` | — | Embedded mode (alloc only) |
-| `serde` | — | Snapshot serialization with CRC64 |
+| `serde` | — | Snapshot serialization with FNV-1a checksums |
 | `parallel` | — | Rayon-based resonator bank parallelism |
 | `telemetry` | — | Structured event hooks |
 | `cli` | — | JSON telemetry sink + config parsing |
@@ -341,7 +341,7 @@ cargo build -p cricket-brain-core --no-default-features
 
 **Minimal embedded example** ([`examples/arduino_minimal.rs`](examples/arduino_minimal.rs)):
 - Fixed-size arrays (no heap allocation)
-- 944 bytes calculated RAM footprint
+- 928 bytes calculated RAM footprint
 - Designed for Arduino Uno, STM32, ESP32, any Cortex-M (host-verified)
 
 ---

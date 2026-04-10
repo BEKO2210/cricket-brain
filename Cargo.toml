@@ -119,5 +119,9 @@ name = "bench_latency"
 path = "benchmarks/spike_latency_benchmark.rs"
 
 [[example]]
+name = "bench_stress"
+path = "benchmarks/stress_test_benchmark.rs"
+
+[[example]]
 name = "bench_patterns"
 path = "benchmarks/pattern_separation_benchmark.rs"
