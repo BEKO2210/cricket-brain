@@ -263,7 +263,7 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 | 3 | DONE | 2026-04-10 | CSV integration, confusion matrix, 11/11 tests, 92.5% accuracy |
 | 4 | DONE | 2026-04-10 | SDT d'=6.18, Latency 0.126µs/step, RAM 928B=match, Criterion bench |
 | 5 | DONE | 2026-04-10 | evaluate.py (F1=0.962), 3 plots, docs/results.md |
-| 6 | PENDING | — | Stress test |
+| 6 | DONE | 2026-04-10 | 5 adversarial tests, noise fails >10%, boundary ±1BPM works |
 | 7 | PENDING | — | Website demo |
 | 8 | PENDING | — | Documentation |
 | 9 | PENDING | — | CI integration |
@@ -276,7 +276,7 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 --- NEXT PROMPT START ---
 Lies use_cases/01_cardiac_arrhythmia/CLAUDE.md und fuehre Run 3 aus.
 
-Run 6 Deliverables — Stress Test:
+Run 7 Deliverables — Website Demo:
 
 1. Erstelle use_cases/01_cardiac_arrhythmia/benchmarks/cardiac_stress.rs:
    - Adversarial-Bedingungen fuer den Cardiac Detector:

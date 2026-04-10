@@ -30,3 +30,7 @@ path = "benchmarks/cardiac_latency.rs"
 [[example]]
 name = "cardiac_memory"
 path = "benchmarks/cardiac_memory.rs"
+
+[[example]]
+name = "cardiac_stress"
+path = "benchmarks/cardiac_stress.rs"
