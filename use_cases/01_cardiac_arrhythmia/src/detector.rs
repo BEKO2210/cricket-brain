@@ -70,12 +70,22 @@ pub struct CardiacDetector {
     steps_since_spike: usize,
     /// Whether we are currently in a spike burst.
     in_burst: bool,
+    /// Duration of the current burst in steps.
+    burst_len: usize,
+    /// Accumulated spike energy during current burst.
+    burst_energy: f32,
     /// Step at which the current burst started.
     burst_start: usize,
+    /// Step at which the last VALIDATED beat was recorded.
+    last_beat_step: usize,
     /// Last classification result.
     last_class: Option<RhythmClass>,
     /// Last computed confidence.
     last_confidence: f32,
+    /// Minimum burst duration (ms) to count as a real QRS.
+    min_burst_ms: usize,
+    /// Refractory period (ms) — ignore spikes after a beat for this long.
+    refractory_ms: usize,
 }
 
 impl CardiacDetector {
@@ -94,9 +104,14 @@ impl CardiacDetector {
             step_count: 0,
             steps_since_spike: 0,
             in_burst: false,
+            burst_len: 0,
+            burst_energy: 0.0,
             burst_start: 0,
+            last_beat_step: 0,
             last_class: None,
             last_confidence: 0.0,
+            min_burst_ms: 1,
+            refractory_ms: 150,
         }
     }
 
@@ -107,36 +122,63 @@ impl CardiacDetector {
         self.step_count += 1;
         self.steps_since_spike += 1;
 
-        // Detect QRS burst boundaries
         let spiking = output > 0.0;
-        if spiking && !self.in_burst {
-            // Burst start — record RR interval from previous burst
-            if self.burst_start > 0 {
-                let rr = self.step_count - self.burst_start;
-                if rr > 10 && rr < 3000 {
-                    // Plausible RR: 20 BPM to 6000 BPM range
-                    self.rr_intervals.push_back(rr);
-                    if self.rr_intervals.len() > self.rr_window {
-                        self.rr_intervals.pop_front();
-                    }
-                }
+
+        // Refractory period: ignore spikes too close to the last validated beat.
+        // A heart can't beat faster than ~400 BPM (150ms minimum RR).
+        let in_refractory = self.last_beat_step > 0
+            && self.step_count.saturating_sub(self.last_beat_step) < self.refractory_ms;
+
+        if spiking && !in_refractory {
+            if !self.in_burst {
+                self.in_burst = true;
+                self.burst_len = 1;
+                self.burst_energy = output;
+                self.burst_start = self.step_count;
+            } else {
+                self.burst_len += 1;
+                self.burst_energy += output;
             }
-            self.burst_start = self.step_count;
-            self.in_burst = true;
             self.steps_since_spike = 0;
         } else if !spiking && self.in_burst {
+            // Burst ended — validate with two criteria:
+            // 1. Minimum duration (filters 1-step noise spikes)
+            // 2. Minimum accumulated energy (filters weak partial resonances)
+            //
+            // A real QRS: ~2-5 spike steps, energy ~2.0+
+            // A noise spike: 1 step, energy ~0.7-0.9
+            let valid_beat = self.burst_len >= self.min_burst_ms
+                && self.burst_energy > 0.5;
+
+            if valid_beat {
+                // Record RR interval from previous validated beat
+                if self.last_beat_step > 0 {
+                    let rr = self.burst_start - self.last_beat_step;
+                    if rr > 10 && rr < 3000 {
+                        self.rr_intervals.push_back(rr);
+                        if self.rr_intervals.len() > self.rr_window {
+                            self.rr_intervals.pop_front();
+                        }
+                    }
+                }
+                self.last_beat_step = self.burst_start;
+            }
+            // else: burst too short — noise spike, discard silently
+
             self.in_burst = false;
+            self.burst_len = 0;
+            self.burst_energy = 0.0;
+
+            // Classify after a valid burst with enough RR data
+            if valid_beat && self.rr_intervals.len() >= 2 {
+                let class = self.classify();
+                self.last_class = Some(class);
+                return Some(class);
+            }
         }
 
         if spiking {
             self.steps_since_spike = 0;
-        }
-
-        // Classify when we have enough RR data and just finished a burst
-        if !self.in_burst && self.steps_since_spike == 1 && self.rr_intervals.len() >= 2 {
-            let class = self.classify();
-            self.last_class = Some(class);
-            return Some(class);
         }
 
         None
@@ -222,7 +264,10 @@ impl CardiacDetector {
         self.step_count = 0;
         self.steps_since_spike = 0;
         self.in_burst = false;
+        self.burst_len = 0;
+        self.burst_energy = 0.0;
         self.burst_start = 0;
+        self.last_beat_step = 0;
         self.last_class = None;
         self.last_confidence = 0.0;
     }
