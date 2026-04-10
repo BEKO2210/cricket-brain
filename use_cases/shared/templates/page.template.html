@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CricketBrain Use Case — [USE CASE NAME]">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="theme-color" content="#0a0f1c" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
+  <title>[USE CASE NAME] — CricketBrain v{{global.version}}</title>
+  <link rel="stylesheet" href="../../website/css/style.css?v={{global.version}}">
+  <style>
+    .uc-page {
+      max-inline-size: 900px;
+      margin-inline: auto;
+      padding: var(--space-3xl) var(--space-lg);
+      min-block-size: calc(100dvh - var(--header-height) - 120px);
+    }
+    .uc-page h1 {
+      font-size: var(--font-size-3xl);
+      margin-block-end: var(--space-md);
+      text-wrap: balance;
+    }
+    .uc-page h2 {
+      font-size: var(--font-size-xl);
+      margin-block: var(--space-2xl) var(--space-md);
+      color: var(--accent);
+      border-block-end: 1px solid var(--border);
+      padding-block-end: var(--space-xs);
+    }
+    .uc-page p, .uc-page li {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-block-end: var(--space-md);
+    }
+    .uc-page .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-md);
+      margin-block: var(--space-lg);
+    }
+    .uc-page .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      text-align: center;
+    }
+    .uc-page .metric-card .value {
+      font-size: var(--font-size-3xl);
+      font-weight: 800;
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+    .uc-page .metric-card .label {
+      font-size: var(--font-size-sm);
+      color: var(--text-muted);
+      margin-block-start: var(--space-xs);
+    }
+    .uc-page .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-2xs) var(--space-sm);
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+      color: var(--accent);
+      font-size: var(--font-size-xs);
+      font-weight: 700;
+      border-radius: var(--radius-full);
+    }
+    .uc-page .disclaimer {
+      background: color-mix(in srgb, var(--danger) 8%, var(--bg-card));
+      border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin-block: var(--space-xl);
+    }
+    .uc-page table {
+      inline-size: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-size-sm);
+      margin-block: var(--space-md);
+    }
+    .uc-page th, .uc-page td {
+      padding: var(--space-xs) var(--space-sm);
+      border-block-end: 1px solid var(--border-subtle);
+      text-align: start;
+    }
+    .uc-page th {
+      background: var(--bg-secondary);
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-size: var(--font-size-xs);
+    }
+    .uc-page td { color: var(--text-secondary); }
+    @media (max-width: 640px) {
+      .uc-page { padding: var(--space-xl) var(--space-md); }
+      .uc-page h1 { font-size: var(--font-size-2xl); }
+      .uc-page .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="../../website/index.html" class="logo" aria-label="CricketBrain Home">Cricket<span>Brain</span></a>
+      <nav class="main-nav" id="main-nav" role="navigation" aria-label="Navigation">
+        <a href="../../website/index.html">Home</a>
+        <a href="../../website/index.html#benchmarks">Benchmarks</a>
+        <a href="../../website/pages/whitepaper.html">Whitepaper</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">
+          <span aria-hidden="true" id="theme-icon">&#9790;</span>
+        </button>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
+          <span aria-hidden="true">&#9776;</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="uc-page">
+    <span class="status-badge">In Development</span>
+    <h1>[USE CASE NAME]</h1>
+    <p>Market: ${{uc.market_size_usd_bn}}B | Dataset: {{uc.dataset_primary}} ({{uc.dataset_license}})</p>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="value">{{global.ram_bytes}} B</div>
+        <div class="label">RAM Footprint</div>
+      </div>
+      <div class="metric-card">
+        <div class="value">{{global.latency_us}} µs</div>
+        <div class="label">Latency / Step</div>
+      </div>
+      <div class="metric-card">
+        <div class="value">{{uc.accuracy_pct}}</div>
+        <div class="label">Accuracy</div>
+      </div>
+      <div class="metric-card">
+        <div class="value">{{uc.latency_ms}} ms</div>
+        <div class="label">Detection Latency</div>
+      </div>
+    </div>
+
+    <h2>Problem</h2>
+    <p>[Describe the problem this use case addresses.]</p>
+
+    <h2>CricketBrain Advantage</h2>
+    <p>{{uc.key_advantage}}</p>
+
+    <h2>Dataset</h2>
+    <table>
+      <thead><tr><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Primary Dataset</td><td>{{uc.dataset_primary}}</td></tr>
+        <tr><td>License</td><td>{{uc.dataset_license}}</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Results</h2>
+    <p>Benchmarks pending. Results will be populated after evaluation against the dataset.</p>
+
+    <div class="disclaimer">
+      <strong>Disclaimer:</strong> This application is a research prototype. It is NOT a certified
+      medical device, safety system, or production-ready solution. Do not use for clinical,
+      safety-critical, or regulatory-relevant decisions without appropriate certification.
+    </div>
+
+    <h2>Technical Specifications</h2>
+    <table>
+      <thead><tr><th>Property</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>CricketBrain Version</td><td>v{{global.version}}</td></tr>
+        <tr><td>Neurons</td><td>{{global.neurons}}</td></tr>
+        <tr><td>Synapses</td><td>{{global.synapses}}</td></tr>
+        <tr><td>Throughput</td><td>{{global.throughput_steps_per_sec}} steps/sec</td></tr>
+        <tr><td>Tests Passing</td><td>{{global.tests_total}}</td></tr>
+        <tr><td>License</td><td>{{global.license}}</td></tr>
+      </tbody>
+    </table>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-compact">
+      <div class="footer-links">
+        <a href="../../website/index.html">Home</a>
+        <a href="../../website/pages/whitepaper.html">Whitepaper</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 Belkis Aslani</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../../website/js/app.js?v={{global.version}}"></script>
+</body>
+</html>

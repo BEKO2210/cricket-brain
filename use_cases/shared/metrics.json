@@ -1,0 +1,108 @@
+{
+  "global": {
+    "version": "3.0.0",
+    "ram_bytes": 928,
+    "neurons": 5,
+    "synapses": 6,
+    "tests_total": 122,
+    "latency_us": 0.175,
+    "latency_ns_marketing": 97,
+    "throughput_steps_per_sec": "10.7M",
+    "checksum": "FNV-1a",
+    "license": "AGPL-3.0",
+    "msrv": "1.75"
+  },
+  "01_cardiac_arrhythmia": {
+    "market_size_usd_bn": 50,
+    "dataset_primary": "MIT-BIH Arrhythmia Database",
+    "dataset_license": "Open Data Commons Attribution",
+    "dataset_url": "https://physionet.org/content/mitdb/1.0.0/",
+    "signal_hz": 360,
+    "existing_demo": "examples/sentinel_ecg_monitor.rs",
+    "accuracy_pct": null,
+    "latency_ms": null,
+    "false_positive_rate": null,
+    "key_advantage": "928 bytes RAM, Privacy-first, bestehende Demo"
+  },
+  "02_predictive_maintenance": {
+    "market_size_usd_bn": 15,
+    "dataset_primary": "CWRU Bearing Dataset",
+    "dataset_license": "Public Domain",
+    "dataset_url": "https://engineering.case.edu/bearingdatacenter",
+    "signal_hz": 12000,
+    "accuracy_pct": null,
+    "latency_ms": 9,
+    "key_advantage": "$0.50 BOM, Resonator Bank"
+  },
+  "03_marine_acoustic": {
+    "market_size_usd_bn": 4,
+    "dataset_primary": "MBARI MARS Hydrophone",
+    "dataset_license": "CC BY 4.0",
+    "dataset_url": "https://www.mbari.org/technology/mars/",
+    "signal_hz": 256000,
+    "accuracy_pct": null,
+    "latency_ms": null,
+    "key_advantage": "no_std Boje, 27-Token Vocab, STDP"
+  },
+  "04_power_grid": {
+    "market_size_usd_bn": 100,
+    "dataset_primary": "EPFL Smart Grid Dataset",
+    "dataset_license": "CC BY 4.0",
+    "signal_hz": 50,
+    "jnd_hz": 88,
+    "gap_detection_ms": 1,
+    "accuracy_pct": null,
+    "key_advantage": "JND 88Hz, Gap Detection 1ms, CV=0.000"
+  },
+  "05_network_intrusion": {
+    "market_size_usd_bn": 25,
+    "dataset_primary": "KDD Cup 1999",
+    "dataset_license": "Public Domain",
+    "dataset_url": "http://kdd.ics.uci.edu/databases/kddcup99/",
+    "latency_ns": 93,
+    "accuracy_pct": null,
+    "key_advantage": "93ns/Paket, FPGA-deployable"
+  },
+  "06_precision_agriculture": {
+    "market_size_usd_bn": 8,
+    "dataset_primary": "iNaturalist Insect Audio",
+    "dataset_license": "CC BY-NC 4.0",
+    "power_uw": 1,
+    "accuracy_pct": null,
+    "key_advantage": "<1µW, biologisch nativ, Knopfzelle"
+  },
+  "07_autonomous_vehicle": {
+    "market_size_usd_bn": 60,
+    "dataset_primary": "UrbanSound8K",
+    "dataset_license": "CC BY 4.0",
+    "dataset_url": "https://urbansounddataset.weebly.com/urbansound8k.html",
+    "latency_ms": 1,
+    "accuracy_pct": null,
+    "key_advantage": "Sub-ms, Sequence Predictor, deterministisch"
+  },
+  "08_hearing_aid": {
+    "market_size_usd_bn": 10,
+    "dataset_primary": "DNS Challenge Dataset",
+    "dataset_license": "CC BY 4.0",
+    "latency_us": 0.175,
+    "accuracy_pct": null,
+    "key_advantage": "0.175µs Latenz, Homeostasis"
+  },
+  "09_quality_control": {
+    "market_size_usd_bn": 0.8,
+    "dataset_primary": "MIMII Dataset",
+    "dataset_license": "CC BY 4.0",
+    "dataset_url": "https://zenodo.org/record/3384388",
+    "accuracy_pct": null,
+    "key_advantage": "Zero Training, 40k-Neuron Scale"
+  },
+  "10_space_systems": {
+    "market_size_usd_bn": 15,
+    "dataset_primary": "NASA Telemetry SMAP/MSL",
+    "dataset_license": "Public Domain",
+    "dataset_url": "https://github.com/khundman/telemanom",
+    "ram_bytes_tmr": 2800,
+    "accuracy_pct": null,
+    "key_advantage": "Keine korrumpierbaren Weights, TMR 2.8KB"
+  }
+}
