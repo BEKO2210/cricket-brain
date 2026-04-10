@@ -68,7 +68,7 @@ let outputs = bank.step(input_freq);
 | 4 | DONE | 2026-04-10 | SDT d'=6.18 all EXCELLENT, 0.129-0.264 µs/step, 3712B/20N |
 | 5 | DONE | 2026-04-10 | evaluate.py (F1=0.932), 3 plots, docs/results.md |
 | 6 | DONE | 2026-04-10 | 100% noise-robust, speed-comp FIXED (6/6 RPMs) |
-| 7 | Website demo page | PENDING |
+| 7 | DONE | 2026-04-10 | website/pages/bearings.html, nav dropdown+card linked |
 | 8 | Documentation: README, API, limitations | PENDING |
 | 9 | CI integration | PENDING |
 | 10 | Metrics finalization | PENDING |
