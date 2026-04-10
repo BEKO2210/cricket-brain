@@ -11,3 +11,15 @@ publish = false
 
 [dependencies]
 cricket-brain = { path = "../.." }
+
+[[example]]
+name = "bearing_sdt"
+path = "benchmarks/bearing_sdt.rs"
+
+[[example]]
+name = "bearing_latency"
+path = "benchmarks/bearing_latency.rs"
+
+[[example]]
+name = "bearing_memory"
+path = "benchmarks/bearing_memory.rs"
