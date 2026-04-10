@@ -258,7 +258,7 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 | Run | Status | Date | Notes |
 |-----|--------|------|-------|
 | 0 | DONE | — | Scaffold directories, SOURCES.md, CLAUDE.md |
-| 1 | PENDING | — | Cargo.toml, src/, README |
+| 1 | DONE | — | Cargo.toml, src/, README, 7/7 tests pass, BPM correct |
 | 2 | PENDING | — | Data pipeline |
 | 3 | PENDING | — | Core detector |
 | 4 | PENDING | — | Benchmarks |
@@ -274,60 +274,48 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 ## 9. Next Prompt
 
 --- NEXT PROMPT START ---
-Lies use_cases/01_cardiac_arrhythmia/CLAUDE.md und fuehre Run 1 aus.
+Lies use_cases/01_cardiac_arrhythmia/CLAUDE.md und fuehre Run 2 aus.
 
-Run 1 Deliverables:
-1. Erstelle use_cases/01_cardiac_arrhythmia/Cargo.toml:
-   - name = "cricket-brain-cardiac"
-   - version = "0.1.0"
-   - edition = "2021"
-   - rust-version = "1.75"
-   - license = "AGPL-3.0-only"
-   - dependency: cricket-brain = { path = "../.." }
-   - dev-dependency: criterion = { version = "0.5", features = ["html_reports"] }
+Run 2 Deliverables — Data Pipeline:
 
-2. Erstelle use_cases/01_cardiac_arrhythmia/src/lib.rs:
-   - pub mod detector;
-   - pub mod ecg_signal;
+1. Erstelle use_cases/01_cardiac_arrhythmia/python/download_mitbih.py:
+   - Nutzt wfdb Python-Bibliothek
+   - Laedt MIT-BIH Records 100-234 nach data/raw/
+   - Gibt Fortschritt aus
+   - Prueft ob bereits heruntergeladen
 
-3. Erstelle use_cases/01_cardiac_arrhythmia/src/detector.rs:
-   - pub struct CardiacDetector mit CricketBrain + RR-Intervall-Tracking
-   - pub enum RhythmClass { NormalSinus, Tachycardia, Bradycardia, Irregular }
-   - pub fn step(&mut self, input_freq: f32) -> Option<RhythmClass>
-   - pub fn confidence(&self) -> f32
-   - pub fn bpm_estimate(&self) -> f32
-   - Nutze BrainConfig mit adaptive_sensitivity=true, privacy_mode=true
-   - Nutze Telemetry trait fuer Spike-Tracking
+2. Erstelle use_cases/01_cardiac_arrhythmia/python/preprocess.py:
+   - Liest .dat/.hea/.atr Dateien mit wfdb
+   - Extrahiert R-Peak Annotations (Beat-Timestamps)
+   - Berechnet R-R Intervalle in ms
+   - Mappt R-R Intervalle zu Frequenzen: freq = 60000.0 / rr_ms (BPM als Hz)
+   - Speichert als CSV: timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq
+   - Erstellt Train/Test Split (Records 100-119 = Train, 200-234 = Test)
 
-4. Erstelle use_cases/01_cardiac_arrhythmia/src/ecg_signal.rs:
-   - pub struct EcgCycle { pub segments: Vec<(f32, usize)> }
-   - pub fn normal_sinus() -> EcgCycle (P=3100Hz/12ms, QRS=4500Hz/10ms, T=3400Hz/14ms, gap=88ms)
-   - pub fn tachycardia() -> EcgCycle (gleich, aber gap=18ms)
-   - pub fn bradycardia() -> EcgCycle (gleich, aber gap=150ms)
-   - pub fn to_frequency_stream(&self, n_cycles: usize) -> Vec<f32>
+3. Erstelle use_cases/01_cardiac_arrhythmia/python/requirements.txt:
+   - wfdb>=4.0
+   - pandas
+   - numpy
 
-5. Erstelle use_cases/01_cardiac_arrhythmia/src/main.rs:
-   - Erzeugt 5 Normal + 5 Tachy + 5 Brady Zyklen
-   - Fuettert alles in CardiacDetector
-   - Gibt Klassifikation, BPM, Confidence pro Beat aus
-   - Misst Latenz in us/step
+4. Erstelle use_cases/01_cardiac_arrhythmia/data/processed/sample_record.csv:
+   - Generiere synthetisch aus ecg_signal.rs Waveforms (kein Download noetig)
+   - 50 Zyklen Normal + 50 Tachy + 50 Brady
+   - Format: timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq
 
-6. Generiere use_cases/01_cardiac_arrhythmia/README.md aus dem Template:
-   - Ersetze alle Platzhalter mit Werten aus metrics.json
-   - Setze [USE CASE NAME] = "Cardiac Arrhythmia Pre-Screening"
-   - Fuege Medical Disclaimer prominent ein
+5. Update use_cases/01_cardiac_arrhythmia/src/ecg_signal.rs:
+   - pub fn from_csv(path: &str) -> Vec<f32> — liest processed CSV
+   - pub fn write_sample_csv(path: &str, n_cycles: usize) — schreibt sample data
 
-7. Verifiziere:
-   - cargo build --manifest-path use_cases/01_cardiac_arrhythmia/Cargo.toml
-   - cargo run --manifest-path use_cases/01_cardiac_arrhythmia/Cargo.toml
-   - Output zeigt Beat-Klassifikationen
+6. Verifiziere:
+   - python -m py_compile python/download_mitbih.py
+   - python -m py_compile python/preprocess.py
+   - cargo test --manifest-path use_cases/01_cardiac_arrhythmia/Cargo.toml
+   - sample_record.csv existiert und hat >100 Zeilen
 
-8. Update use_cases/01_cardiac_arrhythmia/CLAUDE.md:
-   - Markiere Run 1 als DONE
-   - Schreibe den NEXT PROMPT fuer Run 2
+7. Update CLAUDE.md: Run 2 = DONE, schreibe NEXT PROMPT fuer Run 3
 
 REGELN:
 - Aendere NICHTS ausserhalb von use_cases/
-- Alle Zahlen aus metrics.json, nie hardcoden
+- Alle Zahlen aus metrics.json
 - Commit und push am Ende
 --- NEXT PROMPT END ---
