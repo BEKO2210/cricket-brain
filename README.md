@@ -63,6 +63,8 @@ CricketBrain is a **neuromorphic signal processor** that recognizes temporal pat
 
 ## Use Cases
 
+> **10 detailed use cases with market analysis:** [USE_CASES.md](USE_CASES.md)
+
 | Domain | Application | How CricketBrain Helps |
 |--------|-------------|------------------------|
 | **Medical Research** | ECG rhythm analysis | Temporal pattern detection for rhythm classification research ([demo](examples/sentinel_ecg_monitor.rs)) |
@@ -277,6 +279,8 @@ cargo build -p cricket-brain-core --no-default-features
 | [`examples/baselines.rs`](examples/baselines.rs) | Matched filter, Goertzel, IIR bandpass comparison |
 | [`examples/ablation_study.rs`](examples/ablation_study.rs) | Systematic circuit component analysis |
 | [`examples/research_gen.rs`](examples/research_gen.rs) | SNR sweep with Wilson 95% confidence intervals |
+| [`benchmarks/stress_test_benchmark.rs`](benchmarks/stress_test_benchmark.rs) | Adversarial stress test (10 seeds, pink noise, in-band interferers) |
+| [USE_CASES.md](USE_CASES.md) | 10 real-world applications with market analysis |
 | [AI_DEVELOPMENT_STATEMENT.md](AI_DEVELOPMENT_STATEMENT.md) | Full AI-tooling transparency disclosure |
 
 ### Ablation Study
@@ -292,6 +296,7 @@ cargo build -p cricket-brain-core --no-default-features
 cargo run --release --example baselines         # Classical comparison
 cargo run --release --example ablation_study    # Component analysis
 cargo run --release --example research_gen -- --seed 1337  # Full SNR sweep
+cargo run --release --example bench_stress      # Adversarial stress test
 ```
 
 ---
