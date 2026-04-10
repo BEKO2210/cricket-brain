@@ -262,7 +262,7 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 | 2 | DONE | 2026-04-10 | Data pipeline: Python download/preprocess, CSV I/O, 9/9 tests |
 | 3 | DONE | 2026-04-10 | CSV integration, confusion matrix, 11/11 tests, 92.5% accuracy |
 | 4 | DONE | 2026-04-10 | SDT d'=6.18, Latency 0.126µs/step, RAM 928B=match, Criterion bench |
-| 5 | PENDING | — | Python analysis |
+| 5 | DONE | 2026-04-10 | evaluate.py (F1=0.962), 3 plots, docs/results.md |
 | 6 | PENDING | — | Stress test |
 | 7 | PENDING | — | Website demo |
 | 8 | PENDING | — | Documentation |
@@ -276,34 +276,27 @@ We must extract temporal features (R-peak timing) first, then encode as frequenc
 --- NEXT PROMPT START ---
 Lies use_cases/01_cardiac_arrhythmia/CLAUDE.md und fuehre Run 3 aus.
 
-Run 5 Deliverables — Python Analysis:
+Run 6 Deliverables — Stress Test:
 
-1. Erstelle use_cases/01_cardiac_arrhythmia/python/evaluate.py:
-   - Liest sample_record.csv
-   - Ruft CardiacDetector via subprocess (cargo run -- --csv) auf
-   - Parsed die Ausgabe, baut Confusion Matrix in Python
-   - Berechnet: Accuracy, Precision, Recall, F1 pro Klasse
-   - Gibt alles als Markdown-Tabelle aus
+1. Erstelle use_cases/01_cardiac_arrhythmia/benchmarks/cardiac_stress.rs:
+   - Adversarial-Bedingungen fuer den Cardiac Detector:
+   a) Noisy ECG: Zufaellige Frequenz-Spikes waehrend QRS (Bewegungsartefakte)
+   b) Extreme Raten: 30, 40, 50, 60, 80, 100, 120, 150, 200, 250 BPM
+   c) Wechselnde Rhythmen: schneller Wechsel Normal↔Tachy alle 3 Beats
+   d) Near-boundary: 59 BPM (knapp Brady), 61 BPM (knapp Normal), 99/101 BPM
+   e) Irregular: Zufaellige RR-Intervalle (300-1200ms)
+   - Fuer jeden Test: TPR, FPR, Accuracy, ehrliche Grenzen
 
-2. Erstelle use_cases/01_cardiac_arrhythmia/python/plot_results.py:
-   - Generiert Plots mit matplotlib:
-     a) BPM-Zeitverlauf mit Klassifikations-Farben
-     b) Confusion Matrix Heatmap
-     c) Confidence-Verteilung pro Klasse
-   - Speichert als PNG in docs/
+2. Erstelle use_cases/01_cardiac_arrhythmia/docs/limitations.md:
+   - Zusammenfassung aller bekannten Schwaechen
+   - Wo genau bricht die Detektion zusammen?
+   - Vergleich: was kann CricketBrain NICHT vs. Deep-Learning-ECG-Systeme
 
-3. Erstelle use_cases/01_cardiac_arrhythmia/docs/results.md:
-   - Benchmark-Ergebnisse Zusammenfassung
-   - Referenziert Plots
-   - SDT-Ergebnisse (d'=6.18), Latenz (0.126µs/step), RAM (928B)
-   - Ehrliche Limitationen: synthetische Daten, kein reales ECG
+3. Verifiziere:
+   - cargo run --release --example cardiac_stress
+   - Ergebnisse zeigen ehrliche Grenzen
 
-4. Verifiziere:
-   - python evaluate.py laeuft
-   - python plot_results.py erzeugt PNGs
-   - docs/results.md ist vollstaendig
-
-5. Update CLAUDE.md: Run 5 = DONE, NEXT PROMPT fuer Run 6
+4. Update CLAUDE.md: Run 6 = DONE, NEXT PROMPT fuer Run 7
 
 REGELN:
 - Aendere NICHTS ausserhalb von use_cases/
