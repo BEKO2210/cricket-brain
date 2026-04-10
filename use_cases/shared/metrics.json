@@ -19,10 +19,19 @@
     "dataset_url": "https://physionet.org/content/mitdb/1.0.0/",
     "signal_hz": 360,
     "existing_demo": "examples/sentinel_ecg_monitor.rs",
-    "accuracy_pct": null,
-    "latency_ms": null,
-    "false_positive_rate": null,
-    "key_advantage": "928 bytes RAM, Privacy-first, bestehende Demo"
+    "accuracy_pct": 92.5,
+    "d_prime": 6.18,
+    "macro_f1": 0.962,
+    "latency_us_per_step": 0.126,
+    "throughput_steps_per_sec": "7.9M",
+    "latency_ms": 826,
+    "false_positive_rate": 0.0,
+    "ram_bytes_detector": 1336,
+    "tests_passing": 11,
+    "noise_tolerance_pct": 10,
+    "bpm_range": "30-250",
+    "date_measured": "2026-04-10",
+    "key_advantage": "928 bytes RAM, Privacy-first, 0.126 µs/step, d'=6.18"
   },
   "02_predictive_maintenance": {
     "market_size_usd_bn": 15,
