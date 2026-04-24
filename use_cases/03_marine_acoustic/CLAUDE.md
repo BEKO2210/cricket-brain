@@ -119,7 +119,50 @@ Classification in `MarineDetector` accumulates channel energy over a
 
 ---
 
-## 7. License
+## 7. v0.2 Additions (2026-04-24)
+
+Backwards-compatible additive API addressing the two biggest v0.1
+limitations (single-label + boundary frequencies).
+
+### New API
+
+```rust
+MarineDetector::with_bandwidth(0.20)       // wide-tuning constructor
+det.set_bandwidth(0.20)                    // runtime tuning
+det.set_channel_threshold(0.03)            // per-channel multi-label bar
+det.step_multi(freq) -> Option<MultiLabelDecision>
+```
+
+### Measured Impact (`cargo run --release --example marine_v02`)
+
+- **Boundary recovery:** 110 Hz (was Ambient → now ShipNoise), 170 Hz
+  (was Ambient → now Humpback) at recommended bandwidth 0.20.
+- **Multi-label:** fin-whale-under-ship scene — 0 / 40 → **40 / 40**
+  windows flagging both species simultaneously (100 %).
+- **No regression:** CSV accuracy stays at 90 % at bandwidth 0.20; zero
+  false-positive species on 2000-step pure ambient.
+
+### Bandwidth / accuracy trade-off
+
+| BW | CSV acc | 110 Hz | 170 Hz | 260 Hz | 15 Hz |
+|----|---:|---|---|---|---|
+| 0.10 (v0.1) | 90 % | Ambient | Ambient | Ambient | Ambient |
+| **0.20 (v0.2 rec.)** | **90 %** | **Ship** | **Hump** | Ambient | Ambient |
+| 0.30 | 75 % | Ship | Hump | Hump | Fin |
+
+### Tests (5 new)
+
+- `v02_wide_bandwidth_catches_boundary_110hz`
+- `v02_wide_bandwidth_catches_boundary_170hz`
+- `v02_wide_bandwidth_still_rejects_truly_ambient`
+- `v02_multi_label_reports_whale_and_ship_together`
+- `v02_multi_label_single_source_stays_single`
+
+Total tests: 20 (v0.1) + 5 (v0.2) = **25 / 25 passing**.
+
+---
+
+## 8. License
 
 - Source code: AGPL-3.0-only
 - MBARI MARS data: CC BY 4.0 (attribution required)

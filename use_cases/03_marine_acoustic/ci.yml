@@ -41,6 +41,9 @@ jobs:
       - name: Run memory benchmark
         run: cargo run --release --manifest-path use_cases/03_marine_acoustic/Cargo.toml --example marine_memory
 
+      - name: Run v0.1 vs v0.2 comparison
+        run: cargo run --release --manifest-path use_cases/03_marine_acoustic/Cargo.toml --example marine_v02
+
       - name: Verify Python syntax
         run: |
           python3 -m py_compile use_cases/03_marine_acoustic/python/preprocess.py

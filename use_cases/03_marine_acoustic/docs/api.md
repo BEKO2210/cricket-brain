@@ -13,7 +13,12 @@
 ```rust
 use cricket_brain_marine::detector::MarineDetector;
 
+// v0.1 — strict tuning (bandwidth 0.10)
 let mut det = MarineDetector::new();
+
+// v0.2 — wide tuning (recommended bandwidth 0.20) + multi-label path
+let mut det = MarineDetector::with_bandwidth(0.20);
+
 // Creates a ResonatorBank with 4 channels:
 //   FIN  (20 Hz, fin whale 20-Hz pulse)
 //   BLUE (80 Hz, blue whale A-call tonal)
@@ -21,6 +26,15 @@ let mut det = MarineDetector::new();
 //   HUMP (200 Hz, humpback song unit)
 // 20 neurons, 3712 bytes RAM
 ```
+
+### v0.2 Bandwidth Control
+
+```rust
+det.set_bandwidth(0.20);            // same as with_bandwidth at runtime
+det.set_channel_threshold(0.03);    // per-channel multi-label threshold
+```
+
+See `benchmarks/marine_v02.rs` for the bandwidth / accuracy sweep.
 
 ### Ambient-Threshold Tuning
 
@@ -42,6 +56,22 @@ pub fn step(&mut self, input_freq: f32) -> Option<AcousticEvent>
 Feed one dominant-frequency sample (Hz) from a hydrophone FFT window.
 Returns a classification at the end of each 50-step detection window
 (nothing otherwise).
+
+### v0.2 Multi-Label: `step_multi()`
+
+```rust
+pub fn step_multi(&mut self, input_freq: f32) -> Option<MultiLabelDecision>
+
+pub struct MultiLabelDecision {
+    pub events: Vec<AcousticEvent>,  // every channel above channel_threshold
+    pub energies: [f32; 4],           // FIN, BLUE, SHIP, HUMP snapshot
+    pub step: usize,
+}
+```
+
+Unlike `step()` (which picks a single dominant channel), `step_multi()`
+lists **every** channel that exceeded the per-channel threshold, so
+simultaneous fin-whale + ship scenes emit both labels.
 
 ### Batch: `classify_stream()`
 

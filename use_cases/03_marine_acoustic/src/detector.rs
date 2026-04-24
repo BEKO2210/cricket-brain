@@ -47,10 +47,22 @@ pub struct MarineDetector {
     /// Minimum total-channel energy below which we declare `Ambient`.
     /// Raised when the sea is noisy (set via `set_sea_state`).
     ambient_threshold: f32,
+    /// v0.2 per-channel multi-label threshold. Each channel with
+    /// accumulated energy above this value is flagged independently by
+    /// [`MarineDetector::step_multi`].
+    channel_threshold: f32,
 }
 
 /// Default ambient threshold tuned for a calm-sea hydrophone.
 const DEFAULT_AMBIENT_THRESHOLD: f32 = 0.1;
+
+/// v0.2 default per-channel multi-label threshold.
+///
+/// Chosen so that a single channel receiving ~30 % of the default ambient
+/// budget (i.e. real resonance energy, not background noise) triggers a
+/// flag. Empirically this catches simultaneous whale + ship scenes without
+/// false-positive alarms on quiet ambient recordings.
+const DEFAULT_CHANNEL_THRESHOLD: f32 = 0.03;
 
 impl MarineDetector {
     /// Create a new detector with channels for FIN, BLUE, SHIP, HUMP.
@@ -79,7 +91,58 @@ impl MarineDetector {
             last_confidence: 0.0,
             step_count: 0,
             ambient_threshold: DEFAULT_AMBIENT_THRESHOLD,
+            channel_threshold: DEFAULT_CHANNEL_THRESHOLD,
         }
+    }
+
+    /// v0.2: create a detector with a custom Gaussian tuning bandwidth.
+    ///
+    /// Default (from [`MarineDetector::new`]) is ~0.10 (10 % of the channel
+    /// eigenfrequency). Widen to cover boundary frequencies that otherwise
+    /// fall between two channels and get reported as [`AcousticEvent::Ambient`].
+    ///
+    /// **Recommended value: 0.20.** Bandwidth sweep on `sample_marine.csv`
+    /// (see `benchmarks/marine_v02.rs`):
+    ///
+    /// | Bandwidth | CSV accuracy | Boundary recovery |
+    /// |-----------|-------------:|-------------------|
+    /// | 0.10 (v0.1) | 90 % | none (110/170 Hz → Ambient) |
+    /// | 0.15-0.20 | **90 %** | 110 Hz → Ship, 170 Hz → Humpback |
+    /// | 0.25 | 79 % | + 260 Hz → Humpback |
+    /// | 0.30 | 75 % | + 15 Hz → Fin |
+    ///
+    /// 0.20 is the sweet spot: no CSV regression but the between-channel
+    /// gaps get assigned to the nearest species.
+    ///
+    /// ```no_run
+    /// # use cricket_brain_marine::detector::MarineDetector;
+    /// // Wide tuning so that 110 Hz (between Blue 80 and Ship 140) still
+    /// // activates the nearest channel instead of falling through to Ambient.
+    /// let mut det = MarineDetector::with_bandwidth(0.20);
+    /// ```
+    pub fn with_bandwidth(bandwidth: f32) -> Self {
+        let mut det = Self::new();
+        det.set_bandwidth(bandwidth);
+        det
+    }
+
+    /// Set the Gaussian tuning bandwidth on every channel of the resonator
+    /// bank. Clamped to `[0.01, 0.80]`. Values around 0.25-0.35 produce the
+    /// "slight overlap" behaviour recommended for boundary-frequency
+    /// robustness.
+    pub fn set_bandwidth(&mut self, bandwidth: f32) {
+        let bw = bandwidth.clamp(0.01, 0.80);
+        for ch in &mut self.bank.channels {
+            for n in &mut ch.neurons {
+                n.bandwidth = bw;
+            }
+        }
+    }
+
+    /// v0.2: set the per-channel multi-label threshold used by
+    /// [`MarineDetector::step_multi`]. Default = 0.03.
+    pub fn set_channel_threshold(&mut self, threshold: f32) {
+        self.channel_threshold = threshold.max(0.0);
     }
 
     /// Set the ambient-noise threshold explicitly (advanced use).
@@ -176,6 +239,68 @@ impl MarineDetector {
         self.last_confidence = 0.0;
         self.step_count = 0;
     }
+
+    /// v0.2: feed one sample and, at the end of each 50-step window,
+    /// return a [`MultiLabelDecision`] listing **every** channel whose
+    /// accumulated energy exceeds [`MarineDetector::channel_threshold`].
+    ///
+    /// Unlike [`MarineDetector::step`] (which picks the single dominant
+    /// channel), this method emits whale + ship simultaneously when both
+    /// sources are active, addressing the v0.1 limitation documented in
+    /// `docs/limitations.md`.
+    pub fn step_multi(&mut self, input_freq: f32) -> Option<MultiLabelDecision> {
+        let outputs = self.bank.step(input_freq);
+        self.step_count += 1;
+        self.window_step += 1;
+
+        for (i, &out) in outputs.iter().enumerate().take(4) {
+            if out > 0.0 {
+                self.channel_energy[i] += out;
+            }
+        }
+
+        if self.window_step >= self.window_size {
+            let energies = self.channel_energy;
+            let mut events = Vec::new();
+            for (i, &e) in energies.iter().enumerate() {
+                if e >= self.channel_threshold {
+                    events.push(match i {
+                        0 => AcousticEvent::FinWhale,
+                        1 => AcousticEvent::BlueWhale,
+                        2 => AcousticEvent::ShipNoise,
+                        _ => AcousticEvent::Humpback,
+                    });
+                }
+            }
+            if events.is_empty() {
+                events.push(AcousticEvent::Ambient);
+            }
+            let decision = MultiLabelDecision {
+                events,
+                energies,
+                step: self.step_count,
+            };
+            self.channel_energy = [0.0; 4];
+            self.window_step = 0;
+            return Some(decision);
+        }
+
+        None
+    }
+}
+
+/// v0.2: result of a multi-label detection window.
+///
+/// `events` lists every channel whose accumulated energy exceeded the
+/// per-channel threshold; when nothing crossed it, the list contains the
+/// single element [`AcousticEvent::Ambient`]. `energies` is a snapshot of
+/// the four channels (FIN / BLUE / SHIP / HUMP) at the moment the
+/// window fired.
+#[derive(Debug, Clone)]
+pub struct MultiLabelDecision {
+    pub events: Vec<AcousticEvent>,
+    pub energies: [f32; 4],
+    pub step: usize,
 }
 
 impl Default for MarineDetector {
@@ -473,5 +598,146 @@ mod tests {
         let cm = ConfusionMatrix::from_predictions(&preds, &windows, 25);
         assert!(cm.total > 0);
         println!("UC03 CM accuracy: {:.1}%", cm.accuracy() * 100.0);
+    }
+
+    // ----- v0.2 regressions & improvements -----
+
+    /// Helper: fire a 500-step sine-like pulse train at `freq` and return
+    /// the last classification decision (single-label path).
+    fn last_event_at(freq: f32, det: &mut MarineDetector) -> Option<AcousticEvent> {
+        det.reset();
+        let sig: Vec<f32> = (0..500)
+            .map(|i| if (i % 25) < 20 { freq } else { 0.0 })
+            .collect();
+        let mut last = None;
+        for &f in &sig {
+            if let Some(e) = det.step(f) {
+                last = Some(e);
+            }
+        }
+        last
+    }
+
+    #[test]
+    fn v02_wide_bandwidth_catches_boundary_110hz() {
+        // v0.1 (strict tuning) reports Ambient for 110 Hz — it falls
+        // between the Blue (80) and Ship (140) channels. v0.2 with wider
+        // Gaussian tuning must pick it up as the nearest species.
+        let mut v01 = MarineDetector::new();
+        assert_eq!(
+            last_event_at(110.0, &mut v01),
+            Some(AcousticEvent::Ambient),
+            "v0.1 baseline: 110 Hz must fall through to Ambient"
+        );
+
+        let mut v02 = MarineDetector::with_bandwidth(0.20);
+        let ev = last_event_at(110.0, &mut v02);
+        assert!(
+            matches!(
+                ev,
+                Some(AcousticEvent::BlueWhale) | Some(AcousticEvent::ShipNoise)
+            ),
+            "v0.2 wide tuning: 110 Hz must be Blue or Ship, got {ev:?}"
+        );
+    }
+
+    #[test]
+    fn v02_wide_bandwidth_catches_boundary_170hz() {
+        let mut v01 = MarineDetector::new();
+        assert_eq!(last_event_at(170.0, &mut v01), Some(AcousticEvent::Ambient));
+
+        let mut v02 = MarineDetector::with_bandwidth(0.20);
+        let ev = last_event_at(170.0, &mut v02);
+        assert!(
+            matches!(
+                ev,
+                Some(AcousticEvent::ShipNoise) | Some(AcousticEvent::Humpback)
+            ),
+            "v0.2 wide tuning: 170 Hz must be Ship or Humpback, got {ev:?}"
+        );
+    }
+
+    #[test]
+    fn v02_wide_bandwidth_still_rejects_truly_ambient() {
+        // Widening the tuning must not blow up the false-alarm rate on
+        // genuinely quiet ambient recordings.
+        let mut det = MarineDetector::with_bandwidth(0.30);
+        let sig = acoustic_signal::ambient_noise(1000);
+        let mut last = None;
+        for &f in &sig {
+            if let Some(e) = det.step(f) {
+                last = Some(e);
+            }
+        }
+        assert_eq!(
+            last,
+            Some(AcousticEvent::Ambient),
+            "Wide tuning on pure ambient must still classify Ambient"
+        );
+    }
+
+    #[test]
+    fn v02_multi_label_reports_whale_and_ship_together() {
+        // The v0.1 single-label path reports either FinWhale or ShipNoise
+        // per window; v0.2 step_multi should report both on windows where
+        // both sources were active.
+        let sig = acoustic_signal::fin_whale_under_ship(2000);
+        let mut det = MarineDetector::with_bandwidth(0.30);
+
+        let mut both = 0;
+        let mut fin_only = 0;
+        let mut ship_only = 0;
+        let mut total = 0;
+        for &f in &sig {
+            if let Some(d) = det.step_multi(f) {
+                total += 1;
+                let has_fin = d.events.contains(&AcousticEvent::FinWhale);
+                let has_ship = d.events.contains(&AcousticEvent::ShipNoise);
+                match (has_fin, has_ship) {
+                    (true, true) => both += 1,
+                    (true, false) => fin_only += 1,
+                    (false, true) => ship_only += 1,
+                    _ => {}
+                }
+            }
+        }
+        assert!(total > 0);
+        assert!(
+            both >= 5,
+            "v0.2 multi-label must report fin AND ship together on overlap \
+             (got both={both}, fin_only={fin_only}, ship_only={ship_only}, total={total})"
+        );
+    }
+
+    #[test]
+    fn v02_multi_label_single_source_stays_single() {
+        // A pure ship passage with no whales must still report just one
+        // label — widening and multi-label must not manufacture phantom
+        // species.
+        let sig = acoustic_signal::ship_passage(1000);
+        let mut det = MarineDetector::with_bandwidth(0.25);
+        let mut phantom = 0;
+        let mut ship_any = 0;
+        let mut total = 0;
+        for &f in &sig {
+            if let Some(d) = det.step_multi(f) {
+                total += 1;
+                if d.events.contains(&AcousticEvent::ShipNoise) {
+                    ship_any += 1;
+                }
+                // Count decisions that include any non-ship species.
+                for e in &d.events {
+                    if !matches!(e, AcousticEvent::ShipNoise | AcousticEvent::Ambient) {
+                        phantom += 1;
+                    }
+                }
+            }
+        }
+        assert!(total > 0);
+        assert!(ship_any >= total * 8 / 10, "Ship should dominate: {ship_any}/{total}");
+        assert!(
+            phantom <= total / 5,
+            "Phantom species must stay rare (got {phantom} phantom decisions in {total} windows)"
+        );
     }
 }
