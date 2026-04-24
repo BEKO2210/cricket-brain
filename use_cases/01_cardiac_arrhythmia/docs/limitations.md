@@ -97,20 +97,26 @@ The 92.5% accuracy on synthetic data is an **upper bound** — real-world accura
 
 ---
 
-## 6. What CricketBrain CANNOT Do vs. Deep Learning
+## 6. CricketBrain vs. Alternatives (Classical DSP, TinyML, DNN)
 
-| Capability | CricketBrain | Deep Learning (e.g., InceptionTime) |
-|-----------|:---:|:---:|
-| Rate classification (N/Tachy/Brady) | Yes | Yes |
-| Morphological analysis | No | Yes |
-| Multi-class arrhythmia (AAMI) | No | Yes (5+ classes) |
-| Works without training data | Yes | No |
-| Works on microcontroller | Yes | No |
-| Sub-microsecond latency | Yes | No |
-| Explainable decisions | Yes | Partially |
-| Real-time on wearable | Yes | Sometimes |
-| Handles noise robustly | No (>10%) | Yes (trained on noisy data) |
-| Detects MI/STEMI | No | Yes |
+| Capability | CricketBrain | Pan-Tompkins | Tiny MF-CNN ([src](https://pmc.ncbi.nlm.nih.gov/articles/PMC9919183/)) | Stanford DNN ([src](https://www.nature.com/articles/s41591-018-0268-3)) | Apple Watch AFib |
+|-----------|:---:|:---:|:---:|:---:|:---:|
+| RAM | **928 B** | < 1 KB | 4-8 KB | GPU-class | proprietary |
+| Model size | ~20 KB flash | < 5 KB | **15 KB** | ~10-40 MB | ~1-10 MB |
+| Training data | **Zero** | Zero | MIT-BIH inter-patient | 91 k ECGs, 53 k patients | millions |
+| Inference latency | **0.126 µs/step** | 1-10 ms | < 1 ms on RPi | 30 s window | 30-60 s |
+| Rate classification (N/Tachy/Brady/Irregular) | **Yes** | Yes | Yes | Yes | Partial |
+| AAMI 5-class morphology (N/S/V/F/Q) | No | No | **98.18 %** acc, F1 0.92 | Yes | No |
+| 12-rhythm class (AF/VT/AVB/...) | No | No | No | **F1 0.837** (beats cardiologist avg 0.780) | AFib only |
+| MI / ST-elevation | No | No | No | Partial | No |
+| Runs on ATtiny85 ($0.50) | **Yes** | Yes | Tight | No | No |
+| Sub-mW average power | **Yes** | Yes | Partial | No | ~3 mW |
+| Explainable / deterministic | **Yes** | Yes | Partial | No | No |
+| FDA-clearable | Class II plausible | Yes | Yes | Yes (pending) | **Yes (DEN180044)** |
+
+Full sourced breakdown with per-axis numbers, when-to-use-which
+matrix, and power-budget maths:
+[docs/competitive_analysis.md](competitive_analysis.md).
 
 ---
 

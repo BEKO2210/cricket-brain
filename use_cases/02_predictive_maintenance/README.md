@@ -221,7 +221,30 @@ See [data/SOURCES.md](data/SOURCES.md) for download instructions.
 4. **Synthetic data only** — not validated on real CWRU accelerometer signals
 5. **No amplitude analysis** — frequency-only detection, no vibration level trending
 
-See [docs/limitations.md](docs/limitations.md) for full analysis.
+See [docs/limitations.md](docs/limitations.md) for full analysis and
+[docs/competitive_analysis.md](docs/competitive_analysis.md) for the
+fully sourced breakdown against envelope analysis, TinyML CNNs
+(FaultNet, Hakim 2023 Lite CNN), ResNet-50 and commercial SKF IMx.
+
+---
+
+## How It Compares (2026-04-24)
+
+Short version — full breakdown with citations in
+[docs/competitive_analysis.md](docs/competitive_analysis.md):
+
+| System | RAM | Latency | Avg power @ 1 Hz | Training data | CWRU accuracy |
+|--------|----:|--------:|-----------------:|---------------|--------------:|
+| **CricketBrain UC02** | **3.7 KB** | **0.13-0.26 µs/step** | **< 1 µW compute** | **Zero** | 93.0% (synthetic) |
+| Classical envelope analysis | < 5 KB | 1-10 ms | ~500 µW | Zero | 95-98% |
+| Lite CNN (Hakim 2023) | ~100 KB | 120-140 ms | ~14 mW | CWRU full | 99.95% |
+| ResNet-50 | > 1 GB GPU | ~3 s | offline | ImageNet + CWRU | 99.95% |
+| SKF IMx / Emerson AMS | PC-class | — | mains (~10 W) | vendor corpora | — |
+
+CricketBrain's niche: **wireless, self-powered bolt-on vibration tag**
+on $2 STM32F0 where even the lightest TinyML CNN (~100 KB RAM, ~14 mW)
+doesn't fit. CNNs win on accuracy (99.95% vs 93%) and severity
+estimation, but need 250 × more memory and 20,000 × more compute.
 
 ---
 

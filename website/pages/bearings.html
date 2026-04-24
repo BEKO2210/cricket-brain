@@ -250,6 +250,83 @@
       </div>
     </section>
 
+    <!-- How It Compares -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">How It <span>Compares</span></h2>
+        <p class="section-subtitle">Against classical envelope analysis (industry standard), TinyML CNNs (Hakim 2023 Lite CNN, FaultNet), ResNet-50, and commercial SKF IMx / Emerson AMS analysers. All numbers from peer-reviewed papers or vendor documentation.</p>
+
+        <div class="section-card">
+          <h3 style="margin-block-end:var(--space-sm);">RAM, Model Size &amp; Latency</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>System</th><th>RAM</th><th>Model size</th><th>Inference time</th></tr></thead>
+              <tbody>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC02</strong></td><td><strong>3.7 KB</strong></td><td>~25 KB flash</td><td><strong>0.13-0.26 &micro;s/step</strong></td></tr>
+                <tr><td>Classical envelope analysis</td><td>&lt; 5 KB</td><td>&lt; 10 KB</td><td>1-10 ms</td></tr>
+                <tr><td>Lite CNN (Hakim 2023)</td><td>~100 KB</td><td>600 KB (153 K params)</td><td>120-140 ms</td></tr>
+                <tr><td>FaultNet (2-layer CNN)</td><td>~200 KB</td><td>~1 MB</td><td>10-50 ms</td></tr>
+                <tr><td>ResNet-50</td><td>&gt; 1 GB GPU</td><td>96 MB (23.9 M params)</td><td>~3 s</td></tr>
+                <tr><td>Commercial SKF IMx / Emerson AMS</td><td>PC-class</td><td>10-100 MB</td><td>—</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">CricketBrain is ~250&times; smaller than the lightest published CNN that saturates the CWRU benchmark (Hakim 2023), and &gt; 25 000&times; smaller than ResNet-50.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Average Power at 1 Hz Decision Rate</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>System</th><th>Active power</th><th>Duty cycle</th><th>Average power</th></tr></thead>
+              <tbody>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain &mdash; STM32F0 @ 48 MHz</strong></td><td>~15 mW</td><td>0.001%</td><td style="color:var(--accent);"><strong>&lt; 1 &micro;W compute</strong></td></tr>
+                <tr><td>Classical envelope on STM32F4</td><td>~50 mW</td><td>1%</td><td>~500 &micro;W</td></tr>
+                <tr><td>Lite CNN on Cortex-M7 @ 216 MHz</td><td>~100 mW</td><td>14%</td><td>~14 mW</td></tr>
+                <tr><td>FaultNet on RPi</td><td>~500 mW</td><td>5%</td><td>~25 mW</td></tr>
+                <tr><td>ResNet-50 on Jetson</td><td>~5 W</td><td>offline batch</td><td>—</td></tr>
+                <tr><td>SKF IMx / Emerson AMS</td><td>~10 W (mains)</td><td>100%</td><td>~10 W</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">For a self-powered wireless vibration tag running on a piezo/RF energy harvester (~100 &micro;W budget), only CricketBrain fits.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">CWRU Accuracy &amp; Training Data</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>System</th><th>Task</th><th>CWRU accuracy</th><th>Training data</th></tr></thead>
+              <tbody>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC02 (synthetic)</strong></td><td>4 classes</td><td><strong>93.0%, d' 6.18</strong></td><td><strong>Zero</strong></td></tr>
+                <tr><td>Classical envelope analysis</td><td>4 classes</td><td>95-98% on clean data</td><td>Zero</td></tr>
+                <tr><td>Lite CNN (Hakim 2023)</td><td>10 classes</td><td>99.86-99.97% (mean 99.95%)</td><td>CWRU full</td></tr>
+                <tr><td>ResNet-50 (Hakim 2023 table)</td><td>10 classes</td><td>99.95%</td><td>ImageNet + CWRU fine-tune</td></tr>
+                <tr><td>CNN-Transformer (Nature Sci. Rep. 2025)</td><td>10 classes</td><td>&gt; 99%</td><td>CWRU multi-condition</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">CNNs saturate at &gt; 99.9% but need ~250&times; more memory and ~20 000&times; more compute. For a bolt-on wireless vibration tag, the 7% accuracy gap buys 3.7 KB RAM with zero training data.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">When to Pick Which</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Scenario</th><th>Recommendation</th></tr></thead>
+              <tbody>
+                <tr><td>Wireless self-powered tag on thousands of motors/pumps</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>Custom bearing geometry (no training corpus)</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>Edge gateway (Cortex-M7, RPi, Jetson Nano), 10-class repertoire</td><td>Lite CNN / FaultNet</td></tr>
+                <tr><td>Mains-powered analyser, RUL trending, fleet analytics</td><td>ResNet-50 / SKF IMx / Emerson AMS</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">Full sourced breakdown (Hakim 2023, FaultNet, CNN-Transformer): <a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/02_predictive_maintenance/docs/competitive_analysis.md" target="_blank" rel="noopener">docs/competitive_analysis.md</a>.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- Dataset & License -->
     <section class="section">
       <div class="content-wrap">
