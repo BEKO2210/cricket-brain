@@ -11,6 +11,9 @@
     "test:ci": "vitest run",
     "ci": "npm run check && npm run test:ci && npm run build"
   },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "dependencies": {
     "astro": "^6.1.9"
   },

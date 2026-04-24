@@ -29,7 +29,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # Astro 6 requires Node >= 22.12.0 — stay on the current LTS line.
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: website/astro/package-lock.json
 
