@@ -12,6 +12,10 @@ on:
     paths:
       - 'use_cases/03_marine_acoustic/**'
 
+# Least-privilege: the job only needs to read the repo to build and test.
+permissions:
+  contents: read
+
 jobs:
   build-and-test:
     name: Build & Test UC03

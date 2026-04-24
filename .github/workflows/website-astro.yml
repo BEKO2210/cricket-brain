@@ -11,6 +11,10 @@ on:
       - 'website/astro/**'
       - '.github/workflows/website-astro.yml'
 
+# Least-privilege: the job only needs to read the repo to check and build.
+permissions:
+  contents: read
+
 jobs:
   website:
     name: Website checks and tests
