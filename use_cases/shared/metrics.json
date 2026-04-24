@@ -52,9 +52,18 @@
     "dataset_license": "CC BY 4.0",
     "dataset_url": "https://www.mbari.org/technology/mars/",
     "signal_hz": 256000,
-    "accuracy_pct": null,
-    "latency_ms": null,
-    "key_advantage": "no_std Boje, 27-Token Vocab, STDP"
+    "accuracy_pct": 90.0,
+    "d_prime": 6.18,
+    "macro_f1": 0.900,
+    "latency_us_per_step": 0.21,
+    "latency_ms": 49,
+    "ram_bytes_detector": 3712,
+    "tests_passing": 20,
+    "noise_tolerance_pct": 10,
+    "event_classes": ["Ambient", "FinWhale", "BlueWhale", "ShipNoise", "Humpback"],
+    "channel_freqs_hz": [20, 80, 140, 200],
+    "date_measured": "2026-04-24",
+    "key_advantage": "Smart-Buoy ready, 4-channel hydrophone classifier in 3.8 KB, 0.21 µs/step, d'=6.18"
   },
   "04_power_grid": {
     "market_size_usd_bn": 100,
