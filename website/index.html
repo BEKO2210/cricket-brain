@@ -65,7 +65,7 @@
     <!-- Hero -->
     <section class="hero">
       <div class="hero-badge">
-        <span aria-hidden="true">&#9881;</span> v3.0.0 — Production Release
+        <span aria-hidden="true">&#9881;</span> v3.0.0 — Stable Research Release
       </div>
       <h1>Cricket<span class="text-accent">Brain</span></h1>
       <p class="hero-subtitle">Adaptive neuromorphic signal processing. Hardwired core + optional STDP plasticity. Inspired by 200 million years of cricket evolution.</p>
@@ -253,7 +253,7 @@
     <section id="comparison" class="section">
       <div class="content-wrap">
         <h2 class="section-title" data-animate="fade-up">How It <span>Compares</span></h2>
-        <p class="section-subtitle" data-animate="fade-up">Not competing with deep learning &mdash; proving that useful inference is possible at a fundamentally different scale. Numbers against classical DSP, TinyML (TensorFlow Lite Micro, Edge Impulse) and full deep learning, all from vendor docs or peer-reviewed papers.</p>
+        <p class="section-subtitle" data-animate="fade-up">CricketBrain is not a general-purpose AI classifier &mdash; it's an ultra-low-memory neuromorphic signal core for narrow-band, frequency-stable event detection. Numbers against classical DSP, TinyML (TensorFlow Lite Micro, Edge Impulse) and full deep learning, all from vendor docs or peer-reviewed papers. <strong>Not the same task across rows</strong> &mdash; read this as an <em>operating-envelope</em> comparison (RAM, power, latency, training-data requirement), not a shared-accuracy comparison.</p>
 
         <div class="result-table" data-animate="fade-up">
           <table class="comparison-table" role="table">
@@ -330,7 +330,7 @@
 
           <article class="version-card">
             <span class="version-badge">v3.0.0</span>
-            <h3>Production Release</h3>
+            <h3>Stable Research Release</h3>
             <p>Full workspace with cross-platform bindings, STDP plasticity, and research-grade benchmarks.</p>
             <ul>
               <li>C/FFI, Python (PyO3), WASM bindings</li>
@@ -347,19 +347,19 @@
     <section id="use-cases" class="section">
       <div class="content-wrap">
         <h2 class="section-title" data-animate="fade-up">Use <span>Cases</span></h2>
-        <p class="section-subtitle" data-animate="fade-up">Real-world applications built on CricketBrain. Each case includes benchmarks, source code, and honest limitations.</p>
+        <p class="section-subtitle" data-animate="fade-up">Research prototypes built on CricketBrain. Each case includes benchmarks, source code, honest limitations and a validation-status badge. All current accuracy numbers are on synthetic signals; real-dataset validation is the v0.2 roadmap priority.</p>
 
         <div class="version-grid" data-animate="fade-up" data-stagger="true">
           <a href="pages/cardiac.html" class="uc-card-link">
             <article class="version-card uc-live">
-              <span class="version-badge" style="background:color-mix(in srgb, var(--danger) 15%, transparent); color:var(--danger);">Live</span>
-              <h3>Cardiac Arrhythmia</h3>
-              <p>ECG rhythm classification — tachycardia, bradycardia, irregular.</p>
+              <span class="version-badge" style="background:color-mix(in srgb, var(--danger) 15%, transparent); color:var(--danger);">Synthetic Demo</span>
+              <h3>Rate-Based Cardiac Rhythm Triage</h3>
+              <p>Beat-rate regime classifier (bradycardic / normal / tachycardic / irregular). Not a morphology-aware diagnostic.</p>
               <ul>
-                <li>92.5% accuracy, d' = 6.18 (SDT)</li>
+                <li>92.5% synthetic accuracy, d' = 6.18 (SDT, log-linear)</li>
                 <li>0.126 &micro;s/step, 928 bytes RAM</li>
                 <li>17 tests, noise-resilient preprocessor</li>
-                <li>$50B wearable health market</li>
+                <li>Wearable health segment (~$50B, Grand View 2024)</li>
               </ul>
               <span class="uc-cta">View Demo &rarr;</span>
             </article>
@@ -367,14 +367,14 @@
 
           <a href="pages/bearings.html" class="uc-card-link">
             <article class="version-card uc-live">
-              <span class="version-badge" style="background:color-mix(in srgb, #3b82f6 15%, transparent); color:#3b82f6;">Live</span>
-              <h3>Predictive Maintenance</h3>
-              <p>Bearing fault detection via 4-channel ResonatorBank.</p>
+              <span class="version-badge" style="background:color-mix(in srgb, #3b82f6 15%, transparent); color:#3b82f6;">Synthetic Demo</span>
+              <h3>Bearing Fault-Frequency Triage</h3>
+              <p>4-channel ResonatorBank classifies BPFO / BPFI / BSF dominant fault frequencies. Real CWRU <code>.mat</code> validation pending.</p>
               <ul>
-                <li>93.0% accuracy, d' = 6.18 (SDT)</li>
+                <li>93.0% synthetic accuracy, d' = 6.18 (SDT, log-linear)</li>
                 <li>3,712 bytes RAM, 20 neurons</li>
-                <li>100% noise-robust, RPM compensation</li>
-                <li>$15B predictive maintenance market</li>
+                <li>100% on synthetic random-spike noise up to 50%, RPM compensation</li>
+                <li>Predictive-maintenance segment (~$15B, MarketsandMarkets 2024)</li>
               </ul>
               <span class="uc-cta">View Demo &rarr;</span>
             </article>
@@ -382,15 +382,15 @@
 
           <a href="pages/marine.html" class="uc-card-link">
             <article class="version-card uc-live">
-              <span class="version-badge" style="background:color-mix(in srgb, #00d4aa 15%, transparent); color:#00d4aa;">Live</span>
-              <h3>Marine Acoustics</h3>
-              <p>Fin whale, blue whale, ship noise and humpback song detection on hydrophone streams.</p>
+              <span class="version-badge" style="background:color-mix(in srgb, #00d4aa 15%, transparent); color:#00d4aa;">Synthetic Demo</span>
+              <h3>Marine Acoustic Event Triage</h3>
+              <p>Frequency-stable events: fin-whale pulses, blue-whale A-calls, ship cavitation, humpback tonals. Real MARS validation pending.</p>
               <ul>
-                <li>90.0% accuracy, d' = 6.18 (SDT)</li>
+                <li>90.0% synthetic accuracy, d' = 6.18 (SDT, log-linear)</li>
                 <li>3,712 bytes RAM, 20 neurons</li>
-                <li>v0.2: multi-label (100%) &amp; boundary recovery</li>
+                <li>v0.2: multi-label (100% on whale+ship overlap) &amp; boundary recovery</li>
                 <li>25 tests, ship-transit &amp; sea-state compensation</li>
-                <li>$4B marine PAM market</li>
+                <li>Marine PAM segment (~$4B, industry estimate)</li>
               </ul>
               <span class="uc-cta">View Demo &rarr;</span>
             </article>

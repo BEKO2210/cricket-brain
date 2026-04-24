@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
   <meta property="og:title" content="Cardiac Arrhythmia Pre-Screening — CricketBrain">
   <meta property="og:description" content="Neuromorphic cardiac rhythm detection in 928 bytes. Research prototype — NOT a medical device.">
-  <title>Cardiac Arrhythmia — CricketBrain</title>
+  <title>Rate-Based Cardiac Rhythm Triage — CricketBrain</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -128,8 +128,9 @@
         <strong>NOT A MEDICAL DEVICE.</strong> Research prototype only. Not validated for clinical use.
         No regulatory clearance (FDA/CE). Do not use for diagnosis or patient monitoring.
       </div>
-      <h1>Cardiac <span>Arrhythmia</span> Detection</h1>
-      <p class="subtitle">Neuromorphic rhythm classification in 928 bytes of RAM. Detects tachycardia, bradycardia, and irregular rhythm using delay-line coincidence detection.</p>
+      <h1>Rate-Based Cardiac <span>Rhythm</span> Triage</h1>
+      <p class="subtitle">Sub-millisecond, sub-kilobyte rhythm-regime classifier. Triages beat-rate patterns (bradycardic, normal, tachycardic, transition-irregular) in 928 bytes of RAM using delay-line coincidence detection. A pre-screen, not a diagnostic.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--text-muted); margin-block-end:var(--space-lg); max-inline-size:700px;"><strong style="color:var(--text-primary);">Validation status:</strong> synthetic P-QRS-T waveforms only. Real MIT-BIH dataset validation is planned for v0.2.</p>
       <div style="display:flex; flex-wrap:wrap; gap:var(--space-md); justify-content:center;">
         <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/01_cardiac_arrhythmia" class="btn btn-primary" target="_blank" rel="noopener">View Source</a>
         <a href="../index.html#simulation" class="btn btn-secondary">Live Simulation</a>
@@ -145,7 +146,7 @@
         <div class="metric-grid" style="margin-block-end: var(--space-xl);">
           <div class="metric-card">
             <div class="value">92.5%</div>
-            <div class="label">Accuracy (150 beats)</div>
+            <div class="label">Synthetic-window accuracy (150 beats)</div>
           </div>
           <div class="metric-card">
             <div class="value">6.18</div>

@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
   <meta property="og:title" content="Predictive Bearing Maintenance — CricketBrain">
   <meta property="og:description" content="4-channel neuromorphic fault detection in 3712 bytes. Outer race, inner race, ball defects at 0.2 µs/step.">
-  <title>Bearing Fault Detection — CricketBrain</title>
+  <title>Bearing Fault-Frequency Triage — CricketBrain</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -65,8 +65,9 @@
   <main id="main-content">
     <!-- Hero -->
     <section class="bearing-hero">
-      <h1>Bearing <span>Fault</span> Detection</h1>
-      <p class="subtitle">4-channel ResonatorBank detects outer race, inner race, and ball defects from vibration frequencies. 20 neurons in 3,712 bytes — runs on a $2 STM32.</p>
+      <h1>Bearing <span>Fault-Frequency</span> Triage</h1>
+      <p class="subtitle">4-channel ResonatorBank classifies outer-race, inner-race and ball-defect frequencies from vibration streams. 20 neurons in 3,712 bytes &mdash; runs on a $2 STM32.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--text-muted); margin-block-end:var(--space-lg); max-inline-size:700px;"><strong style="color:var(--text-primary);">Validation status:</strong> synthetic CWRU-frequency signals only. Real CWRU <code>.mat</code> accelerometer-file validation is the top-priority v0.2 milestone.</p>
       <div style="display:flex; flex-wrap:wrap; gap:var(--space-md); justify-content:center;">
         <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/02_predictive_maintenance" class="btn btn-primary" target="_blank" rel="noopener">View Source</a>
         <a href="../index.html#use-cases" class="btn btn-secondary">All Use Cases</a>
@@ -79,7 +80,7 @@
         <h2 class="section-title">Key <span>Metrics</span></h2>
         <p class="section-subtitle">Measured 2026-04-10 on synthetic SKF 6205-2RS vibration signals. CWRU bearing characteristic frequencies.</p>
         <div class="metric-grid">
-          <div class="metric-card"><div class="value">93.0%</div><div class="label">Accuracy (200 windows)</div></div>
+          <div class="metric-card"><div class="value">93.0%</div><div class="label">Synthetic-window accuracy (200 windows)</div></div>
           <div class="metric-card"><div class="value">6.18</div><div class="label">d' Sensitivity (SDT)</div></div>
           <div class="metric-card"><div class="value">0.932</div><div class="label">Macro F1 Score</div></div>
           <div class="metric-card"><div class="value">3,712</div><div class="label">Bytes RAM (20 neurons)</div></div>
@@ -115,16 +116,16 @@
         <h2 class="section-title">Stress Test &mdash; <span>Honest Limits</span></h2>
 
         <div class="section-card">
-          <h3 style="margin-block-end:var(--space-sm);">Noise Resilience</h3>
+          <h3 style="margin-block-end:var(--space-sm);">Noise Resilience <span style="font-size:var(--font-size-sm); color:var(--text-muted); font-weight:400;">&mdash; synthetic random-spike transients only</span></h3>
           <div class="result-table">
             <table class="comparison-table" role="table">
-              <thead><tr><th>Noise Level</th><th>Accuracy</th><th>Verdict</th></tr></thead>
+              <thead><tr><th>Synthetic noise %</th><th>Accuracy</th><th>Verdict</th></tr></thead>
               <tbody>
-                <tr><td>0%</td><td>100%</td><td>OK</td></tr>
-                <tr><td>10%</td><td>100%</td><td>OK</td></tr>
-                <tr><td>20%</td><td>100%</td><td>OK</td></tr>
-                <tr><td>30%</td><td>100%</td><td>OK</td></tr>
-                <tr><td>50%</td><td>100%</td><td>OK</td></tr>
+                <tr><td>0%</td><td>100%</td><td>OK on synthetic random-spike noise</td></tr>
+                <tr><td>10%</td><td>100%</td><td>OK on synthetic random-spike noise</td></tr>
+                <tr><td>20%</td><td>100%</td><td>OK on synthetic random-spike noise</td></tr>
+                <tr><td>30%</td><td>100%</td><td>OK on synthetic random-spike noise</td></tr>
+                <tr><td>50%</td><td>100%</td><td>OK on synthetic random-spike noise</td></tr>
               </tbody>
             </table>
           </div>

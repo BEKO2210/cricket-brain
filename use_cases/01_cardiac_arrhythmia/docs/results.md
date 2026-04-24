@@ -30,8 +30,15 @@ The 11 "Irregular" predictions occur during rhythm transitions (Normal → Tachy
 | Bradycardia vs Normal | 6.18 | 1.000 | 0.000 | EXCELLENT |
 | Normal vs Tachycardia | 6.18 | 1.000 | 0.000 | EXCELLENT |
 
-Methodology: Green & Swets (1966). 200 trials per class, Wilson 95% CI.
+Methodology: Green & Swets (1966). 200 trials per class, Wilson 95 % CI.
 TPR 95% CI: [0.981, 1.000]. FPR 95% CI: [0.000, 0.019].
+
+**d' convention.** d' uses the **log-linear correction** for ceiling
+hit-rates and floor false-alarm rates (hits clipped to
+`[0.5/n, 1 − 0.5/n]` before the inverse-normal transform; Hautus
+1995). Without the correction, TPR = 1.000 / FPR = 0.000 cells would
+yield an undefined / infinite d'. The 6.18 value is the finite ceiling
+for n = 200 trials/class.
 
 ---
 

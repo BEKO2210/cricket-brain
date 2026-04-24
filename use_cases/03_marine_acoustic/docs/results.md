@@ -31,6 +31,13 @@ frequency (visible as the two `Conf≈0.53` transitions in the CSV output).
 `cargo run --release --example marine_sdt` (200 signal + 200 noise trials
 per condition, 500 steps per trial).
 
+**d' convention.** d' is reported with the **log-linear correction**
+for ceiling hit-rates and floor false-alarm rates (hits clipped to
+`[0.5/n, 1 − 0.5/n]` before the inverse-normal transform; Hautus 1995).
+Without the correction, the TPR = 1.000 / FPR = 0.000 cells would
+yield an undefined / infinite d'. The correction is conservative — it
+caps d' at a finite ceiling (6.18 for n = 200).
+
 | Condition | d' | TPR | FPR | Rating |
 |-----------|---:|----:|----:|--------|
 | Fin Whale vs Ambient | 6.18 | 1.000 | 0.000 | EXCELLENT |

@@ -173,4 +173,30 @@ Each use case follows the same 10-run progression:
 
 ---
 
-*Last updated: 2026-04-24 — UC03 complete (10/10 runs); 3 of 10 use cases done.*
+---
+
+## 7. v0.2 Priority Backlog — Real-Data Validation
+
+All three completed use cases currently benchmark on **synthetic
+signals**. The next-highest-value work is not a fourth use case but
+**real-data validation** of the existing three, in this order:
+
+1. **UC02 Bearings — real CWRU `.mat` files** (easiest; dataset is
+   already used by the Python preprocess pipeline, just needs the
+   end-to-end run). Highest credibility-per-hour payoff.
+2. **UC03 Marine — real MBARI MARS hydrophone segments** (AWS Open
+   Data). Harder because labelling / preprocessing requires
+   domain knowledge.
+3. **UC01 Cardiac — real MIT-BIH records** (most regulatory care
+   required; frame as "rate-based triage demo", not clinical).
+
+Each validation should add a `docs/real_data_results.md` alongside the
+existing synthetic `docs/results.md` so the distinction stays visible.
+Until real-data rows exist, *all accuracy claims carry a "synthetic-
+window accuracy" qualifier*.
+
+---
+
+*Last updated: 2026-04-24 — UC03 v0.2 complete (10/10 runs + v0.2 API);
+3 of 10 use cases done; real-data validation is the next v0.2
+priority across all three.*

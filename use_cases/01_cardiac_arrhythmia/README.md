@@ -1,6 +1,10 @@
-# CricketBrain Application: Cardiac Arrhythmia Pre-Screening
+# CricketBrain Application: Rate-Based Cardiac Rhythm Triage
 
-> **Status:** v0.1.0 | **CricketBrain v3.0.0** | **License:** AGPL-3.0 | **Date:** 2026-04-10
+> **Status:** v0.1.0 research prototype | **CricketBrain v3.0.0** | **License:** AGPL-3.0 | **Date:** 2026-04-10
+>
+> **Validation status:** Synthetic P-QRS-T waveforms only. Real MIT-BIH
+> dataset validation is planned for v0.2 — see
+> [MASTER_PLAN.md](../MASTER_PLAN.md).
 
 > **NOT A MEDICAL DEVICE.** This application is a research prototype for educational
 > and experimental purposes only. Do not use for clinical diagnosis, patient monitoring,
@@ -11,18 +15,33 @@
 
 ## Overview
 
-Continuous ECG monitoring on wearables requires detecting irregular heartbeat
-patterns in real-time. CricketBrain's 5-neuron coincidence detection circuit
-provides sub-microsecond rhythm classification in 928 bytes of RAM — no cloud,
-no training data, no battery drain.
+A sub-millisecond, sub-kilobyte **rate-based rhythm triage** core for
+continuous ECG monitoring on implantable, patch, or earbud-class
+hardware. CricketBrain's 5-neuron coincidence detector classifies
+beat-rate regimes (bradycardic, normal, tachycardic, transition-irregular)
+in 928 bytes of RAM — no cloud, no training data, no battery drain.
 
-**Market Size:** $50B wearable health monitoring
+**What it is:** A fast pre-screener for abnormal heart-rate regimes
+suitable as a front-end to a richer analyser.
+
+**What it is NOT:** A morphology-aware arrhythmia detector. See
+"[What this detector does NOT do](#what-this-detector-does-not-do)"
+below.
+
+### Market context
+
+Continuous-ECG wearables are a ~$50 B annual segment (Grand View
+Research, 2024 estimate) — included for scope, not as a product claim.
 
 ---
 
-## Benchmark Results (2026-04-10)
+## Benchmark Results (2026-04-10, synthetic ECG)
 
 ### Classification Performance
+
+All numbers below are measured on **synthetic P-QRS-T waveforms** (no
+motion artefacts, no baseline wander, no ectopic beats). Real MIT-BIH
+validation is pending — see [docs/limitations.md](docs/limitations.md).
 
 | Class | TP | FP | FN | Precision | Recall | F1 |
 |-------|---:|---:|---:|----------:|-------:|---:|
@@ -31,14 +50,17 @@ no training data, no battery drain.
 | Bradycardia | 43 | 0 | 2 | 1.000 | 0.956 | 0.977 |
 | **Macro Average** | | | | **1.000** | **0.927** | **0.962** |
 
-**Accuracy:** 92.5% (136/147) on 150 synthetic beats
+**Synthetic-window accuracy:** 92.5 % (136 / 147) on 150 synthetic beats.
+Macro F1 is computed over the three rate classes present in the sample;
+the *Irregular* transition class is represented separately in the stress
+tests (`docs/limitations.md` §2).
 
 ### Key Metrics
 
 | Metric | Value | Method |
 |--------|-------|--------|
-| Accuracy | 92.5% | Confusion matrix on sample_record.csv |
-| d' (SDT) | 6.18 | Green & Swets (1966), 200 trials/class |
+| Synthetic accuracy | 92.5 % | Confusion matrix on `sample_record.csv` |
+| d' (SDT) [†] | 6.18 | Green & Swets (1966), 200 trials/class |
 | Macro F1 | 0.962 | Precision/Recall per class |
 | Latency | 0.126 µs/step | Release mode, avg over 3 rhythms |
 | Throughput | 7.9M steps/sec | Single CPU thread |
@@ -46,7 +68,12 @@ no training data, no battery drain.
 | Detector total | 1,336 bytes | Struct (408B) + CricketBrain heap (928B) |
 | Arduino fit | 65% | Of 2,048B Arduino Uno RAM |
 
-### Noise Rejection — With ECG Preprocessor
+[†] d' computed with log-linear correction for ceiling hit-rates and
+floor false-alarm rates: hits in [0.5/n, 1 - 0.5/n]. Without the
+correction the perfect TPR=1.0 / FPR=0.0 cells would yield an
+undefined / infinite d'.
+
+### Noise Rejection — With ECG Preprocessor (synthetic random-spike noise)
 
 | Noise Level | Without Preprocessor | With Preprocessor | Improvement |
 |-------------|---------------------:|------------------:|------------:|
@@ -231,7 +258,34 @@ cargo bench
 
 ---
 
+## What this detector does NOT do
+
+- **No morphology-aware diagnosis.** No AF, VT, AVB, BBB, ST-elevation
+  MI, long-QT, Wolff-Parkinson-White.
+- **No P-wave / T-wave analysis.** Only beat-to-beat rate.
+- **No severity grading.** A 120 BPM exercise sinus rhythm and a 120 BPM
+  atrial flutter are both reported as "Tachycardic".
+- **No source localisation / lead-specific analysis.** Single-channel
+  rate-time-series only.
+- **No real-world validation yet.** All benchmarks are on synthetic
+  P-QRS-T waveforms; real MIT-BIH validation is planned.
+- **Not a certified medical device.** See [Medical Disclaimer](#medical-disclaimer).
+
+For any of the above, combine CricketBrain as a pre-screen with a
+richer morphology-aware classifier on the same beat stream.
+
+---
+
 ## How It Compares (2026-04-24)
+
+> **Disclaimer — these systems do not all perform the same task.**
+> CricketBrain classifies 4 beat-rate regimes on a single-lead rate
+> time-series. Tiny MF-CNN classifies 5 AAMI beat-morphology classes.
+> Stanford DNN classifies 12 rhythm classes including AF / VT. Apple
+> Watch performs AFib-vs-sinus only. The comparison is therefore one
+> of **operating envelope** (RAM, power, explainability, training-data
+> requirement), not of shared accuracy.
+
 
 Short version — full breakdown with citations in
 [docs/competitive_analysis.md](docs/competitive_analysis.md):

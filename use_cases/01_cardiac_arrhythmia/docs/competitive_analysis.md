@@ -2,6 +2,14 @@
 
 **Date:** 2026-04-24 | **CricketBrain v3.0.0 (UC01)**
 
+> **Disclaimer — not the same task.** CricketBrain triages 4 beat-rate
+> regimes on a single-lead rate time-series. Pan-Tompkins detects QRS
+> timing. Tiny MF-CNN classifies 5 AAMI morphology classes. Stanford
+> DNN classifies 12 rhythm classes including AF / VT. Apple Watch
+> performs AFib-vs-sinus only. Accuracy numbers are **not directly
+> comparable** — read the tables as an *operating-envelope* comparison
+> (RAM, power, latency, training-data requirement, explainability).
+
 How does CricketBrain compare to **classical ECG DSP** (Pan-Tompkins
 QRS detection, rule-based rhythm logic), to **TinyML** on
 microcontrollers, and to **full-scale deep learning** (Stanford's

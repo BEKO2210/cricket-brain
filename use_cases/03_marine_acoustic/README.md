@@ -1,25 +1,44 @@
-# CricketBrain Application: Marine Acoustic Monitoring
+# CricketBrain Application: Marine Acoustic Event Triage
 
-> **Status:** v0.1.0 | **CricketBrain v3.0.0** | **License:** AGPL-3.0 | **Date:** 2026-04-24
+> **Status:** v0.2.0 research prototype | **CricketBrain v3.0.0** | **License:** AGPL-3.0 | **Date:** 2026-04-24
+>
+> **Validation status:** Synthetic MBARI-style hydrophone streams
+> only. Real MARS archive validation is planned — see
+> [MASTER_PLAN.md](../MASTER_PLAN.md).
 
 ---
 
 ## Overview
 
-The ocean is an increasingly noisy place. Baleen whales vocalise in the
-same 10-500 Hz band that cargo-ship propellers dominate, and the IMO
-expects a 30 % rise in shipping traffic by 2035. CricketBrain's
-ResonatorBank classifies hydrophone signals into five categories — fin
-whale, blue whale, ship noise, humpback song, or ambient — in 3,800 bytes
-of RAM with zero training data.
+The ocean is an increasingly noisy place. Baleen whales vocalise in
+the same 10-500 Hz band that cargo-ship propellers dominate, and the
+IMO expects a 30 % rise in shipping traffic by 2035. CricketBrain's
+ResonatorBank triages hydrophone signals into five categories — fin
+whale, blue whale, ship noise, humpback song, or ambient — in
+3,800 bytes of RAM with zero training data.
 
-**Market Size:** $4 B marine PAM | **Target:** ESP32 / STM32F0 ($2 MCU) on a solar-powered smart buoy
+**What it is:** A frequency-stable acoustic-event triage core for
+sub-mW smart buoys.
+
+**What it is NOT:** A full species-identification system or a
+substitute for PAMGuard / deep-learning analysis pipelines. See
+[What this detector does NOT do](#what-this-detector-does-not-do).
+
+### Market context
+
+Marine passive-acoustic monitoring is a ~$4 B annual segment
+(industry estimate, included for scope). **Target hardware:** ESP32 /
+STM32F0 ($2 MCU) on a solar-powered smart buoy.
 
 ---
 
-## Benchmark Results (2026-04-24)
+## Benchmark Results (2026-04-24, synthetic hydrophone streams)
 
-### Classification Performance (`sample_marine.csv`, 200 windows)
+All numbers below are measured on **synthetic MBARI-style frequency
+streams** — not on real MARS recordings. Real `.wav` validation is
+pending.
+
+### Classification Performance (`sample_marine.csv`, 200 synthetic windows)
 
 | Class | TP | FP | Precision | Recall | F1 |
 |---|---:|---:|---:|---:|---:|
@@ -30,7 +49,12 @@ of RAM with zero training data.
 | Humpback Song (200 Hz) | 18 | 0 | 1.000 | 0.900 | 0.947 |
 | **Macro Average** | | | **0.903** | **0.900** | **0.900** |
 
-**Accuracy:** 90/100 = **90.0 %** | **d' (SDT):** 6.18 (EXCELLENT, all conditions)
+**Synthetic-window accuracy:** 90 / 100 = **90.0 %** | **d' (SDT) [†]:** 6.18
+
+[†] d' uses log-linear correction for ceiling hit-rates and floor
+false-alarm rates (hits clipped to `[0.5/n, 1 − 0.5/n]` before the
+inverse-normal). Without the correction, perfect TPR = 1.000 /
+FPR = 0.000 would yield an undefined / infinite d'.
 
 ### Ship Traffic Detection
 
@@ -56,7 +80,10 @@ scenario). Over 2000 steps the detector produces:
 | FinWhale | 32 |
 | ShipNoise | 8 |
 
-The endangered species surfaces despite acoustic masking.
+In the synthetic mixed scene, fin-whale pulses remain separately
+detectable in ~80 % of the overlap windows — the v0.2 multi-label
+path (`step_multi`) recovers them as a second label on the same
+window. Real-ocean masking behaviour is pending MARS validation.
 
 ### Noise Resilience
 
@@ -266,7 +293,28 @@ and full-size marine CNNs.
 
 ---
 
+## What this detector does NOT do
+
+- **No source localisation.** Answers *what*, not *where* or *how far*.
+- **No severity / distance / range estimation.** Frequency-only.
+- **No complex-spectrogram species (dolphin whistles, sperm-whale
+  clicks, time-varying humpback-song phrases).** Frequency-stable
+  tonal events only.
+- **No real MARS-data validation yet** (top-priority v0.2 milestone).
+- **Not a replacement for PAMGuard or full-size marine CNNs.** This is
+  a triage front-end for a sub-mW solar buoy.
+
+---
+
 ## How It Compares (2026-04-24)
+
+> **Disclaimer — these systems do not all perform the same task.**
+> CricketBrain triages 4 frequency-stable events + Ambient. Tiny MF-CNN
+> and Edge Impulse audio classify MFCC spectrograms. PAMGuard provides
+> localisation + > 50 click/whistle types. Full CNNs handle complex
+> humpback-song phrase structure. The comparison is one of **operating
+> envelope** (RAM, power, explainability, training-data requirement),
+> not of shared accuracy.
 
 Short version — full breakdown with citations in
 [docs/competitive_analysis.md](docs/competitive_analysis.md):
