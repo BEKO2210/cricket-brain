@@ -32,7 +32,15 @@
 
 ## What is CricketBrain?
 
-CricketBrain is a **neuromorphic signal processor** that recognizes temporal patterns in real-time using delay-line coincidence detection — the same mechanism the field cricket (*Gryllus bimaculatus*) uses to find mates in noisy environments.
+CricketBrain is an **ultra-low-memory neuromorphic signal core for
+narrow-band, frequency-stable event detection** — modelled on the
+delay-line coincidence detection the field cricket
+(*Gryllus bimaculatus*) uses to find mates in noisy environments.
+
+It is optimised for deterministic, narrow-band temporal pattern
+detection under extreme RAM and power constraints. **It is not a
+general-purpose AI classifier** and not intended as a replacement for
+full-spectrum DSP, CNNs, or clinical / industrial certified systems.
 
 > **Hardwired core architecture with optional adaptive plasticity.**
 > 5 neurons, 6 synapses, STDP learning, homeostatic regulation — **97 ns/step** in **~1 KB RAM**.
@@ -200,7 +208,7 @@ The following results were reproduced locally on Windows using the public exampl
 | **Live roundtrip** | `"HELLO WORLD"` → **EXACT MATCH** | End-to-end encoding, spike processing, and decoding work correctly |
 | **Frequency discrimination** | Strong response at **4200–4800 Hz**, peak at **4500 Hz** | Tight frequency selectivity around the cricket carrier band |
 | **Morse alphabet** | All **A–Z** produce stable spike signatures | Reliable temporal-symbol encoding |
-| **Multi-frequency tokens** | `"RUST"` detected at **100% accuracy** | Parallel token discrimination across frequency bands |
+| **Multi-frequency tokens** | `"RUST"` detected at **100% accuracy on the synthetic benchmark** | Parallel token discrimination across frequency bands |
 | **Sequence prediction** | Correct prefix-based next-token prediction | Topology-based temporal memory without gradient training |
 | **Scale predictor** | **1,280 neurons**, **0.31 MB RAM**, **1.12e8 neuron-ops/sec** | Efficient scaling for structured sequence tasks |
 | **Large scale test** | **40,960 neurons**, **14.22 MB RAM**, **8.02e7 neuron-ops/sec** | High throughput on commodity CPU hardware |

@@ -2,6 +2,14 @@
 
 **Date:** 2026-04-24 | **CricketBrain v3.0.0 (UC03 v0.2)**
 
+> **Disclaimer — not the same task.** CricketBrain triages 4
+> frequency-stable events + Ambient. Tiny CNNs classify MFCC
+> spectrograms of audio clips. PAMGuard provides localisation and
+> > 50 click/whistle types. Humpback-song CNNs learn time-varying
+> phrase structure. Accuracy numbers are **not directly comparable** —
+> read the tables as an *operating-envelope* comparison (RAM, power,
+> latency, training-data requirement, explainability).
+
 How does CricketBrain compare to **TinyML** (TensorFlow Lite Micro, Edge
 Impulse) at a similar power budget, and to classical DSP (Goertzel,
 matched filter)? This document collects published numbers so the
@@ -129,12 +137,19 @@ at all.
 | Custom CNN mel-spectrogram | Humpback detection | 98.92 %, FN 0.75 % | [PMC12845957](https://pmc.ncbi.nlm.nih.gov/articles/PMC12845957/) |
 | Marine mammal DNN (Shiu 2020) | 32 species, full spectrogram | F1 0.87 across species | [Nature Sci. Rep. 2020](https://www.nature.com/articles/s41598-020-57549-y) |
 
-**Honest read:** On complex spectrograms (humpback song with its rich
-phrase structure), TinyML-class CNNs beat CricketBrain's 4-channel
-resonator bank on accuracy. The closer the target gets to a pure
-tonal, frequency-stable signal (fin whale 20-Hz pulse, ship cavitation
-peak), the smaller the gap — and CricketBrain pulls ahead on every
-non-accuracy axis.
+**Honest read:** The fair comparison is not accuracy alone, but the
+**operating envelope**: RAM, power, explainability, training-data
+requirement. On complex spectrograms (humpback song with its rich
+phrase structure), TinyML-class CNNs achieve higher reported accuracy
+than this 4-channel resonator bank. On frequency-stable tonal signals
+(fin-whale 20-Hz pulse, ship cavitation peak) the accuracy gap
+narrows, while CricketBrain trades diagnostic / general-class
+accuracy for extreme memory, latency and power efficiency.
+
+None of the cited accuracy numbers are directly comparable — the
+systems do not perform the same task, use different class definitions,
+and train on different corpora. Use the per-axis numbers above as the
+operating-envelope comparison.
 
 Schall et al. (2024) note in their baleen-whale benchmark that deep
 learning "tend[s] to be too computationally expensive to run on

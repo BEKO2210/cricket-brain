@@ -2,6 +2,15 @@
 
 **Date:** 2026-04-24 | **CricketBrain v3.0.0 (UC02)**
 
+> **Disclaimer — not the same task.** CricketBrain triages 4 defect
+> frequencies (BPFO / BPFI / BSF / FTF). Envelope analysis additionally
+> tracks sideband harmonics and amplitude trending. Lite CNN and
+> ResNet-50 classify 10 CWRU classes (4 fault types × 3 severities +
+> normal). SKF IMx tracks ISO 10816 vibration levels + remaining
+> useful life. Accuracy numbers are **not directly comparable** — read
+> the tables as an *operating-envelope* comparison (RAM, power,
+> latency, training-data requirement, explainability).
+
 How does CricketBrain compare to the industry-standard **envelope
 analysis** pipeline (FFT demodulation around bearing defect
 frequencies), to **TinyML** (edge CNNs, anomaly autoencoders), and to
@@ -44,8 +53,11 @@ sourced.
 | ResNet-50 | > 1 GB GPU | **23.9 M params ≈ 96 MB** fp32 | [Hakim 2023 Table](https://pmc.ncbi.nlm.nih.gov/articles/PMC10054387/) |
 | Commercial SKF IMx / Emerson AMS | PC-class | 10-100 MB | vendor datasheets |
 
-CricketBrain is ~**250 × smaller** than the lightest published CNN that
-hits the CWRU accuracy ceiling, and > 25,000 × smaller than ResNet-50.
+CricketBrain's RAM footprint is ~**250 ×** smaller than the lightest
+published CNN that saturates the CWRU benchmark, and > 25,000 × smaller
+than ResNet-50 — with the matching trade-off that CricketBrain does
+**not** reach the same 10-class CWRU accuracy and does **not**
+estimate severity.
 
 ---
 

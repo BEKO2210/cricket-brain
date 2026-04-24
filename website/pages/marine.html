@@ -65,8 +65,9 @@
   <main id="main-content">
     <!-- Hero -->
     <section class="marine-hero">
-      <h1>Marine <span>Acoustic</span> Monitoring</h1>
-      <p class="subtitle">4-channel ResonatorBank listens to the deep ocean: fin whale, blue whale, ship noise, humpback song. 20 neurons in 3,800 bytes &mdash; fits on a solar-powered smart buoy.</p>
+      <h1>Marine Acoustic <span>Event Triage</span></h1>
+      <p class="subtitle">4-channel ResonatorBank detects frequency-stable acoustic events &mdash; fin-whale pulses, blue-whale A-calls, ship cavitation, humpback tonal components &mdash; in 3,800 bytes. Designed as a sub-mW triage front-end for a solar-powered smart buoy.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--text-muted); margin-block-end:var(--space-sm); max-inline-size:700px;"><strong style="color:var(--text-primary);">Validation status:</strong> synthetic MBARI-style hydrophone streams only. Real MARS archive validation is planned.</p>
       <p style="font-size:var(--font-size-sm); color:var(--accent); margin-block-end:var(--space-lg);"><strong>v0.2 update:</strong> wider Gaussian tuning recovers boundary frequencies &middot; multi-label output flags whale <em>and</em> ship simultaneously</p>
       <div style="display:flex; flex-wrap:wrap; gap:var(--space-md); justify-content:center;">
         <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/03_marine_acoustic" class="btn btn-primary" target="_blank" rel="noopener">View Source</a>
@@ -80,7 +81,7 @@
         <h2 class="section-title">Key <span>Metrics</span></h2>
         <p class="section-subtitle">Measured 2026-04-24 on synthetic MBARI MARS-style hydrophone streams spanning fin whale 20-Hz pulses, blue whale A-calls, ship cavitation, and humpback song.</p>
         <div class="metric-grid">
-          <div class="metric-card"><div class="value">90.0%</div><div class="label">Accuracy (200 windows)</div></div>
+          <div class="metric-card"><div class="value">90.0%</div><div class="label">Synthetic-window accuracy (200 windows)</div></div>
           <div class="metric-card"><div class="value">6.18</div><div class="label">d' Sensitivity (SDT)</div></div>
           <div class="metric-card"><div class="value">0.900</div><div class="label">Macro F1 Score</div></div>
           <div class="metric-card"><div class="value">3,800</div><div class="label">Bytes RAM (20 neurons)</div></div>
@@ -178,7 +179,7 @@
               </tbody>
             </table>
           </div>
-          <p style="color:var(--text-muted); font-size:var(--font-size-xs);">The endangered species surfaces despite acoustic masking by anthropogenic noise.</p>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs);">In the synthetic mixed scene, fin-whale pulses remain separately detectable during overlapping ship-noise windows. Real-ocean masking behaviour is pending MARS validation.</p>
         </div>
 
         <div class="section-card" style="margin-block-start:var(--space-lg);">
