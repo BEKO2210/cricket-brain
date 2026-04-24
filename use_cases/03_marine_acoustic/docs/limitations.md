@@ -158,20 +158,25 @@ preprocessed with `python/preprocess.py --wav`.
 
 ---
 
-## 6. CricketBrain vs. Established PAM Tools
+## 6. CricketBrain vs. Established PAM & TinyML Tools
 
-| Capability | CricketBrain | PAMGuard | Orcasound / DeepAcoustics |
-|------------|:------------:|:--------:|:-------------------------:|
-| Fixed-frequency species detection | Yes | Yes | Yes |
-| Sub-microsecond latency | Yes | No | No |
-| Runs on $2 STM32 | Yes | No | No |
-| Multi-label simultaneous species | No | Yes | Yes |
-| Localisation (TDOA / bearing) | No | Yes | Partial |
-| Training data required | No | No | Yes (large) |
-| Species repertoire | 4 channels | >50 click/whistle types | Species-specific |
-| Power budget | 1 mW @ ESP32 | 10 W laptop | 100 W GPU |
+| Capability | CricketBrain | PAMGuard | Edge Impulse audio | TFLite Micro | CNN / Jetson |
+|-----------|:---:|:---:|:---:|:---:|:---:|
+| Fixed-frequency species detection | Yes | Yes | Yes | Yes | Yes |
+| Variable-frequency / complex song | No | Yes | Yes | Yes | Yes |
+| Multi-label simultaneous species | **v0.2** | Yes | Yes | Yes | Yes |
+| Localisation (TDOA / bearing) | No | Yes | No | No | Partial |
+| Training data required | **No** | No | ~100-1000 clips/class | ~1000 clips/class | 100-10000 h |
+| RAM | **3.7 KB** | N/A (PC) | 19.6 KB ([src](https://docs.edgeimpulse.com/knowledge/metrics/inference-performance)) | 10 KB ([src](https://github.com/tensorflow/tflite-micro/blob/main/tensorflow/lite/micro/examples/micro_speech/README.md)) | >100 MB |
+| Latency | 49 ms (49 buffer + 10 µs compute) | offline | 54-225 ms ([src](https://docs.edgeimpulse.com/knowledge/metrics/inference-performance)) | ~1 s window | 0.96-150 ms |
+| Average power @ 1 Hz decisions | **<1 µW compute** | 10 W laptop | ~5-11 mW | ~30 mW | ~500 mW (RPi) |
+| Runs on $2 STM32F0 (4 KB SRAM) | **Yes** | No | No | Tight | No |
+| Runs on solar buoy (<1 mW avg) | **Yes** | No | No (5 mW +) | No | No |
+| Explainable / deterministic | **Yes** | Yes | Partial | Partial | No |
 
 CricketBrain's niche: **continuous edge monitoring on a solar-powered
-buoy**, where the ~8 mm² of silicon and milliwatt power budget rule out
-PAMGuard or deep-learning approaches. For post-hoc analysis of archived
-MARS data, use PAMGuard.
+smart buoy**, where the 3.7 KB RAM footprint and <1 µW compute budget
+rule out even the lightest TinyML audio pipelines. For a detailed,
+fully-sourced breakdown (published TinyML latency / RAM numbers, CNN
+accuracy, when-to-use-which matrix) see
+[docs/competitive_analysis.md](competitive_analysis.md).

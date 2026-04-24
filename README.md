@@ -290,6 +290,33 @@ Tested against 3 classical detectors under **identical conditions** ([source](ex
 
 > CricketBrain achieves **perfect detection (TPR=1.0) with zero false positives (FPR=0.0)** across all SNR levels from -10 dB to +30 dB.
 
+### vs. TinyML (TensorFlow Lite Micro, Edge Impulse) and Deep Learning
+
+Numbers come from vendor docs and peer-reviewed papers — no marketing claims.
+
+| Property | CricketBrain | Classical DSP | TinyML (TFLite Micro / Edge Impulse) | Deep Learning (GPU / Jetson) |
+|----------|:---:|:---:|:---:|:---:|
+| RAM | **~1 KB** | < 5 KB | 10–100 KB | > 100 MB |
+| Model / flash | ~20 KB | < 10 KB | 22–500 KB | 10 MB – 100 GB |
+| Latency | **0.175 µs/step** | 1–10 ms | 54–225 ms ([Edge Impulse docs](https://docs.edgeimpulse.com/knowledge/metrics/inference-performance)) | 1–3000 ms |
+| Active power | ~15 mW (STM32F0) | ~50 mW (M4) | 50–100 mW (M4F/M7) | 5–200 W |
+| Average power @ 1 Hz decisions | **< 1 µW compute** | ~500 µW | 5–30 mW | ~500 mW – 200 W |
+| Training data required | **Zero** | Zero | 100–10 000 clips | 10 000 h – millions |
+| Runs on $2 STM32F0 (4 KB SRAM) | **Yes** | Yes | Tight | No |
+| Runs on < 1 mW solar / harvester | **Yes** | Yes | No | No |
+| Complex spectrogram / multi-class (> 10) | No | No | Yes | **Yes** |
+| Deterministic / explainable | **Yes** | Yes | Partial | No |
+
+**CricketBrain's niche:** the sub-mW, sub-5 KB corner of the design
+space — where classical DSP is not expressive enough and even the
+lightest TinyML pipeline does not fit.
+
+Per-domain competitive analyses with full references:
+
+- Cardiac (Pan-Tompkins · Nuzzo 2023 Tiny MF-CNN · Hannun 2019 Stanford DNN · Apple Watch AFib) — [use_cases/01_cardiac_arrhythmia/docs/competitive_analysis.md](use_cases/01_cardiac_arrhythmia/docs/competitive_analysis.md)
+- Bearings (envelope analysis · Hakim 2023 Lite CNN · FaultNet · ResNet-50 · SKF IMx) — [use_cases/02_predictive_maintenance/docs/competitive_analysis.md](use_cases/02_predictive_maintenance/docs/competitive_analysis.md)
+- Marine (Goertzel · TFLite Micro · Edge Impulse · PAMGuard · Allen 2021 humpback CNN) — [use_cases/03_marine_acoustic/docs/competitive_analysis.md](use_cases/03_marine_acoustic/docs/competitive_analysis.md)
+
 ---
 
 ## Features

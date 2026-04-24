@@ -410,6 +410,64 @@
       </div>
     </section>
 
+    <!-- How It Compares -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">How It <span>Compares</span></h2>
+        <p class="section-subtitle">Against Pan-Tompkins QRS detection, TinyML ECG classifiers (Nuzzo 2023 Tiny MF-CNN), the Stanford cardiologist-level DNN (Hannun 2019), and the Apple Watch AFib algorithm. All TinyML / DNN numbers from peer-reviewed papers or FDA filings.</p>
+
+        <div class="section-card">
+          <h3 style="margin-block-end:var(--space-sm);">RAM, Model Size &amp; Latency</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>System</th><th>RAM</th><th>Model size</th><th>Latency</th></tr></thead>
+              <tbody>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC01</strong></td><td><strong>928 B</strong></td><td>~20 KB flash</td><td><strong>0.126 &micro;s/step</strong></td></tr>
+                <tr><td>Pan-Tompkins (QRS + rule-based)</td><td>&lt; 1 KB</td><td>&lt; 5 KB</td><td>1-10 ms/beat</td></tr>
+                <tr><td>Tiny MF-CNN (Nuzzo 2023)</td><td>~4-8 KB</td><td>15 KB</td><td>&lt; 1 ms on RPi</td></tr>
+                <tr><td>Stanford DNN (Hannun 2019)</td><td>GPU-class</td><td>~10-40 MB</td><td>30 s window</td></tr>
+                <tr><td>Apple Watch AFib</td><td>proprietary</td><td>~1-10 MB</td><td>30-60 s polling</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Accuracy &amp; Training Data</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>System</th><th>Task</th><th>Accuracy / F1</th><th>Training data</th></tr></thead>
+              <tbody>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC01</strong></td><td>4 rate classes</td><td><strong>92.5%, F1 0.962, d' 6.18</strong></td><td><strong>Zero</strong></td></tr>
+                <tr><td>Pan-Tompkins + rate logic</td><td>4 rate classes</td><td>~90% on MIT-BIH</td><td>Zero</td></tr>
+                <tr><td>Tiny MF-CNN (Nuzzo 2023)</td><td>5 AAMI classes</td><td>98.18% acc, F1 0.92</td><td>MIT-BIH inter-patient</td></tr>
+                <tr><td>Stanford DNN (Hannun 2019)</td><td>12 rhythm classes</td><td>F1 0.837 (beat cardiologist avg 0.780)</td><td>91 k ECGs, 53 k patients</td></tr>
+                <tr><td>Apple Watch AFib</td><td>AFib vs Sinus</td><td>98.3% sens / 99.6% spec</td><td>millions of users</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">CricketBrain's 92.5% on rate-based classification is competitive with Pan-Tompkins; morphology-aware CNNs hit 98%+ on harder 5- and 12-class tasks but need 15 KB-40 MB RAM and labelled training data.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">When to Pick Which</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Scenario</th><th>Recommendation</th></tr></thead>
+              <tbody>
+                <tr><td>Implantable loop recorder, sub-mW, rate-only triage</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>Earbud / patch, privacy-preserving, no cloud</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>Wearable with Cortex-M4F+, AAMI 5-class morphology</td><td>Tiny MF-CNN / TinyML</td></tr>
+                <tr><td>Clinical monitor, 12-class rhythm + morphology</td><td>Stanford DNN / commercial wearable</td></tr>
+                <tr><td>FDA-cleared AFib detection</td><td>Apple Watch / commercial</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">Full sourced breakdown (Nuzzo 2023, Hannun 2019, Apple FDA DEN180044): <a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/01_cardiac_arrhythmia/docs/competitive_analysis.md" target="_blank" rel="noopener">docs/competitive_analysis.md</a>.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- Dataset & License -->
     <section class="section">
       <div class="content-wrap">

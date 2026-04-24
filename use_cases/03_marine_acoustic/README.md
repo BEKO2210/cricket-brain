@@ -259,7 +259,31 @@ See [data/SOURCES.md](data/SOURCES.md) for download instructions.
 5. **Synthetic data only in v0.1.0** — real MARS data validation planned
    for v0.2.
 
-See [docs/limitations.md](docs/limitations.md) for full analysis.
+See [docs/limitations.md](docs/limitations.md) for full analysis and
+[docs/competitive_analysis.md](docs/competitive_analysis.md) for a fully
+sourced comparison against TinyML (TensorFlow Lite Micro, Edge Impulse)
+and full-size marine CNNs.
+
+---
+
+## How It Compares (2026-04-24)
+
+Short version — full breakdown with citations in
+[docs/competitive_analysis.md](docs/competitive_analysis.md):
+
+| System | RAM | Latency | Avg power @ 1 Hz | Training data |
+|--------|----:|--------:|-----------------:|---------------|
+| **CricketBrain UC03 v0.2** | **3.7 KB** | **49 ms** (10 µs compute) | **< 0.5 µW compute** | **Zero** |
+| TFLite Micro `micro_speech` | 10 KB | ~1 s window | ~30 mW | ~1,000 clips/class |
+| Edge Impulse audio — M7 @ 216 MHz | 19.6 KB | 54 ms + 1 s | ~5.4 mW | ~100-1,000 clips/class |
+| Edge Impulse audio — M4F @ 80 MHz | 19.6 KB | 225 ms + 1 s | ~11 mW | ~100-1,000 clips/class |
+| Humpback CNN (Allen 2021) | > 100 MB | Jetson / GPU only | > 500 mW | 187,000 h |
+
+CricketBrain wins on power, RAM and zero-shot deployment; TinyML wins
+on accuracy over complex, time-varying spectrograms. Schall et al.
+(2024) note deep-learning baleen-whale detectors "tend to be too
+computationally expensive to run on existing wildlife monitoring
+systems" — the exact niche UC03 targets.
 
 ---
 

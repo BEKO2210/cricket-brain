@@ -231,6 +231,26 @@ cargo bench
 
 ---
 
+## How It Compares (2026-04-24)
+
+Short version — full breakdown with citations in
+[docs/competitive_analysis.md](docs/competitive_analysis.md):
+
+| System | RAM | Latency | Avg power @ 1 Hz | Training data |
+|--------|----:|--------:|-----------------:|---------------|
+| **CricketBrain UC01** | **928 B** | 0.126 µs/step | **< 1 µW compute** | **Zero** |
+| Pan-Tompkins (QRS + rule-based) | < 1 KB | ~1-10 ms/beat | ~15 µW | Zero |
+| Tiny MF-CNN (Nuzzo 2023) | ~4-8 KB | < 1 ms | ~500 µW | MIT-BIH inter-patient |
+| Stanford DNN (Hannun 2019) | GPU class | 30 s window | N/A | 91 k ECGs, 53 k patients |
+| Apple Watch AFib | proprietary | ~30-60 s | ~3 mW | Millions of users |
+
+CricketBrain's niche is **sub-mW rate-based triage** (Normal / Tachy /
+Brady / Irregular) on implantable, patch, or earbud-class hardware
+where no CNN can live. For morphology (AF, VT, AVB, ST-elevation) use
+a Tiny CNN or a commercial wearable.
+
+---
+
 ## Dataset
 
 | Field | Value |

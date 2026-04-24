@@ -253,7 +253,7 @@
     <section id="comparison" class="section">
       <div class="content-wrap">
         <h2 class="section-title" data-animate="fade-up">How It <span>Compares</span></h2>
-        <p class="section-subtitle" data-animate="fade-up">CricketBrain is not competing with deep learning. It proves that useful inference is possible at a fundamentally different scale.</p>
+        <p class="section-subtitle" data-animate="fade-up">Not competing with deep learning &mdash; proving that useful inference is possible at a fundamentally different scale. Numbers against classical DSP, TinyML (TensorFlow Lite Micro, Edge Impulse) and full deep learning, all from vendor docs or peer-reviewed papers.</p>
 
         <div data-animate="fade-up">
           <table class="comparison-table" role="table">
@@ -261,21 +261,28 @@
               <tr>
                 <th scope="col">Property</th>
                 <th scope="col">CricketBrain</th>
-                <th scope="col">Deep Learning</th>
+                <th scope="col">Classical DSP</th>
+                <th scope="col">TinyML (TFLite Micro / Edge Impulse)</th>
+                <th scope="col">Deep Learning (GPU / Jetson)</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>Latency</td><td>0.175 &#xb5;s/step</td><td>~10 ms</td></tr>
-              <tr><td>Memory</td><td>~1 KB</td><td>~800 GB</td></tr>
-              <tr><td>Training</td><td>Optional STDP</td><td>Months on cluster</td></tr>
-              <tr><td>GPU required</td><td>No</td><td>Yes</td></tr>
-              <tr><td>Deterministic</td><td>Yes</td><td>No</td></tr>
-              <tr><td>no_std / Embedded</td><td>Yes</td><td>No</td></tr>
-              <tr><td>Explainable</td><td>Fully</td><td>Black box</td></tr>
-              <tr><td>False positives in silence</td><td>0</td><td>N/A</td></tr>
+              <tr><td>RAM</td><td><strong>~1 KB</strong></td><td>&lt; 5 KB</td><td>10&ndash;100 KB</td><td>&gt; 100 MB</td></tr>
+              <tr><td>Model / flash</td><td>~20 KB</td><td>&lt; 10 KB</td><td>22&ndash;500 KB</td><td>10 MB &ndash; 100 GB</td></tr>
+              <tr><td>Latency</td><td><strong>0.175 &micro;s/step</strong></td><td>1&ndash;10 ms</td><td>54&ndash;225 ms</td><td>1&ndash;3000 ms</td></tr>
+              <tr><td>Active power</td><td>~15 mW (STM32F0)</td><td>~50 mW (M4)</td><td>50&ndash;100 mW (M4F/M7)</td><td>5&ndash;200 W</td></tr>
+              <tr><td>Average power @ 1 Hz decisions</td><td><strong>&lt; 1 &micro;W compute</strong></td><td>~500 &micro;W</td><td>5&ndash;30 mW</td><td>~500 mW &ndash; 200 W</td></tr>
+              <tr><td>Training data</td><td><strong>Zero</strong></td><td>Zero</td><td>100&ndash;10 000 clips</td><td>10 000 h &ndash; millions of samples</td></tr>
+              <tr><td>Runs on $2 STM32F0</td><td><strong>Yes</strong></td><td>Yes</td><td>Tight</td><td>No</td></tr>
+              <tr><td>Runs on &lt; 1 mW solar buoy</td><td><strong>Yes</strong></td><td>Yes</td><td>No</td><td>No</td></tr>
+              <tr><td>Complex spectrogram / multi-class (&gt; 10)</td><td>No</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Deterministic / explainable</td><td><strong>Yes</strong></td><td>Yes</td><td>Partial</td><td>No</td></tr>
+              <tr><td>Sources</td><td>this repo</td><td>DSP textbook</td><td><a href="https://docs.edgeimpulse.com/knowledge/metrics/inference-performance" target="_blank" rel="noopener">Edge Impulse docs</a> &middot; <a href="https://github.com/tensorflow/tflite-micro/blob/main/tensorflow/lite/micro/examples/micro_speech/README.md" target="_blank" rel="noopener">TFLite Micro</a></td><td><a href="https://www.nature.com/articles/s41591-018-0268-3" target="_blank" rel="noopener">Hannun 2019</a> &middot; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10054387/" target="_blank" rel="noopener">Hakim 2023</a></td></tr>
             </tbody>
           </table>
         </div>
+
+        <p style="margin-block-start:var(--space-lg); color:var(--text-muted); font-size:var(--font-size-sm); text-align:center;" data-animate="fade-up">Per-domain breakdowns: <a href="pages/cardiac.html#comparison">cardiac</a> &middot; <a href="pages/bearings.html#comparison">bearings</a> &middot; <a href="pages/marine.html#comparison">marine</a>.</p>
       </div>
     </section>
 
