@@ -27,3 +27,7 @@ path = "benchmarks/marine_memory.rs"
 [[example]]
 name = "marine_stress"
 path = "benchmarks/marine_stress.rs"
+
+[[example]]
+name = "marine_v02"
+path = "benchmarks/marine_v02.rs"

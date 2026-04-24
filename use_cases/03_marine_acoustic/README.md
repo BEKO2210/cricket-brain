@@ -249,10 +249,10 @@ See [data/SOURCES.md](data/SOURCES.md) for download instructions.
 
 ## Honest Limitations
 
-1. **Single-label only** — reports the dominant channel; cannot flag
-   simultaneous species.
-2. **Boundary frequencies → Ambient** — sources between two tuned
-   channels fall outside every Gaussian tuning curve.
+1. ~~Single-label only~~ — **mitigated in v0.2** via `step_multi()`
+   (see *v0.2 Changes* below).
+2. ~~Boundary frequencies → Ambient~~ — **mitigated in v0.2** via
+   `with_bandwidth(0.20)` (see *v0.2 Changes* below).
 3. **No source localisation** — answers *what*, not *where* or *how far*.
 4. **Noise robustness caps at ~20 %** — sustained broadband contamination
    degrades accuracy.
@@ -260,6 +260,62 @@ See [data/SOURCES.md](data/SOURCES.md) for download instructions.
    for v0.2.
 
 See [docs/limitations.md](docs/limitations.md) for full analysis.
+
+---
+
+## v0.2 Changes (2026-04-24)
+
+Two additive, backwards-compatible extensions address the biggest v0.1
+limitations:
+
+### 1. Wider Gaussian tuning — `with_bandwidth(0.20)`
+
+The `Neuron::bandwidth` field is already public in the core library;
+v0.2 adds `MarineDetector::with_bandwidth(bw)` and `set_bandwidth(bw)`
+to widen the resonator-bank's Gaussian selectivity. Measured on the
+sustained-tone stress test:
+
+| Input | v0.1 (bw=0.10) | v0.2 (bw=0.20) |
+|------:|----------------|-----------------|
+| 110 Hz (between Blue & Ship) | Ambient | **Ship Noise** |
+| 170 Hz (between Ship & Hump) | Ambient | **Humpback** |
+
+Bandwidth sweep on `sample_marine.csv`:
+
+| Bandwidth | CSV accuracy |
+|-----------|-------------:|
+| 0.10 (v0.1) | 90 % |
+| **0.20 (recommended)** | **90 %** |
+| 0.25 | 79 % |
+| 0.30 | 75 % |
+
+0.20 is the sweet spot — no CSV regression and the between-channel gaps
+at 110 / 170 Hz are now assigned to the nearest species.
+
+### 2. Multi-label output — `step_multi()`
+
+```rust
+let mut det = MarineDetector::with_bandwidth(0.20);
+while let Some(d) = det.step_multi(freq) {
+    // d.events may contain [FinWhale, ShipNoise] at the same time
+}
+```
+
+Measured on the fin-whale-under-ship scene (2000 steps, `marine_v02`):
+
+| Version | Windows flagging BOTH species | Coverage |
+|---------|------------------------------:|---------:|
+| v0.1 single-label | 0 / 40 | 0 % |
+| **v0.2 multi-label (bw=0.20)** | **40 / 40** | **100 %** |
+
+Zero false-positive species on 2000 steps of pure ambient ocean — the
+multi-label path is strictly additive.
+
+Run the full comparison:
+
+```bash
+cargo run --release --example marine_v02
+```
 
 ---
 

@@ -4,13 +4,13 @@
 
 ---
 
-## 1. Single-Label Output
+## 1. Single-Label Output — MITIGATED in v0.2
 
-The detector reports only the **dominant** channel per 50-step window.
-Measurements on `marine_stress::E`:
+**Status (v0.1):** The detector reports only the **dominant** channel per
+50-step window. Measurements on `marine_stress::E`:
 
-| Mixed Scene | Detected | Missed |
-|-------------|----------|--------|
+| Mixed Scene | v0.1 Detected | v0.1 Missed |
+|-------------|---------------|-------------|
 | Fin + Blue | BlueWhale | FinWhale |
 | Blue + Humpback | BlueWhale | Humpback |
 | Fin + Humpback | Humpback | FinWhale |
@@ -18,43 +18,85 @@ Measurements on `marine_stress::E`:
 **Root cause:** `classify()` takes `argmax` of accumulated energy per
 channel. Multiple simultaneous species compete for the decision.
 
-**Impact:** During biologically rich encounters (fin whales and blue
-whales sharing a foraging ground; mother-calf humpback escorts calling
-while a cargo vessel transits), only the loudest source is reported.
+### v0.2 Mitigation: `step_multi()`
 
-**Mitigation:** Threshold every channel independently and emit a
-multi-label vector. This would require a small API change (return a
-`Vec<AcousticEvent>` instead of a single enum) and is planned for v0.2.
+v0.2 adds a multi-label API that thresholds every channel independently
+and emits a [`MultiLabelDecision`] whose `events` field lists every
+active source:
+
+```rust
+let mut det = MarineDetector::with_bandwidth(0.20);  // wide tuning
+while let Some(decision) = det.step_multi(freq) {
+    // decision.events may be [FinWhale, ShipNoise] simultaneously
+}
+```
+
+**Result on the fin-whale-under-ship scene (`marine_v02` benchmark,
+2000 steps):**
+
+| Version | Windows flagging BOTH fin+ship | Coverage |
+|---------|-------------------------------:|---------:|
+| v0.1 single-label | 0 / 40 | 0 % |
+| v0.2a (bw=0.20) multi-label | 40 / 40 | **100 %** |
+| v0.2b (bw=0.30) multi-label | 40 / 40 | **100 %** |
+
+**Regression check:** zero false-positive species on 2000 steps of pure
+ambient ocean at bandwidth 0.20 (verified in
+`v02_wide_bandwidth_still_rejects_truly_ambient` and
+`v02_multi_label_single_source_stays_single`).
 
 ---
 
-## 2. Boundary Frequencies → Ambient
+## 2. Boundary Frequencies → Ambient — PARTIALLY MITIGATED in v0.2
 
-Signals with a dominant frequency between two tuned channels fall outside
-every Gaussian tuning curve and are reported as Ambient. From
-`marine_stress::F`:
+**Status (v0.1):** Signals with a dominant frequency between two tuned
+channels fall outside every Gaussian tuning curve and are reported as
+Ambient.
 
-| Input | Between | Decision |
-|------:|---------|----------|
-| 50 Hz | Fin (20) and Blue (80) | Ambient |
-| 110 Hz | Blue (80) and Ship (140) | Ambient |
-| 170 Hz | Ship (140) and Hump (200) | Ambient |
-| 15 Hz | below Fin (20) | Ambient |
-| 260 Hz | above Hump (200) | Ambient |
-| 80 Hz | exact Blue | BlueWhale |
+### v0.2 Mitigation: `with_bandwidth(0.20)`
 
-**Root cause:** `TokenVocabulary::new(&["FIN", "BLUE", "SHIP", "HUMP"],
-20.0, 200.0)` places four Gaussian resonators at 20 / 80 / 140 / 200 Hz.
-Anything outside a ±10 % tuning envelope misses all four.
+Each `Neuron` exposes a public `bandwidth` field that controls the
+Gaussian selectivity (sigma = bandwidth × eigenfrequency). v0.2 adds
+`MarineDetector::with_bandwidth(bw)` which widens every channel's
+tuning at construction time. Measured head-to-head on a sustained tone
+(`marine_v02` benchmark):
 
-**Impact:** Species with frequencies between the four canonical channels
-(e.g. minke whale "boing" ~1.3 kHz; sei whale downsweeps 40-60 Hz) are
-invisible to this detector.
+| Input | v0.1 (bw=0.10) | v0.2a (bw=0.20) | v0.2b (bw=0.30) |
+|------:|----------------|-----------------|------------------|
+| 50 Hz | Ambient | Ambient | Ambient |
+| **110 Hz** | Ambient | **Ship Noise** | **Ship Noise** |
+| **170 Hz** | Ambient | **Humpback** | **Humpback** |
+| 260 Hz | Ambient | Ambient | Humpback |
+| 15 Hz | Ambient | Ambient | Fin Whale |
+| 80 Hz (exact) | Blue | Blue | Blue |
+| 140 Hz (exact) | Ship | Ship | Ship |
 
-**Mitigation:** Spawn a wider ResonatorBank with more channels
-(up to the 27-token marine vocabulary described in the MASTER_PLAN's
-UC03 `key_advantage`) at the cost of ~928 bytes per additional 5-neuron
-circuit.
+### The bandwidth / accuracy trade-off
+
+Wider Gaussians also let out-of-band noise bleed into channels. Bandwidth
+sweep on `sample_marine.csv`:
+
+| Bandwidth | CSV accuracy | Boundary recovery |
+|-----------|-------------:|-------------------|
+| 0.10 (v0.1) | 90 % | none |
+| 0.15 | 90 % | partial |
+| **0.20 (recommended)** | **90 %** | **110 Hz + 170 Hz** |
+| 0.22 | 89 % | + margins |
+| 0.25 | 79 % | + margins |
+| 0.30 | 75 % | + edges (15 / 260 Hz) |
+
+0.20 is the sweet spot — zero CSV regression and the two
+between-channel gaps at 110 / 170 Hz are now assigned to the nearest
+species. 0.30 additionally catches out-of-band signals (15 Hz, 260 Hz)
+but at a 15 % accuracy cost.
+
+### Remaining gap
+
+The 50 Hz window (between Fin=20 and Blue=80) is still reported as
+Ambient even at bandwidth 0.30 — the relative gap (80-20)/20 = 300 %
+is too wide for any reasonable Gaussian to bridge. Species in this
+range (sei whale downsweeps 40-60 Hz) would need their own dedicated
+channel in a 5-channel or 6-channel bank.
 
 ---
 
