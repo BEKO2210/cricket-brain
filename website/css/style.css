@@ -801,6 +801,24 @@
     color: var(--text-muted);
   }
 
+  /* Responsive table wrapper — forces horizontal scroll on narrow viewports
+     instead of squishing columns. Applied globally so every <table> wrapped
+     in <div class="result-table"> gets the same behaviour. */
+  .result-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-block: var(--space-lg);
+    border-radius: var(--radius-lg);
+    /* Scroll-hint: subtle fade on the right edge when content overflows.
+       Uses background-attachment to pin fade to scroll container. */
+    background:
+      linear-gradient(to right, var(--bg-card), var(--bg-card)) left center / 10px 100% no-repeat,
+      linear-gradient(to left,  var(--bg-card), var(--bg-card)) right center / 10px 100% no-repeat,
+      linear-gradient(to right, color-mix(in srgb, var(--bg) 60%, transparent), transparent) left center / 12px 100% no-repeat,
+      linear-gradient(to left,  color-mix(in srgb, var(--bg) 60%, transparent), transparent) right center / 12px 100% no-repeat;
+    background-attachment: local, local, scroll, scroll;
+  }
+
   /* Comparison */
   .comparison-table {
     inline-size: 100%;
@@ -845,9 +863,23 @@
   }
 
   @media (max-width: 640px) {
-    .comparison-table { font-size: var(--font-size-sm); }
+    .comparison-table {
+      font-size: var(--font-size-xs);
+      /* Keep natural column widths so a wide table scrolls horizontally
+         inside .result-table instead of getting crushed on a phone. */
+      min-inline-size: 560px;
+    }
     .comparison-table th,
-    .comparison-table td { padding: var(--space-xs) var(--space-sm); }
+    .comparison-table td {
+      padding: var(--space-2xs) var(--space-xs);
+      white-space: nowrap;
+    }
+    /* Allow the first column (label) to wrap so rows don't balloon. */
+    .comparison-table th:first-child,
+    .comparison-table td:first-child {
+      white-space: normal;
+      min-inline-size: 120px;
+    }
   }
 
   /* Version cards */

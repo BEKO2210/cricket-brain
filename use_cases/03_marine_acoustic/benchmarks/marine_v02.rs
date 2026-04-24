@@ -18,6 +18,15 @@ use cricket_brain_marine::detector::{AcousticEvent, ConfusionMatrix, MarineDetec
 
 const BOUNDARY_STEPS: usize = 500;
 
+/// Resolve the sample CSV relative to the crate root so this example works
+/// regardless of the current working directory. CI invokes Cargo from the
+/// repository root via `--manifest-path`, which leaves the binary's CWD
+/// outside the crate — the CSV lives at `CARGO_MANIFEST_DIR/data/processed/`.
+fn sample_csv_path() -> String {
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    format!("{manifest_dir}/data/processed/sample_marine.csv")
+}
+
 fn last_single(det: &mut MarineDetector, sig: &[f32]) -> Option<AcousticEvent> {
     det.reset();
     let mut last = None;
@@ -186,7 +195,8 @@ fn main() {
     println!("\n─── 4) Bandwidth sweep — CSV sample_marine.csv accuracy ───\n");
     println!("  {:<22} {:<20}", "Bandwidth", "Accuracy");
     println!("  {:─<22} {:─<20}", "", "");
-    let windows = acoustic_signal::from_csv("data/processed/sample_marine.csv");
+    let csv_path = sample_csv_path();
+    let windows = acoustic_signal::from_csv(&csv_path);
 
     // v0.1 baseline (whatever the library picks — auto-clamped at 0.10)
     let mut v01 = MarineDetector::new();
