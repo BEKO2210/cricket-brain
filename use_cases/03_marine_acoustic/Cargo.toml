@@ -1,0 +1,29 @@
+[package]
+name = "cricket-brain-marine"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Marine acoustic monitoring using CricketBrain — fin whale, blue whale, ship noise, humpback song detection on hydrophone data"
+license = "AGPL-3.0-only"
+publish = false
+
+[workspace]
+
+[dependencies]
+cricket-brain = { path = "../.." }
+
+[[example]]
+name = "marine_sdt"
+path = "benchmarks/marine_sdt.rs"
+
+[[example]]
+name = "marine_latency"
+path = "benchmarks/marine_latency.rs"
+
+[[example]]
+name = "marine_memory"
+path = "benchmarks/marine_memory.rs"
+
+[[example]]
+name = "marine_stress"
+path = "benchmarks/marine_stress.rs"

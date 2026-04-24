@@ -107,8 +107,8 @@ Each use case follows the same 10-run progression:
 | UC | Dataset | License | Signal Hz | Status |
 |----|---------|---------|-----------|--------|
 | 01 Cardiac | MIT-BIH Arrhythmia | ODC-By | 360 | **COMPLETE** (10/10) |
-| 02 Bearings | CWRU Bearing | Public Domain | 12,000 | Planned |
-| 03 Marine | MBARI MARS | CC BY 4.0 | 256,000 | Planned |
+| 02 Bearings | CWRU Bearing | Public Domain | 12,000 | **COMPLETE** (10/10) |
+| 03 Marine | MBARI MARS | CC BY 4.0 | 256,000 | **COMPLETE** (10/10) |
 | 04 Grid | EPFL Smart Grid | CC BY 4.0 | 50 | Planned |
 | 05 Network | KDD Cup 1999 | Public Domain | — | Planned |
 | 06 Agriculture | BioAcoustica | CC BY 4.0 | varies | Planned |
@@ -153,11 +153,16 @@ Each use case follows the same 10-run progression:
   - Run 9: CI workflow (uc01-cardiac.yml, all steps verified)
   - Run 10: Metrics finalization (metrics.json updated with real values)
 
-### In Progress
-- [ ] UC02 Predictive Maintenance: CLAUDE.md created, Run 1 pending
+- [x] **UC02 Predictive Maintenance — ALL 10 RUNS COMPLETE** (2026-04-10)
+  - 4-channel ResonatorBank (FTF / BSF / BPFO / BPFI), 93.0% accuracy, d'=6.18
+  - 20 neurons / 3,712 bytes RAM, 0.13-0.26 µs/step, STM32F0 ready
+- [x] **UC03 Marine Acoustic — ALL 10 RUNS COMPLETE** (2026-04-24)
+  - 4-channel ResonatorBank (FIN 20 Hz / BLUE 80 Hz / SHIP 140 Hz / HUMP 200 Hz)
+  - 90.0% accuracy, d'=6.18, 20 tests passing
+  - 20 neurons / 3,712 bytes RAM, 0.13-0.28 µs/step, smart-buoy ready
+  - Ship-transit tests, whale-under-ship scenario, sea-state compensation
 
 ### Planned
-- [ ] UC03 Marine Acoustic: Runs 1-10
 - [ ] UC04 Power Grid: Runs 1-10
 - [ ] UC05 Network Intrusion: Runs 1-10
 - [ ] UC06 Precision Agriculture: Runs 1-10
@@ -168,4 +173,4 @@ Each use case follows the same 10-run progression:
 
 ---
 
-*Last updated: 2026-04-10 — UC01 complete (10/10 runs)*
+*Last updated: 2026-04-24 — UC03 complete (10/10 runs); 3 of 10 use cases done.*

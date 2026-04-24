@@ -1,0 +1,48 @@
+# CI workflow for UC03 Marine Acoustic
+# Copy to .github/workflows/uc03-marine.yml to activate
+# Date: 2026-04-24
+
+name: UC03 Marine
+
+on:
+  push:
+    paths:
+      - 'use_cases/03_marine_acoustic/**'
+  pull_request:
+    paths:
+      - 'use_cases/03_marine_acoustic/**'
+
+jobs:
+  build-and-test:
+    name: Build & Test UC03
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: use_cases/03_marine_acoustic
+
+      - name: Build
+        run: cargo build --manifest-path use_cases/03_marine_acoustic/Cargo.toml
+
+      - name: Test
+        run: cargo test --manifest-path use_cases/03_marine_acoustic/Cargo.toml
+
+      - name: Run demo
+        run: cargo run --release --manifest-path use_cases/03_marine_acoustic/Cargo.toml
+
+      - name: Run ship-transit demo
+        run: cargo run --release --manifest-path use_cases/03_marine_acoustic/Cargo.toml -- --ship-transit
+
+      - name: Run SDT benchmark
+        run: cargo run --release --manifest-path use_cases/03_marine_acoustic/Cargo.toml --example marine_sdt
+
+      - name: Run memory benchmark
+        run: cargo run --release --manifest-path use_cases/03_marine_acoustic/Cargo.toml --example marine_memory
+
+      - name: Verify Python syntax
+        run: |
+          python3 -m py_compile use_cases/03_marine_acoustic/python/preprocess.py
+          python3 -m py_compile use_cases/03_marine_acoustic/python/evaluate.py
+          python3 -m py_compile use_cases/03_marine_acoustic/python/plot_results.py
