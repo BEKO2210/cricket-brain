@@ -67,6 +67,7 @@
     <section class="marine-hero">
       <h1>Marine <span>Acoustic</span> Monitoring</h1>
       <p class="subtitle">4-channel ResonatorBank listens to the deep ocean: fin whale, blue whale, ship noise, humpback song. 20 neurons in 3,800 bytes &mdash; fits on a solar-powered smart buoy.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--accent); margin-block-end:var(--space-lg);"><strong>v0.2 update:</strong> wider Gaussian tuning recovers boundary frequencies &middot; multi-label output flags whale <em>and</em> ship simultaneously</p>
       <div style="display:flex; flex-wrap:wrap; gap:var(--space-md); justify-content:center;">
         <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/03_marine_acoustic" class="btn btn-primary" target="_blank" rel="noopener">View Source</a>
         <a href="../index.html#use-cases" class="btn btn-secondary">All Use Cases</a>
@@ -184,15 +185,95 @@
           <h3 style="margin-block-end:var(--space-sm);">Remaining Limitations</h3>
           <div class="result-table">
             <table class="comparison-table" role="table">
-              <thead><tr><th>Limitation</th><th>Impact</th></tr></thead>
+              <thead><tr><th>Limitation</th><th>Status</th><th>Impact</th></tr></thead>
               <tbody>
-                <tr><td>Single-label output</td><td>Cannot flag simultaneous species (picks dominant only)</td></tr>
-                <tr><td>Boundary frequencies</td><td>Sources between tuned channels become Ambient</td></tr>
-                <tr><td>No source localisation</td><td>Answers <em>what</em>, not <em>where</em> or <em>how far</em></td></tr>
-                <tr><td>Synthetic data only</td><td>Real MARS hydrophone data validation planned for v0.2</td></tr>
+                <tr><td>Single-label output</td><td style="color:var(--accent);"><strong>Fixed in v0.2</strong></td><td><code>step_multi()</code> flags whale + ship together (100% coverage)</td></tr>
+                <tr><td>Boundary frequencies</td><td style="color:var(--accent);"><strong>Fixed in v0.2</strong></td><td><code>with_bandwidth(0.20)</code> catches 110 Hz and 170 Hz (50 Hz still Ambient)</td></tr>
+                <tr><td>No source localisation</td><td>Open</td><td>Answers <em>what</em>, not <em>where</em> or <em>how far</em></td></tr>
+                <tr><td>Synthetic data only</td><td>Open</td><td>Real MARS hydrophone data validation pending</td></tr>
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- v0.2 Improvements -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">v0.2 <span>Improvements</span></h2>
+        <p class="section-subtitle">Two additive, backwards-compatible API extensions address the biggest v0.1 limitations identified in review. All 20 v0.1 tests still pass; 5 new v0.2 tests cover the new paths (25 / 25 green).</p>
+
+        <div class="section-card">
+          <h3 style="margin-block-end:var(--space-sm);">1. Wider Gaussian Tuning &mdash; <code>with_bandwidth(0.20)</code></h3>
+          <p style="color:var(--text-secondary); font-size:var(--font-size-sm);">Each <code>Neuron::bandwidth</code> is writable through the public API. v0.2 widens every channel past the library's auto-clamped 0.10 so the between-channel gaps no longer fall through to Ambient.</p>
+
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Input Frequency</th><th>v0.1 (bw=0.10)</th><th>v0.2 (bw=0.20, recommended)</th><th>v0.2 (bw=0.30)</th></tr></thead>
+              <tbody>
+                <tr><td>50 Hz</td><td>Ambient</td><td>Ambient</td><td>Ambient</td></tr>
+                <tr><td>110 Hz (between Blue &amp; Ship)</td><td style="color:var(--danger);">Ambient</td><td style="color:var(--accent);">Ship Noise</td><td style="color:var(--accent);">Ship Noise</td></tr>
+                <tr><td>170 Hz (between Ship &amp; Hump)</td><td style="color:var(--danger);">Ambient</td><td style="color:var(--accent);">Humpback</td><td style="color:var(--accent);">Humpback</td></tr>
+                <tr><td>260 Hz (above Hump)</td><td>Ambient</td><td>Ambient</td><td style="color:var(--accent);">Humpback</td></tr>
+                <tr><td>15 Hz (below Fin)</td><td>Ambient</td><td>Ambient</td><td style="color:var(--accent);">Fin Whale</td></tr>
+                <tr><td>80 Hz (exact Blue)</td><td>Blue Whale</td><td>Blue Whale</td><td>Blue Whale</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4 style="margin-block-start:var(--space-lg); margin-block-end:var(--space-sm);">Bandwidth vs. CSV accuracy &mdash; sweet spot at 0.20</h4>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Bandwidth</th><th>CSV Accuracy</th><th>Verdict</th></tr></thead>
+              <tbody>
+                <tr><td>0.10 (v0.1 default)</td><td>90.0%</td><td>strict &mdash; drops boundary signals</td></tr>
+                <tr><td>0.15</td><td>90.0%</td><td>partial recovery</td></tr>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>0.20 (v0.2 recommended)</strong></td><td><strong>90.0%</strong></td><td><strong>catches 110 Hz + 170 Hz, no regression</strong></td></tr>
+                <tr><td>0.22</td><td>89.0%</td><td>slight regression starts</td></tr>
+                <tr><td>0.25</td><td style="color:var(--danger);">79.0%</td><td>200 Hz channel picks up 260 Hz noise</td></tr>
+                <tr><td>0.30</td><td style="color:var(--danger);">75.0%</td><td>too wide &mdash; false positives on ambient</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">2. Multi-Label Output &mdash; <code>step_multi()</code></h3>
+          <p style="color:var(--text-secondary); font-size:var(--font-size-sm);">Thresholds every channel independently and returns a <code>MultiLabelDecision</code> listing <em>all</em> active sources &mdash; so a fin whale calling through a simultaneous ship passage produces the label <code>[FinWhale, ShipNoise]</code>.</p>
+
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Whale-under-ship scene (2,000 steps)</th><th>Windows flagging BOTH species</th><th>Coverage</th></tr></thead>
+              <tbody>
+                <tr><td>v0.1 single-label</td><td style="color:var(--danger);">0 / 40</td><td style="color:var(--danger);">0%</td></tr>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>v0.2 multi-label (bw=0.20)</strong></td><td style="color:var(--accent);"><strong>40 / 40</strong></td><td style="color:var(--accent);"><strong>100%</strong></td></tr>
+                <tr><td>v0.2 multi-label (bw=0.30)</td><td style="color:var(--accent);">40 / 40</td><td style="color:var(--accent);">100%</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">Regression check: zero false-positive species on 2,000 steps of pure ambient ocean at bandwidth 0.20 &mdash; the multi-label path is strictly additive.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Usage</h3>
+          <div class="code-block">
+            <div class="code-block-header"><span>Rust</span><button class="copy-btn" type="button" aria-label="Copy">Copy</button></div>
+            <pre><code><span class="comment">// v0.2: wider Gaussian tuning + multi-label output</span>
+<span class="keyword">let</span> <span class="keyword">mut</span> det = MarineDetector::<span class="function">with_bandwidth</span>(<span class="number">0.20</span>);
+
+<span class="keyword">while let</span> <span class="type">Some</span>(d) = det.<span class="function">step_multi</span>(freq) {
+    <span class="comment">// d.events may be [FinWhale, ShipNoise] simultaneously</span>
+    <span class="comment">// d.energies == [FIN, BLUE, SHIP, HUMP] snapshot</span>
+}</code></pre>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">Reproduce the full comparison locally: <code>cargo run --release --example marine_v02</code>.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Remaining Gap &mdash; 50 Hz</h3>
+          <p style="color:var(--text-secondary); font-size:var(--font-size-sm);">The 50 Hz window (between Fin=20 and Blue=80) is still reported as Ambient even at bandwidth 0.30 &mdash; the relative gap (80&ndash;20)/20 = 300% is too wide for any reasonable Gaussian to bridge. Species in this range (sei whale downsweeps 40&ndash;60 Hz) would need their own dedicated channel in a 5- or 6-channel bank.</p>
         </div>
       </div>
     </section>
@@ -236,7 +317,8 @@
 <span class="command">cargo run</span> <span class="flag">--release --</span> --ship-transit                    <span class="comment"># Cargo-ship transit</span>
 <span class="command">cargo run</span> <span class="flag">--release --</span> --csv data/processed/sample_marine.csv <span class="comment"># CSV mode</span>
 <span class="command">cargo run</span> <span class="flag">--release --example</span> marine_sdt                <span class="comment"># SDT benchmark</span>
-<span class="command">cargo run</span> <span class="flag">--release --example</span> marine_stress             <span class="comment"># Stress test</span></code></pre>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> marine_stress             <span class="comment"># Stress test</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> marine_v02                <span class="comment"># v0.1 vs v0.2 comparison</span></code></pre>
           </div>
         </div>
       </div>
