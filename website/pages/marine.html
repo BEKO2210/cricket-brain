@@ -278,6 +278,87 @@
       </div>
     </section>
 
+    <!-- How It Compares -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">How It <span>Compares</span></h2>
+        <p class="section-subtitle">Against classical DSP (Goertzel / matched filter), TinyML stacks (TensorFlow Lite Micro, Edge Impulse) and full-size marine CNNs. All TinyML numbers from vendor docs; all CNN numbers from peer-reviewed papers.</p>
+
+        <div class="section-card">
+          <h3 style="margin-block-end:var(--space-sm);">RAM, ROM &amp; Latency</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>System</th><th>RAM</th><th>Flash / ROM</th><th>Latency</th></tr></thead>
+              <tbody>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC03 v0.2</strong></td><td><strong>3.7 KB</strong></td><td>~20 KB</td><td><strong>49 ms</strong> (10 &micro;s compute)</td></tr>
+                <tr><td>TFLite Micro &mdash; <code>micro_speech</code></td><td>10 KB</td><td>22 KB</td><td>~1 s audio window</td></tr>
+                <tr><td>Edge Impulse audio &mdash; Cortex-M7 @ 216 MHz</td><td>19.6 KB</td><td>47.3 KB</td><td>54 ms + 1 s buffer</td></tr>
+                <tr><td>Edge Impulse audio &mdash; Cortex-M4F @ 80 MHz</td><td>19.6 KB</td><td>47.3 KB</td><td>225 ms + 1 s buffer</td></tr>
+                <tr><td>Typical TinyML audio CNN</td><td>20-100 KB</td><td>50-500 KB</td><td>10-100 ms</td></tr>
+                <tr><td>Humpback CNN (Allen 2021)</td><td>&gt;100 MB</td><td>&gt;100 MB</td><td>GPU / Jetson only</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">CricketBrain is ~3&times; smaller than TFLite Micro's smallest audio example and ~5&times; smaller than a typical Edge Impulse audio model.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Average Power at 1 Hz Decision Rate</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>System</th><th>Active power</th><th>Duty cycle</th><th>Average power</th></tr></thead>
+              <tbody>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain &mdash; STM32F0 @ 48 MHz</strong></td><td>~15 mW</td><td>0.001%</td><td style="color:var(--accent);"><strong>&lt; 0.5 &micro;W compute</strong></td></tr>
+                <tr><td>Edge Impulse &mdash; Cortex-M7 @ 216 MHz</td><td>~100 mW</td><td>5.4%</td><td>~5.4 mW</td></tr>
+                <tr><td>Edge Impulse &mdash; Cortex-M4F @ 80 MHz</td><td>~50 mW</td><td>22.5%</td><td>~11 mW</td></tr>
+                <tr><td>TFLite Micro &mdash; STM32F1 continuous</td><td>~30 mW</td><td>~100%</td><td>~30 mW</td></tr>
+                <tr><td>DeepAcoustics / ORCA-SPOT (RPi-class)</td><td>~5 W</td><td>~10%</td><td>~500 mW</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">Edge Impulse doesn't publish mW numbers directly; estimates use the documented latency &times; ST datasheet power curves. At sub-1 mW budgets a solar-charged smart buoy can afford CricketBrain but not Edge Impulse.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Training Data &amp; Accuracy Trade-off</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>System</th><th>Training data</th><th>Reported accuracy</th></tr></thead>
+              <tbody>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC03 v0.2</strong></td><td><strong>Zero</strong></td><td>90.0% (4 classes), d' = 6.18</td></tr>
+                <tr><td>Classical Goertzel / matched filter</td><td>Zero</td><td>~85-90% on clean fin-whale 20 Hz</td></tr>
+                <tr><td>Edge Impulse audio</td><td>~100-1,000 clips/class</td><td>typical 85-95%</td></tr>
+                <tr><td>TFLite Micro keyword</td><td>~1,000 clips/class</td><td>typical 90-95%</td></tr>
+                <tr><td>Humpback CNN (Allen 2021)</td><td>187,000 h labelled</td><td>AP 0.97, AUC 0.992</td></tr>
+                <tr><td>Custom mel-spectrogram CNN</td><td>Large corpus</td><td>98.92% (FN 0.75%)</td></tr>
+                <tr><td>Marine mammal DNN (Shiu 2020)</td><td>Large corpus</td><td>F1 0.87 over 32 species</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">On complex spectrograms (humpback song) CNNs beat CricketBrain on accuracy. On frequency-stable tonal signals (fin whale 20-Hz pulse, ship cavitation) the gap closes &mdash; and CricketBrain pulls ahead on every non-accuracy axis. Schall et al. (2024) note in their baleen-whale benchmark that deep-learning detectors "tend to be too computationally expensive to run on existing wildlife monitoring systems".</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">When to Pick Which</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Scenario</th><th>Recommendation</th></tr></thead>
+              <tbody>
+                <tr><td>Solar buoy, &lt; 1 mW budget, multi-year deployment</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>Known frequency-stable sources (fin whale, ship cavitation)</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>No labelled training data exists</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>Regulatory / auditable / explainable required</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>Power budget &gt; 10 mW, complex spectrogram classes</td><td>Edge Impulse / TFLite Micro</td></tr>
+                <tr><td>Post-hoc analysis of archived hydrophone data</td><td>PAMGuard / Jetson CNN</td></tr>
+                <tr><td>Research-grade accuracy (&gt; 95%) on 30+ species</td><td>Jetson / RPi CNN</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">Full sourced breakdown (vendor docs, peer-reviewed papers): <a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/03_marine_acoustic/docs/competitive_analysis.md" target="_blank" rel="noopener">docs/competitive_analysis.md</a>.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- Dataset & License -->
     <section class="section">
       <div class="content-wrap">
