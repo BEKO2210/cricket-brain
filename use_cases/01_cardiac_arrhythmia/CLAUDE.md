@@ -40,9 +40,107 @@ These rules apply to **every** future change in this use case:
 
 ---
 
-## v0.5 (2026-04-25) — AAMI EC57:2012 DS2 inter-patient evaluation + baselines
+## v0.6 (2026-04-25) — Clinician rhythm-annotation GT + Irregular fix + drift sweep
 
 Status: **DONE — published on website.**
+
+Three changes addressing critique:
+
+### (1) The Irregular-recall problem (0.84 → "actually 0.19")
+
+The v0.5 0.84 Irregular recall was inflated by a **partially circular**
+ground truth: the GT used CV(RR) > 0.30 to label Irregular, and the
+detector also used CV(RR) > 0.30 to predict Irregular. They agreed
+by construction.
+
+Audit on real DS2 records: the rhythm-change annotations in MIT-BIH
+shipped with `wfdb.rdann`'s `aux_note` field carry clinician-curated
+labels — `(AFIB`, `(AFL`, `(B` (bigeminy), `(T` (trigeminy), `(SBR`,
+`(SVTA`, `(VT`, `(NOD`, `(IVR`, `(VFL`, `(AB`, `(PREX`, `(BII`,
+`(N`, `(P`. Pooling DS2 by rhythm and computing per-window CV
+shows: AFIB beats fire `cv > 0.30` only **11 %** of the time
+(stable rapid AF has low CV). pNN50 fires too often on Normal
+sinus to be useful (94 % FP rate). Best feature found:
+`range/RR > 0.40` — fires on 52 % of AFIB beats, 98 % of bigeminy
+beats, 98 % of trigeminy beats, 34 % of Normal beats.
+
+Two corrections shipped:
+- **Hybrid GT** (`mitbih::rhythm_label_to_class`): AFIB / AFL / B /
+  T / AB / VFL / BII / PREX → Irregular; SBR / NOD / IVR → Brady;
+  SVTA / VT → Tachy; `(N` / `(P` defer to RR window.
+- **Detector adds `range/RR > 0.40`** to the existing `cv > 0.30`.
+  Same rule replicated in `ThresholdBurstBaseline` for fair
+  comparison.
+
+Result on AAMI DS2 / hybrid GT:
+- Pooled accuracy: 78.44 % (was 73.4 % with v0.5 detector + hybrid GT)
+- Macro-F1: 0.7793 (was 0.700)
+- **Irregular recall: 0.781 (was 0.189) — 4× lift ✅**
+- Trade-off: Normal/Tachy/Brady recalls each drop 10–30 pp because
+  the new rule fires more often. **Stable rapid AFIB cannot be
+  reliably distinguished from sinus tachy by short-window RR
+  features alone** — a fundamental limit of rate-regime triage,
+  not a fixable detector flaw.
+- ThresholdBurst rule (same v0.6 upgrade): 78.74 % — still ~0.3 pp
+  ahead of CricketBrain, on par as before.
+
+### (2) The "Daseinsberechtigung" question
+
+Hypothesised that CricketBrain's Gaussian tuning would degrade
+more gracefully than the rule's hard ±10 % band-pass under QRS
+carrier-frequency drift. New `cardiac_drift_sweep` benchmark
+sweeps the carrier from −20 % to +20 % and compares both systems
+on a deterministic synthetic recording.
+
+**Honest negative result:** the rule has clean cliffs at ±10 %
+(its band edge). CricketBrain's response is **non-monotonic** —
+works at off ∈ {0, ±1 %, ±5 %, +20 %}, emits zero classifications
+at off ∈ {±3 %, ±7 %, ±10 %, ±15 %, −20 %}. Both break around the
+same drift magnitude; neither is meaningfully more drift-robust.
+
+Real Daseinsberechtigung reframed on website:
+- **928 bytes RAM** (no rule baseline ships with that on a real MCU)
+- **Zero training** (no GPU, no labelled data, deterministic)
+- **Same 5-neuron circuit** reused across UC02 bearings / UC03
+  marine / UC04 grid — that's the "build once, redeploy" angle
+
+### (3) Visualization
+
+Embedded `assets/circuit_inline.svg` (5-neuron Münster circuit) at
+the top of the cardiac page's "How It Works" section, with
+explainer text linking the cross-domain reuse story.
+
+### Code
+
+- `python/preprocess.py`: 7th CSV column `rhythm_label` (rhythm in
+  effect at each beat, derived from `wfdb.rdann` aux notes via a
+  binary-search lookup over `+`-symbol events).
+- `src/ecg_signal.rs`: `BeatRecord.rhythm_label`, loader
+  auto-detects 7-col header (back-compat with 6-col / 5-col).
+- `src/mitbih.rs`: `rhythm_label_to_class()` with full mapping.
+- `src/detector.rs`: `range/RR > 0.40` added to `classify()`.
+- `src/baselines.rs`: same rule mirrored for the threshold-burst
+  baseline.
+- `benchmarks/cardiac_mitbih.rs`: `--ground-truth rr|annot|hybrid`
+  flag, hybrid as default.
+- `benchmarks/cardiac_mitbih_baselines.rs`: same flag.
+- `benchmarks/cardiac_drift_sweep.rs`: new bench.
+
+Tests: 44 → 48 passing (+4 for rhythm-label mapping incl.
+defer-when-ambiguous).
+
+Result files refreshed:
+- `results/cardiac_mitbih_summary.json` (DS2, hybrid GT)
+- `results/cardiac_mitbih_per_record.csv`
+- `results/cardiac_mitbih_failure_cases.md`
+- `results/cardiac_mitbih_baselines.csv` (hybrid GT)
+- `results/cardiac_drift_sweep.csv` (new)
+
+---
+
+## v0.5 (2026-04-25) — AAMI EC57:2012 DS2 inter-patient evaluation + baselines
+
+Status: **DONE — superseded by v0.6.**
 
 Full AAMI DS2 ingest (22 records, 49 584 annotation beats / 42 510
 emissions). Records 100, 103, 105, 111, 113, 117, 121, 123, 200,

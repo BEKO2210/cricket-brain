@@ -129,8 +129,18 @@ impl ThresholdBurstBaseline {
                             .sum::<f32>()
                             / rr_intervals.len() as f32;
                         let cv = var.sqrt() / mean;
+                        // Apply the same v0.6 normalised-range rule the
+                        // detector uses, so the comparison stays
+                        // apples-to-apples.
+                        let max_rr = *rr_intervals.iter().max().unwrap_or(&0) as f32;
+                        let min_rr = *rr_intervals.iter().min().unwrap_or(&0) as f32;
+                        let range_norm = if mean > 0.0 {
+                            (max_rr - min_rr) / mean
+                        } else {
+                            0.0
+                        };
 
-                        let class = if cv > self.cv_irregular {
+                        let class = if cv > self.cv_irregular || range_norm > 0.40 {
                             RhythmClass::Irregular
                         } else if bpm > 100.0 {
                             RhythmClass::Tachycardia

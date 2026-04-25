@@ -114,6 +114,41 @@ pub fn aami_from_symbol(sym: &str) -> Option<AamiClass> {
     Some(c)
 }
 
+/// Map a MIT-BIH rhythm-change annotation (the `aux_note` text on a
+/// `+` symbol, e.g. `"(AFIB"`, `"(SBR"`, `"(N"`) to the rate-regime
+/// class used by [`crate::detector::CardiacDetector`].
+///
+/// Returns `None` when the rhythm label does not unambiguously imply a
+/// single rate-regime class — typically:
+///
+/// - `(N`  — sinus rhythm: rate-regime depends on BPM, defer to RR window
+/// - `(P`  — paced rhythm: AAMI excludes paced records from triage scoring
+/// - empty / unknown labels
+///
+/// Reference: MIT-BIH PhysioBank annotation dictionary (Moody &
+/// Mark 2001, AAMI EC57:2012).
+pub fn rhythm_label_to_class(label: &str) -> Option<RhythmClass> {
+    // Strip the leading "(" if present.
+    let l = label.strip_prefix('(').unwrap_or(label).trim();
+    match l {
+        // Definitively irregular: AF, AFL, ectopic patterns, V-flutter,
+        // Wenckebach / advanced AV blocks.
+        "AFIB" | "AFL" | "B" | "T" | "AB" | "VFL" | "BII" | "PREX" => Some(RhythmClass::Irregular),
+        // Definitively bradycardic: sinus brady, junctional rhythms,
+        // idioventricular rhythm — typically slow.
+        "SBR" | "NOD" | "IVR" => Some(RhythmClass::Bradycardia),
+        // Definitively tachycardic: SVTA, sustained VT.
+        "SVTA" | "VT" => Some(RhythmClass::Tachycardia),
+        // Sinus rhythm: rate depends on BPM, leave to RR window.
+        "N" => None,
+        // Paced rhythm: caller should treat as "no opinion" / fall back
+        // to RR. AAMI excludes paced records from morphology scoring;
+        // we keep them for rate-regime traceability.
+        "P" => None,
+        _ => None,
+    }
+}
+
 /// Configuration for the rate-regime ground-truth window used on real
 /// MIT-BIH annotation streams.
 ///
@@ -326,6 +361,44 @@ mod tests {
         let win = RateRegimeWindow::default();
         assert!(rate_regime_truth(&rr, 0, &win).is_none());
         assert!(rate_regime_truth(&rr, 1, &win).is_none());
+    }
+
+    #[test]
+    fn rhythm_label_known_mappings() {
+        assert_eq!(rhythm_label_to_class("(AFIB"), Some(RhythmClass::Irregular));
+        assert_eq!(rhythm_label_to_class("(AFL"), Some(RhythmClass::Irregular));
+        assert_eq!(rhythm_label_to_class("(B"), Some(RhythmClass::Irregular));
+        assert_eq!(rhythm_label_to_class("(T"), Some(RhythmClass::Irregular));
+        assert_eq!(
+            rhythm_label_to_class("(SBR"),
+            Some(RhythmClass::Bradycardia)
+        );
+        assert_eq!(
+            rhythm_label_to_class("(NOD"),
+            Some(RhythmClass::Bradycardia)
+        );
+        assert_eq!(
+            rhythm_label_to_class("(SVTA"),
+            Some(RhythmClass::Tachycardia)
+        );
+        assert_eq!(rhythm_label_to_class("(VT"), Some(RhythmClass::Tachycardia));
+    }
+
+    #[test]
+    fn rhythm_label_defers_when_ambiguous() {
+        // Sinus rhythm → caller defers to RR-window decision.
+        assert_eq!(rhythm_label_to_class("(N"), None);
+        // Paced rhythm → no rate-regime claim from the label.
+        assert_eq!(rhythm_label_to_class("(P"), None);
+        // Empty / unknown.
+        assert_eq!(rhythm_label_to_class(""), None);
+        assert_eq!(rhythm_label_to_class("(WAT"), None);
+    }
+
+    #[test]
+    fn rhythm_label_strips_paren() {
+        // Whether or not the caller passed the leading "(", we accept it.
+        assert_eq!(rhythm_label_to_class("AFIB"), Some(RhythmClass::Irregular));
     }
 
     #[test]

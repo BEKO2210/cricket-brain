@@ -5,13 +5,16 @@ Preprocess MIT-BIH Arrhythmia Database for CricketBrain cardiac detector.
 Reads raw wfdb records, extracts R-peak annotations, computes R-R intervals,
 and maps them to frequency-domain input for CricketBrain.
 
-Output CSV columns (v0.3 — 6-col format, backward-compat aware loader):
+Output CSV columns (v0.6 — 7-col format, backward-compat aware loader):
     timestamp_ms   — annotation sample index / (sample_rate / 1000)
     rr_interval_ms — R-R interval in milliseconds
     beat_type      — AAMI beat annotation (N, S, V, F, Q)
     bpm            — instantaneous heart rate (60000 / rr_ms)
     mapped_freq    — frequency for CricketBrain input
     record_id      — MIT-BIH record identifier ("100", "212", "synth_normal", ...)
+    rhythm_label   — MIT-BIH rhythm annotation in effect at this beat
+                     ((AFIB, (N, (B, (T, (SBR, (SVTA, (VT, (AFL, (NOD, ...).
+                     Empty string when the record has no rhythm annotations.
 
 Train/Test split:
     Records 100-119: Training set
@@ -71,6 +74,34 @@ def process_record(record_num: int, output_dir: Path) -> int:
     ann = wfdb.rdann(record_path, "atr")
     samples = ann.sample   # R-peak sample indices
     symbols = ann.symbol   # Beat type symbols
+    aux_notes = ann.aux_note  # Non-empty for rhythm-change rows ('+')
+
+    # Build a sorted list of rhythm-change events: (sample, rhythm_label).
+    # The rhythm "in effect" at any later beat is the most recent one.
+    rhythm_events = []
+    for i, sym in enumerate(symbols):
+        if sym == "+":
+            note = aux_notes[i].rstrip("\x00").strip() if aux_notes[i] else ""
+            if note.startswith("("):
+                rhythm_events.append((samples[i], note))
+    # Sort just to be safe (annotations are usually time-ordered already).
+    rhythm_events.sort(key=lambda x: x[0])
+
+    def rhythm_at(sample_idx: int) -> str:
+        """Most recent rhythm label whose sample <= given sample."""
+        if not rhythm_events:
+            return ""
+        # Binary search for the rightmost event with sample <= sample_idx.
+        lo, hi = 0, len(rhythm_events)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if rhythm_events[mid][0] <= sample_idx:
+                lo = mid + 1
+            else:
+                hi = mid
+        if lo == 0:
+            return ""  # before first rhythm event
+        return rhythm_events[lo - 1][1]
 
     # Compute R-R intervals
     rows = []
@@ -92,6 +123,8 @@ def process_record(record_num: int, output_dir: Path) -> int:
         mapped_freq = 2000.0 + (bpm - 40.0) * (3000.0 / 160.0)
         mapped_freq = max(1000.0, min(8000.0, mapped_freq))
 
+        rhythm_label = rhythm_at(samples[i])
+
         rows.append({
             "timestamp_ms": f"{timestamp_ms:.1f}",
             "rr_interval_ms": f"{rr_ms:.1f}",
@@ -99,6 +132,7 @@ def process_record(record_num: int, output_dir: Path) -> int:
             "bpm": f"{bpm:.1f}",
             "mapped_freq": f"{mapped_freq:.1f}",
             "record_id": str(record_num),
+            "rhythm_label": rhythm_label,
         })
 
     # Write CSV
@@ -108,7 +142,7 @@ def process_record(record_num: int, output_dir: Path) -> int:
     with open(csv_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=["timestamp_ms", "rr_interval_ms",
                                                 "beat_type", "bpm", "mapped_freq",
-                                                "record_id"])
+                                                "record_id", "rhythm_label"])
         writer.writeheader()
         writer.writerows(rows)
 
@@ -145,13 +179,14 @@ def generate_synthetic(output_path: Path, n_per_class: int = 50):
                 "bpm": f"{bpm:.1f}",
                 "mapped_freq": f"{freq:.1f}",
                 "record_id": rid,
+                "rhythm_label": "",
             })
             t += rr
 
     with open(output_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=["timestamp_ms", "rr_interval_ms",
                                                 "beat_type", "bpm", "mapped_freq",
-                                                "record_id"])
+                                                "record_id", "rhythm_label"])
         writer.writeheader()
         writer.writerows(rows)
 
