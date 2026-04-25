@@ -109,6 +109,7 @@ Each use case follows the same 10-run progression:
 | 01 Cardiac | MIT-BIH Arrhythmia | ODC-By | 360 | **COMPLETE** (10/10) |
 | 02 Bearings | CWRU Bearing | Public Domain | 12,000 | **COMPLETE** (10/10) |
 | 03 Marine | MBARI MARS | CC BY 4.0 | 256,000 | **COMPLETE** (10/10) |
+| 04 Grid | EPFL Smart Grid | CC BY 4.0 | 50 | **COMPLETE** (10/10) |
 | 04 Grid | EPFL Smart Grid | CC BY 4.0 | 50 | Planned |
 | 05 Network | KDD Cup 1999 | Public Domain | — | Planned |
 | 06 Agriculture | BioAcoustica | CC BY 4.0 | varies | Planned |
@@ -158,12 +159,17 @@ Each use case follows the same 10-run progression:
   - 20 neurons / 3,712 bytes RAM, 0.13-0.26 µs/step, STM32F0 ready
 - [x] **UC03 Marine Acoustic — ALL 10 RUNS COMPLETE** (2026-04-24)
   - 4-channel ResonatorBank (FIN 20 Hz / BLUE 80 Hz / SHIP 140 Hz / HUMP 200 Hz)
-  - 90.0% accuracy, d'=6.18, 20 tests passing
+  - 90.0% accuracy, d'=6.18, 20 tests passing (25 with v0.2)
   - 20 neurons / 3,712 bytes RAM, 0.13-0.28 µs/step, smart-buoy ready
   - Ship-transit tests, whale-under-ship scenario, sea-state compensation
+- [x] **UC04 Power Grid — ALL 10 RUNS COMPLETE** (2026-04-24)
+  - 4-channel ResonatorBank (FUND 50 Hz / H2 100 Hz / H3 150 Hz / H4 200 Hz)
+  - 90.0% synthetic-window accuracy, d'=6.18, 18 tests passing
+  - 20 neurons / 3,712 bytes RAM, 0.13-0.34 µs/step, < $5 / node
+  - Factory-startup, rolling brownout, off-nominal sweep tests
+  - v0.2 API from day one (`with_bandwidth`, `step_multi`)
 
 ### Planned
-- [ ] UC04 Power Grid: Runs 1-10
 - [ ] UC05 Network Intrusion: Runs 1-10
 - [ ] UC06 Precision Agriculture: Runs 1-10
 - [ ] UC07 Autonomous Vehicle: Runs 1-10
@@ -197,6 +203,6 @@ window accuracy" qualifier*.
 
 ---
 
-*Last updated: 2026-04-24 — UC03 v0.2 complete (10/10 runs + v0.2 API);
-3 of 10 use cases done; real-data validation is the next v0.2
-priority across all three.*
+*Last updated: 2026-04-24 — UC04 Power Grid complete (10/10 runs);
+4 of 10 use cases done; real-data validation is the next v0.2
+priority across all four.*

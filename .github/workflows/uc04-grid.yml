@@ -1,0 +1,55 @@
+# CI workflow for UC04 Power Grid
+# Copy to .github/workflows/uc04-grid.yml to activate
+# Date: 2026-04-24
+
+name: UC04 Grid
+
+on:
+  push:
+    paths:
+      - 'use_cases/04_power_grid/**'
+  pull_request:
+    paths:
+      - 'use_cases/04_power_grid/**'
+
+# Least-privilege: the job only needs to read the repo to build and test.
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build & Test UC04
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: use_cases/04_power_grid
+
+      - name: Build
+        run: cargo build --manifest-path use_cases/04_power_grid/Cargo.toml
+
+      - name: Test
+        run: cargo test --manifest-path use_cases/04_power_grid/Cargo.toml
+
+      - name: Run demo
+        run: cargo run --release --manifest-path use_cases/04_power_grid/Cargo.toml
+
+      - name: Run factory-startup demo
+        run: cargo run --release --manifest-path use_cases/04_power_grid/Cargo.toml -- --factory
+
+      - name: Run brownout demo
+        run: cargo run --release --manifest-path use_cases/04_power_grid/Cargo.toml -- --brownout
+
+      - name: Run SDT benchmark
+        run: cargo run --release --manifest-path use_cases/04_power_grid/Cargo.toml --example grid_sdt
+
+      - name: Run memory benchmark
+        run: cargo run --release --manifest-path use_cases/04_power_grid/Cargo.toml --example grid_memory
+
+      - name: Verify Python syntax
+        run: |
+          python3 -m py_compile use_cases/04_power_grid/python/preprocess.py
+          python3 -m py_compile use_cases/04_power_grid/python/evaluate.py
+          python3 -m py_compile use_cases/04_power_grid/python/plot_results.py

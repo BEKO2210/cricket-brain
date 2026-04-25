@@ -36,7 +36,7 @@
             <a href="pages/cardiac.html" class="nav-uc-item"><span class="nav-uc-dot" style="background:#ef4444;"></span>Cardiac Arrhythmia</a>
             <a href="pages/bearings.html" class="nav-uc-item"><span class="nav-uc-dot" style="background:#3b82f6;"></span>Predictive Maintenance</a>
             <a href="pages/marine.html" class="nav-uc-item"><span class="nav-uc-dot" style="background:#00d4aa;"></span>Marine Acoustics</a>
-            <a href="#use-cases" class="nav-uc-item"><span class="nav-uc-dot" style="background:#94a3b8;"></span>Smart Grid</a>
+            <a href="pages/grid.html" class="nav-uc-item"><span class="nav-uc-dot" style="background:#f59e0b;"></span>Power Grid</a>
             <a href="#use-cases" class="nav-uc-item"><span class="nav-uc-dot" style="background:#94a3b8;"></span>Network Intrusion</a>
             <a href="#use-cases" class="nav-uc-item"><span class="nav-uc-dot" style="background:#94a3b8;"></span>Precision Agriculture</a>
             <a href="#use-cases" class="nav-uc-item"><span class="nav-uc-dot" style="background:#94a3b8;"></span>Autonomous Vehicle</a>
@@ -282,7 +282,7 @@
           </table>
         </div>
 
-        <p style="margin-block-start:var(--space-lg); color:var(--text-muted); font-size:var(--font-size-sm); text-align:center;" data-animate="fade-up">Per-domain breakdowns: <a href="pages/cardiac.html#comparison">cardiac</a> &middot; <a href="pages/bearings.html#comparison">bearings</a> &middot; <a href="pages/marine.html#comparison">marine</a>.</p>
+        <p style="margin-block-start:var(--space-lg); color:var(--text-muted); font-size:var(--font-size-sm); text-align:center;" data-animate="fade-up">Per-domain breakdowns: <a href="pages/cardiac.html#comparison">cardiac</a> &middot; <a href="pages/bearings.html#comparison">bearings</a> &middot; <a href="pages/marine.html#comparison">marine</a> &middot; <a href="pages/grid.html#comparison">grid</a>.</p>
       </div>
     </section>
 
@@ -396,16 +396,20 @@
             </article>
           </a>
 
-          <article class="version-card" style="opacity:0.6;">
-            <span class="version-badge">Planned</span>
-            <h3>Smart Grid</h3>
-            <p>50/60 Hz power grid frequency monitoring at scale.</p>
-            <ul>
-              <li>JND 88 Hz, Gap Detection 1 ms</li>
-              <li>Millions of nodes, near-zero cost</li>
-              <li>$100B smart grid market</li>
-            </ul>
-          </article>
+          <a href="pages/grid.html" class="uc-card-link">
+            <article class="version-card uc-live">
+              <span class="version-badge" style="background:color-mix(in srgb, #f59e0b 15%, transparent); color:#f59e0b;">Synthetic Demo</span>
+              <h3>Power-Grid Harmonic Triage</h3>
+              <p>50 Hz fundamental + 2nd / 3rd / 4th harmonic + outage triage on PMU streams. Real EPFL validation pending.</p>
+              <ul>
+                <li>90.0% synthetic accuracy, d' = 6.18 (SDT, log-linear)</li>
+                <li>3,712 bytes RAM, 20 neurons</li>
+                <li>18 tests, factory-startup &amp; brownout demos</li>
+                <li>Smart-grid segment (~$100B, BloombergNEF 2024)</li>
+              </ul>
+              <span class="uc-cta">View Demo &rarr;</span>
+            </article>
+          </a>
 
           <article class="version-card" style="opacity:0.6;">
             <span class="version-badge">Planned</span>
@@ -671,6 +675,7 @@
         <a href="pages/cardiac.html">Cardiac Demo</a>
         <a href="pages/bearings.html">Bearings Demo</a>
         <a href="pages/marine.html">Marine Demo</a>
+        <a href="pages/grid.html">Grid Demo</a>
         <a href="https://github.com/BEKO2210/cricket-brain/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
         <a href="https://github.com/BEKO2210/cricket-brain/blob/main/docs/architecture.md" target="_blank" rel="noopener">Docs</a>
         <a href="https://github.com/BEKO2210/cricket-brain/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a>
