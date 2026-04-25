@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "generated_at": "2026-04-25T09:56:19Z",
+    "git_commit": "4fdcfe7",
+    "command": "target/release/examples/cardiac_eval --seed 42 --beats-per-class 30 --write",
+    "dataset_type": "synthetic",
+    "dataset_name": "uc01_synth_v0.2_seed42_bpc30",
+    "synthetic_generator_version": "0.2.0",
+    "seed": 42,
+    "classes": ["Normal", "Tachy", "Brady", "Irregular"],
+    "window_size_ms": 1,
+    "sample_rate_hz": 1000,
+    "limitations": ["Synthetic ECG only — no real-patient validation yet.", "Frequency-encoded inputs; not a clinical waveform analyser.", "Rate-regime triage only; no morphology, no AF, no VT, no ST analysis.", "Not a medical device. Research / embedded prototype only."]
+  },
+  "synthetic_config": {"seed": 42, "beats_per_class": 30, "include_irregular": true, "hrv": 0.000000, "noise_prob": 0.000000, "amp_jitter": 0.000000, "baseline_wander_hz": 0.000000, "morph_jitter": 0.000000, "missing_qrs_prob": 0.000000, "motion_burst_prob": 0.000000},
+  "detector": {"ram_bytes": 928, "preprocessor": "off"}
+}

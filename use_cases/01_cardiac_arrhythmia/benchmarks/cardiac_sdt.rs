@@ -17,7 +17,9 @@ use cricket_brain_cardiac::ecg_signal;
 const TRIALS: usize = 200;
 
 fn wilson_ci(successes: usize, total: usize) -> (f32, f32) {
-    if total == 0 { return (0.0, 1.0); }
+    if total == 0 {
+        return (0.0, 1.0);
+    }
     let n = total as f32;
     let p = successes as f32 / n;
     let z = 1.96f32;
@@ -42,7 +44,11 @@ fn inv_norm(p: f32) -> f32 {
     let d2 = 0.189269;
     let d3 = 0.001308;
     let val = t - (c0 + c1 * t + c2 * t * t) / (1.0 + d1 * t + d2 * t * t + d3 * t * t * t);
-    if p < 0.5 { -val } else { val }
+    if p < 0.5 {
+        -val
+    } else {
+        val
+    }
 }
 
 fn d_prime(hit_rate: f32, fa_rate: f32) -> f32 {
@@ -60,9 +66,15 @@ struct SdtResult {
 }
 
 impl SdtResult {
-    fn tpr(&self) -> f32 { self.hits as f32 / (self.hits + self.misses).max(1) as f32 }
-    fn fpr(&self) -> f32 { self.false_alarms as f32 / (self.false_alarms + self.correct_rejections).max(1) as f32 }
-    fn d_prime(&self) -> f32 { d_prime(self.tpr(), self.fpr()) }
+    fn tpr(&self) -> f32 {
+        self.hits as f32 / (self.hits + self.misses).max(1) as f32
+    }
+    fn fpr(&self) -> f32 {
+        self.false_alarms as f32 / (self.false_alarms + self.correct_rejections).max(1) as f32
+    }
+    fn d_prime(&self) -> f32 {
+        d_prime(self.tpr(), self.fpr())
+    }
     fn auc(&self) -> f32 {
         // Simple AUC approximation from TPR and FPR
         let tpr = self.tpr();
@@ -117,7 +129,13 @@ fn run_condition(
         }
     }
 
-    SdtResult { name, hits, misses, false_alarms, correct_rejections }
+    SdtResult {
+        name,
+        hits,
+        misses,
+        false_alarms,
+        correct_rejections,
+    }
 }
 
 fn main() {
@@ -136,8 +154,14 @@ fn main() {
         run_condition("Normal vs Tachy", RhythmClass::NormalSinus, &normal, &tachy),
     ];
 
-    println!("  {:30} {:>6} {:>6} {:>7} {:>6} {:>8}", "Condition", "TPR", "FPR", "d'", "AUC", "Rating");
-    println!("  {:─>30} {:─>6} {:─>6} {:─>7} {:─>6} {:─>8}", "", "", "", "", "", "");
+    println!(
+        "  {:30} {:>6} {:>6} {:>7} {:>6} {:>8}",
+        "Condition", "TPR", "FPR", "d'", "AUC", "Rating"
+    );
+    println!(
+        "  {:─>30} {:─>6} {:─>6} {:─>7} {:─>6} {:─>8}",
+        "", "", "", "", "", ""
+    );
 
     for r in &results {
         let tpr = r.tpr();
@@ -147,13 +171,24 @@ fn main() {
         let (tpr_lo, tpr_hi) = wilson_ci(r.hits, r.hits + r.misses);
         let (fpr_lo, fpr_hi) = wilson_ci(r.false_alarms, r.false_alarms + r.correct_rejections);
 
-        let rating = if dp > 3.0 { "EXCELLENT" }
-            else if dp > 2.0 { "GOOD" }
-            else if dp > 1.0 { "MODERATE" }
-            else { "POOR" };
+        let rating = if dp > 3.0 {
+            "EXCELLENT"
+        } else if dp > 2.0 {
+            "GOOD"
+        } else if dp > 1.0 {
+            "MODERATE"
+        } else {
+            "POOR"
+        };
 
-        println!("  {:30} {:.3}  {:.3}  {:>6.2}  {:.3}  {}", r.name, tpr, fpr, dp, auc, rating);
-        println!("    TPR 95% CI: [{:.3}, {:.3}]  FPR 95% CI: [{:.3}, {:.3}]", tpr_lo, tpr_hi, fpr_lo, fpr_hi);
+        println!(
+            "  {:30} {:.3}  {:.3}  {:>6.2}  {:.3}  {}",
+            r.name, tpr, fpr, dp, auc, rating
+        );
+        println!(
+            "    TPR 95% CI: [{:.3}, {:.3}]  FPR 95% CI: [{:.3}, {:.3}]",
+            tpr_lo, tpr_hi, fpr_lo, fpr_hi
+        );
     }
 
     println!("\n  Note: d' > 3.0 = excellent discrimination (near ceiling).");

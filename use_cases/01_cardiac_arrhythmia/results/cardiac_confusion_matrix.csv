@@ -1,0 +1,15 @@
+# generated_at: 2026-04-25T09:56:19Z
+# git_commit: 4fdcfe7
+# command: target/release/examples/cardiac_eval --seed 42 --beats-per-class 30 --write
+# dataset_type: synthetic
+# dataset_name: uc01_synth_v0.2_seed42_bpc30
+# synthetic_generator_version: 0.2.0
+# seed: 42
+# sample_rate_hz: 1000
+# window_size_ms: 1
+# limitations: Synthetic ECG only — no real-patient validation yet. | Frequency-encoded inputs; not a clinical waveform analyser. | Rate-regime triage only; no morphology, no AF, no VT, no ST analysis. | Not a medical device. Research / embedded prototype only.
+truth,Normal,Tachy,Brady,Irregular
+Normal,28,0,0,0
+Tachy,3,23,0,4
+Brady,0,1,22,7
+Irregular,2,0,3,25

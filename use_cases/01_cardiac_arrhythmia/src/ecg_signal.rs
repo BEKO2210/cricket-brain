@@ -218,15 +218,13 @@ mod tests {
 
     #[test]
     fn beats_to_stream() {
-        let records = vec![
-            BeatRecord {
-                timestamp_ms: 0.0,
-                rr_interval_ms: 820.0,
-                beat_type: "N".to_string(),
-                bpm: 73.0,
-                mapped_freq: 2618.75,
-            },
-        ];
+        let records = vec![BeatRecord {
+            timestamp_ms: 0.0,
+            rr_interval_ms: 820.0,
+            beat_type: "N".to_string(),
+            bpm: 73.0,
+            mapped_freq: 2618.75,
+        }];
         let stream = beats_to_frequency_stream(&records);
         // 810 ms silence + 10 ms QRS = 820 total
         assert_eq!(stream.len(), 820);

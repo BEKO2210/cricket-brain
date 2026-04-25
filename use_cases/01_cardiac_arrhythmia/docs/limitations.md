@@ -1,8 +1,43 @@
 # UC01 Cardiac Arrhythmia — Known Limitations
 
-**Date:** 2026-04-10 | **CricketBrain v3.0.0**
+**Date:** v0.2 hardening | **CricketBrain core v3.0.0**
 
 > Scientific integrity requires transparent documentation of failure modes.
+
+---
+
+## 0. v0.2 audit findings (new)
+
+The v0.2 benchmark hardening replaced the legacy circular confusion
+matrix with truth-based metrics and added 7-dimension stress sweeps,
+two rule baselines, and a reject-aware coverage curve. The biggest
+findings are:
+
+- **The legacy 92.5 % accuracy was partly circular.** Truth was
+  derived from the detector's own BPM estimate. The new truth-based
+  4-class accuracy on the equivalent synthetic scenario is **~87 %**
+  (after a 2-emission per-segment warmup) with macro-F1 ≈ 0.88.
+- **Morphology jitter at 5 % already breaks detection.** Per-cycle
+  scaling of P/QRS/T frequencies and durations by ±5 % drives
+  macro-F1 below 0.10. The coincidence gate is tightly tuned to the
+  carrier; modest morphology drift defeats it. Fix is on the
+  [BENCHMARK_ROADMAP.md](../BENCHMARK_ROADMAP.md) v0.6 ablation
+  milestone.
+- **CricketBrain ≈ rule baseline on clean data.** A simple
+  band-gate + RR-window threshold rule
+  (`baselines::ThresholdBurstBaseline`) matches CricketBrain exactly
+  on clean synthetic streams, and *outperforms* it under 2 %
+  in-band noise. The v0.2 baseline benchmark surfaces this fact
+  rather than hiding it.
+- **In-band noise > 5 % spike probability** drives accuracy below
+  0.20; the noise model is per-sample probability of a random in-band
+  replacement, *not* the legacy whole-stream replacement model — the
+  two are not directly comparable.
+- **Reject-aware operating point is solid.** At confidence ≥ 0.9 the
+  detector rejects ~39 % of decisions but is 100 % correct on the
+  remainder (single-seed, `cardiac_reject_curve.csv`).
+
+The v0.1 numbers below are kept for traceability.
 
 ---
 

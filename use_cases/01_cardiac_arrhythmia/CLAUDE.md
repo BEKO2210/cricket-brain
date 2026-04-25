@@ -4,6 +4,81 @@
 
 ---
 
+## 0. Working rules (v0.2 hardening)
+
+These rules apply to **every** future change in this use case:
+
+1. **Benchmark-first, not marketing.** Treat UC01 as a research
+   benchmark suite. Do not enlarge website claims, market sizes, or
+   accuracy headlines without a corresponding result file in
+   `results/` produced by a fresh `cargo run --release --example …
+   --write` invocation.
+2. **Never invent results.** No fake MIT-BIH numbers, no "improved
+   accuracy" without a regenerated result file, no hand-edited CSV
+   metrics. Hardcoded benchmark scores in docs are tolerated **only**
+   when explicitly labelled "example" and tied to a documented seed
+   and command.
+3. **Truth-based metrics only.** New benchmarks must use
+   `evaluate::run_and_score` (or an equivalent that takes external
+   ground truth). The legacy `ConfusionMatrix::from_predictions`
+   path is preserved for traceability and must not be re-introduced
+   into v0.2-or-later result files.
+4. **Document every benchmark change.** When code changes affect
+   results, update at minimum:
+   - `README.md` (sample tables and command lines)
+   - `BENCHMARK_ROADMAP.md` (state transitions of milestones / claims)
+   - `docs/methodology.md` (definitions, conventions)
+   - `docs/limitations.md` (new failure modes)
+   - `docs/results.md` (versioned legacy log)
+5. **Conservative medical claims.** No diagnosis. No "FDA
+   plausible". No "validated on patients". Triage / pre-screening /
+   research only.
+6. **Repository scope:** changes for UC01 stay inside
+   `use_cases/01_cardiac_arrhythmia/`. Touching `website/`, root
+   `README.md`, or `MASTER_PLAN.md` is allowed *only* to fix wrong /
+   stale numbers or commands; do not enlarge marketing copy.
+
+---
+
+## v0.2 (2026-04-25) — Benchmark hardening
+
+Status: **DONE** in this PR.
+
+New modules:
+
+- `src/metrics.rs` — 4-class confusion matrix, per-class P/R/F1/specificity,
+  macro-F1, weighted-F1, balanced accuracy, reject-aware coverage curve.
+- `src/synthetic.rs` — labelled synthetic generator with seedable
+  variability (HRV, baseline wander, amplitude jitter, morphology
+  jitter, missing QRS, motion-artifact bursts, in-band noise).
+- `src/evaluate.rs` — pairs detector emissions with ground-truth segments.
+- `src/baselines.rs` — `ThresholdBurstBaseline`, `FrequencyRuleBaseline`.
+- `src/report.rs` — JSON / CSV writer with metadata header
+  (`generated_at`, `git_commit`, `seed`, `synthetic_generator_version`,
+  `limitations`).
+
+New benches:
+
+- `cardiac_eval` — truth-based 4-class metrics, JSON + CSV + failure
+  cases markdown.
+- `cardiac_stress_sweep` — 7-dimension stress sweeps, per-dimension CSVs.
+- `cardiac_baselines` — CricketBrain vs both rule baselines on 5 scenarios.
+- `cardiac_reject` — coverage / accuracy curve.
+- `cardiac_mitbih` — MIT-BIH skeleton (refuses to publish "validated"
+  numbers until real ingestion lands).
+
+Documentation:
+
+- `BENCHMARK_ROADMAP.md` (new, top-level)
+- `docs/methodology.md` (new)
+- `README.md` (rewritten benchmarks section, structure block, results table)
+- `docs/results.md` (marked legacy, points to v0.2 outputs)
+- `docs/limitations.md` (added v0.2 audit findings as § 0)
+
+Tests: 31 unit tests pass after the change (was 17).
+
+---
+
 ## 1. Analysis of examples/sentinel_ecg_monitor.rs
 
 The existing demo (116 lines) does:
