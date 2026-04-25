@@ -9,6 +9,7 @@ pub mod detector;
 pub mod ecg_signal;
 pub mod evaluate;
 pub mod metrics;
+pub mod mitbih;
 pub mod preprocess;
 pub mod report;
 pub mod synthetic;

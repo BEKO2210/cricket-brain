@@ -97,6 +97,11 @@ use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 
 /// A single preprocessed beat record from CSV.
+///
+/// `record_id` was added in v0.3 and identifies which MIT-BIH-style
+/// patient record the beat came from. The legacy 5-column CSV format
+/// (without `record_id`) is still accepted by [`from_csv`]; missing
+/// `record_id` defaults to the empty string.
 #[derive(Debug, Clone)]
 pub struct BeatRecord {
     pub timestamp_ms: f32,
@@ -104,34 +109,101 @@ pub struct BeatRecord {
     pub beat_type: String,
     pub bpm: f32,
     pub mapped_freq: f32,
+    /// Patient / record identifier (e.g. MIT-BIH "100"). Empty for
+    /// legacy CSVs that don't carry the column.
+    pub record_id: String,
 }
 
-/// Read preprocessed CSV (timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq).
-/// Returns a list of beat records and a frequency stream for CricketBrain input.
+/// Read a preprocessed CSV.
+///
+/// Accepts both the legacy 5-column header
+/// `timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq` and the
+/// v0.3 6-column header
+/// `timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq,record_id`.
+/// In the legacy case `record_id` is filled with the file stem (so
+/// per-record aggregation still works).
 pub fn from_csv(path: &str) -> Vec<BeatRecord> {
     let file = fs::File::open(path).expect("cannot open CSV");
     let reader = BufReader::new(file);
     let mut records = Vec::new();
 
+    let fallback_id = Path::new(path)
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("")
+        .to_string();
+
+    let mut header_has_record_id = false;
     for (i, line) in reader.lines().enumerate() {
         let line = line.expect("cannot read line");
         if i == 0 {
-            continue; // Skip header
+            header_has_record_id = line.split(',').any(|c| c.trim() == "record_id");
+            continue;
         }
         let cols: Vec<&str> = line.split(',').collect();
         if cols.len() < 5 {
             continue;
         }
+        let rid = if header_has_record_id && cols.len() >= 6 {
+            cols[5].trim().to_string()
+        } else {
+            fallback_id.clone()
+        };
         records.push(BeatRecord {
             timestamp_ms: cols[0].parse().unwrap_or(0.0),
             rr_interval_ms: cols[1].parse().unwrap_or(0.0),
             beat_type: cols[2].to_string(),
             bpm: cols[3].parse().unwrap_or(0.0),
             mapped_freq: cols[4].parse().unwrap_or(0.0),
+            record_id: rid,
         });
     }
 
     records
+}
+
+/// Recursively load every `*.csv` under `dir` and return them grouped
+/// by `record_id`. Each `(record_id, beats)` group is sorted by
+/// `timestamp_ms` so a stream that was split across files re-assembles
+/// correctly.
+///
+/// Files that fail to parse or don't end in `.csv` are skipped. The
+/// scan is non-recursive (only files directly in `dir`); deeper
+/// scanning is intentionally not done here so that
+/// `data/processed/train/` and `data/processed/test/` stay separate
+/// when the caller asks for them separately.
+pub fn from_csv_dir(dir: &str) -> Vec<(String, Vec<BeatRecord>)> {
+    let mut grouped: std::collections::BTreeMap<String, Vec<BeatRecord>> =
+        std::collections::BTreeMap::new();
+
+    let read = match fs::read_dir(dir) {
+        Ok(r) => r,
+        Err(_) => return Vec::new(),
+    };
+    for entry in read.flatten() {
+        let path = entry.path();
+        if path.extension().and_then(|s| s.to_str()) != Some("csv") {
+            continue;
+        }
+        let path_str = match path.to_str() {
+            Some(s) => s,
+            None => continue,
+        };
+        let beats = from_csv(path_str);
+        for b in beats {
+            grouped.entry(b.record_id.clone()).or_default().push(b);
+        }
+    }
+
+    let mut out: Vec<(String, Vec<BeatRecord>)> = grouped.into_iter().collect();
+    for (_, beats) in &mut out {
+        beats.sort_by(|a, b| {
+            a.timestamp_ms
+                .partial_cmp(&b.timestamp_ms)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+    }
+    out
 }
 
 /// Convert beat records to a CricketBrain frequency stream.
@@ -213,7 +285,56 @@ mod tests {
         assert!(records[0].rr_interval_ms > 800.0); // Normal
         assert!(records[10].rr_interval_ms < 500.0); // Tachy
         assert!(records[20].rr_interval_ms > 1400.0); // Brady
+                                                      // 5-col legacy CSV → record_id falls back to file stem
+        assert_eq!(records[0].record_id, "cricket_brain_test_sample");
         std::fs::remove_file(path).ok();
+    }
+
+    #[test]
+    fn csv_with_record_id_column() {
+        // Synthetic 6-column CSV. Verifies that the v0.3 header is
+        // detected and `record_id` is read from the row.
+        let path = "/tmp/cricket_brain_test_record_id.csv";
+        std::fs::write(
+            path,
+            "timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq,record_id\n\
+             0.0,820.0,N,73.2,2622.0,100\n\
+             820.0,820.0,N,73.2,2622.0,100\n\
+             1640.0,400.0,N,150.0,3000.0,200\n",
+        )
+        .unwrap();
+        let records = from_csv(path);
+        assert_eq!(records.len(), 3);
+        assert_eq!(records[0].record_id, "100");
+        assert_eq!(records[2].record_id, "200");
+        std::fs::remove_file(path).ok();
+    }
+
+    #[test]
+    fn from_csv_dir_groups_by_record_id() {
+        let dir = "/tmp/cricket_brain_test_csv_dir";
+        std::fs::create_dir_all(dir).unwrap();
+        std::fs::write(
+            format!("{dir}/a.csv"),
+            "timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq,record_id\n\
+             0.0,820.0,N,73.2,2622.0,100\n\
+             820.0,820.0,N,73.2,2622.0,100\n",
+        )
+        .unwrap();
+        std::fs::write(
+            format!("{dir}/b.csv"),
+            "timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq,record_id\n\
+             0.0,400.0,N,150.0,3000.0,200\n",
+        )
+        .unwrap();
+        let groups = from_csv_dir(dir);
+        assert_eq!(groups.len(), 2);
+        let ids: Vec<&str> = groups.iter().map(|(id, _)| id.as_str()).collect();
+        assert!(ids.contains(&"100"));
+        assert!(ids.contains(&"200"));
+        let beats_100 = groups.iter().find(|(id, _)| id == "100").unwrap();
+        assert_eq!(beats_100.1.len(), 2);
+        std::fs::remove_dir_all(dir).ok();
     }
 
     #[test]
@@ -224,6 +345,7 @@ mod tests {
             beat_type: "N".to_string(),
             bpm: 73.0,
             mapped_freq: 2618.75,
+            record_id: String::new(),
         }];
         let stream = beats_to_frequency_stream(&records);
         // 810 ms silence + 10 ms QRS = 820 total

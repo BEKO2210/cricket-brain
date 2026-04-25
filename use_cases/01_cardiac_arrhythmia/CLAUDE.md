@@ -40,9 +40,49 @@ These rules apply to **every** future change in this use case:
 
 ---
 
+## v0.3 (2026-04-25) — MIT-BIH loader + patient-aware eval
+
+Status: **DONE — infrastructure ready; awaiting PhysioNet ingestion.**
+
+New module:
+
+- `src/mitbih.rs` — AAMI 5-class symbol mapping (Moody & Mark 2001),
+  non-circular `rate_regime_truth` sliding window (5 beats by
+  default, distinct from the detector's 8-beat window), and
+  `PerRecordResult` / `PooledResult` aggregation primitives.
+
+CSV format extension:
+
+- `BeatRecord` gains a `record_id` field. The loader auto-detects 5-col
+  vs 6-col headers; legacy files fall back to file stem.
+- New `ecg_signal::from_csv_dir(dir)` returns `Vec<(record_id, beats)>`
+  grouped and time-sorted.
+- `python/preprocess.py` emits the v0.3 6-col format for both real
+  records (`record_id = "100"`, `"212"`, ...) and the synthetic
+  sample (`record_id = "synth_normal" | "synth_tachy" | "synth_brady"`).
+
+Bench rewrite — `benchmarks/cardiac_mitbih.rs`:
+
+- `--records-dir <dir>` for multi-record evaluation, `--csv <path>`
+  for single-file mode.
+- For each record: detector emissions paired with rate-regime truth
+  derived from the **annotation RR intervals** via the 5-beat
+  sliding window (no circularity with the detector's own BPM).
+- Per-record + macro-pooled summary; AAMI N/S/V/F/Q distributions
+  reported per record for traceability only.
+- **Refuses to write any `cardiac_mitbih_summary.json` when every
+  loaded record_id starts with `synth_`** — instead writes
+  `cardiac_mitbih_skeleton_only.json` with a clear "no real records"
+  status and the next-step command.
+
+Tests: 31 → 42 passing (+11 new for AAMI symbols, rate-regime
+window, pooled aggregation, 6-col CSV header, multi-record loader).
+
+---
+
 ## v0.2 (2026-04-25) — Benchmark hardening
 
-Status: **DONE** in this PR.
+Status: **DONE.**
 
 New modules:
 

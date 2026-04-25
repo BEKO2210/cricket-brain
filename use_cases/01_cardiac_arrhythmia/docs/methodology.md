@@ -137,6 +137,45 @@ generator version.
 - **Clinical outcomes.** No survival, no false-discharge rate, no
   reader study. UC01 is *not* a clinical study and never claims to be.
 
+## 9b. MIT-BIH ingest (v0.3)
+
+The v0.3 milestone ships the **infrastructure** for real-data
+evaluation, but explicitly does **not** publish "MIT-BIH validated"
+numbers until real PhysioNet records are ingested. The honesty rules
+are enforced in code, not just in docs:
+
+- **Extended CSV format** — v0.3 introduces a 6th column `record_id`
+  on top of the legacy 5-col format. The Rust loader
+  ([`ecg_signal::from_csv`](../src/ecg_signal.rs)) auto-detects which
+  format the file uses; legacy files fall back to using the file
+  stem as `record_id`. The Python preprocess pipeline
+  ([`python/preprocess.py`](../python/preprocess.py)) emits the v0.3
+  format for both real records and the synthetic sample.
+- **Synthetic record IDs are tagged.** The synthetic CSV uses
+  `record_id = "synth_normal" | "synth_tachy" | "synth_brady"`. The
+  `cardiac_mitbih` bench checks for the `synth_` prefix and
+  **refuses to write any `cardiac_mitbih_summary.json`** when every
+  loaded record is synthetic — instead it writes
+  `cardiac_mitbih_skeleton_only.json` with a clear "no real records"
+  status.
+- **Non-circular ground truth.** `cardiac_mitbih` derives the
+  rate-regime ground truth via
+  [`mitbih::rate_regime_truth`](../src/mitbih.rs) — a sliding
+  **5-beat** window over the annotation-derived RR intervals. The
+  detector internally uses an **8-beat** window, so transitions are
+  visible as honest disagreement instead of being collapsed by
+  matching window sizes.
+- **AAMI mapping is traceability only.** AAMI N / S / V / F / Q
+  distributions are reported per record so reviewers can see *which*
+  AAMI symbols dominate the failure set. CricketBrain is a
+  rate-regime classifier and is **not** scored on AAMI morphology —
+  the docs and the bench are explicit about this.
+- **Patient-level structure is preserved.** The pooled summary
+  reports both `micro_accuracy` (over all beats) and
+  `macro_accuracy_over_records` (each record weighted equally), so
+  one long record cannot dominate. Per-record numbers are always
+  emitted alongside the pooled headline.
+
 ## 10. Reproducing a result file
 
 ```bash

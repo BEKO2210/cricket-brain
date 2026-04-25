@@ -338,9 +338,11 @@ cargo run --release --example cardiac_baselines -- --seed 42 --beats-per-class 3
 # Reject-aware coverage / accuracy curve
 cargo run --release --example cardiac_reject -- --seed 42 --beats-per-class 30 --write
 
-# MIT-BIH skeleton (refuses to publish "validated" numbers until real data ingested)
+# MIT-BIH skeleton — v0.3 patient-aware loader, refuses to publish
+# "validated" numbers when only synthetic record_ids (synth_*) are present.
+cargo run --release --example cardiac_mitbih -- --write           # synth-only → skeleton json
 cargo run --release --example cardiac_mitbih -- \
-    --csv data/processed/sample_record.csv --write
+    --records-dir data/processed/test --write                     # real records → full results
 ```
 
 ### Legacy benches (kept for traceability)
@@ -368,7 +370,10 @@ results/
   cardiac_stress_<dim>.csv           # one file per stress dimension
   cardiac_baselines.csv              # CricketBrain vs rule baselines
   cardiac_reject_curve.csv           # coverage / accuracy vs confidence
-  cardiac_csv_summary.csv            # CSV-path metrics (legacy compat)
+  cardiac_mitbih_skeleton_only.json  # v0.3 status when no real records loaded
+  cardiac_mitbih_summary.json        # v0.3 patient-aware summary (real data only)
+  cardiac_mitbih_per_record.csv      # v0.3 per-record metrics + AAMI counts
+  cardiac_mitbih_failure_cases.md    # v0.3 auto-captured failure list (real data)
 ```
 
 Each file has a metadata header (`generated_at`, `git_commit`,
@@ -479,6 +484,7 @@ See [data/SOURCES.md](data/SOURCES.md) for detailed provenance.
 │   ├── metrics.rs           # 4-class CM, P/R/F1, macro/weighted F1, reject curve
 │   ├── evaluate.rs          # run_and_score: pairs predictions with ground truth
 │   ├── baselines.rs         # ThresholdBurstBaseline + FrequencyRuleBaseline
+│   ├── mitbih.rs            # v0.3 AAMI mapping + non-circular RR-window truth
 │   ├── report.rs            # JSON / CSV writers + RunMetadata
 │   └── main.rs              # Demo binary (--csv mode)
 ├── benchmarks/
