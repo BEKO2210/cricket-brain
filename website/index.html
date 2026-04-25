@@ -347,19 +347,19 @@
     <section id="use-cases" class="section">
       <div class="content-wrap">
         <h2 class="section-title" data-animate="fade-up">Use <span>Cases</span></h2>
-        <p class="section-subtitle" data-animate="fade-up">Research prototypes built on CricketBrain. Each case includes benchmarks, source code, honest limitations and a validation-status badge. UC01 has its first real MIT-BIH run (v0.4, 5 records / 96.1 % pooled accuracy); the other UCs remain synthetic-only and are tracked for real-data validation.</p>
+        <p class="section-subtitle" data-animate="fade-up">Research prototypes built on CricketBrain. Each case includes benchmarks, source code, honest limitations and a validation-status badge. UC01 ships AAMI EC57:2012 inter-patient evaluation on the full MIT-BIH DS2 split (v0.5, 22 patients / 96.6 % pooled accuracy &mdash; on par with a hand-coded band-gate rule, not better); other UCs remain synthetic-only and are tracked for real-data validation.</p>
 
         <div class="version-grid" data-animate="fade-up" data-stagger="true">
           <a href="pages/cardiac.html" class="uc-card-link">
             <article class="version-card uc-live">
-              <span class="version-badge" style="background:color-mix(in srgb, var(--accent) 15%, transparent); color:var(--accent);">v0.4 &middot; First MIT-BIH</span>
+              <span class="version-badge" style="background:color-mix(in srgb, var(--accent) 15%, transparent); color:var(--accent);">v0.5 &middot; AAMI DS2</span>
               <h3>Rate-Based Cardiac Rhythm Triage</h3>
               <p>Beat-rate regime flags only (bradycardic / normal / tachycardic / irregular). Triage, not diagnosis &mdash; not a substitute for clinical ECG.</p>
               <ul>
-                <li><strong>96.1 % pooled accuracy on 5 MIT-BIH records</strong> (11 375 beats, real PhysioNet data)</li>
-                <li>0.94 Irregular recall on AF / ectopic-rich segments</li>
-                <li>~0.13 &micro;s/step, 928 bytes RAM, zero training</li>
-                <li>42 tests, deterministic, no inter-patient leakage</li>
+                <li><strong>96.60 % pooled accuracy on AAMI DS2</strong> (22 patients / 42 510 emissions, real PhysioNet data)</li>
+                <li>Macro-F1 0.934, all four rate-regime classes covered (Brady recall 0.98)</li>
+                <li>On par with hand-coded band-gate rule (97.5 %), not better &mdash; honest finding</li>
+                <li>~0.13 &micro;s/step, 928 bytes RAM, zero training, 44 tests</li>
               </ul>
               <span class="uc-cta">View Demo &rarr;</span>
             </article>

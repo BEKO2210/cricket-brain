@@ -203,8 +203,9 @@ for the full milestone plan.
 | **v0.1** synthetic results (legacy, partly circular) | Done, marked legacy |
 | **v0.2** synthetic benchmark hardening (truth-based metrics, stress sweeps, reject curve, baselines, structured outputs) | **Done** |
 | **v0.3** MIT-BIH loader + first real-data run | **Done** |
-| **v0.4** real-data CM + failure cases (5-record subset published) | **Done — 96.1 % pooled accuracy, results on website** |
-| **v0.5** baseline comparison on real data (Pan-Tompkins, Tiny CNN reference) | Pending |
+| **v0.4** real-data CM + failure cases (5-record subset) | **Done — superseded by v0.5** |
+| **v0.5** AAMI EC57:2012 DS2 + on-data baselines | **Done — 96.60 % pooled accuracy on 22 patients; on par with hand-coded rule (97.53 %), not better. Honest finding published on website** |
+| **v0.5-followup** Pan-Tompkins + Tiny CNN reference baselines | Pending |
 | **v0.6** ablation + cross-seed robustness | Pending |
 | **v1.0** reproducible benchmark report (one command, bit-stable hash, reviewer bundle) | Pending |
 

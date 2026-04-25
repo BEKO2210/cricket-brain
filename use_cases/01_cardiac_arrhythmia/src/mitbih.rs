@@ -28,6 +28,41 @@
 
 use crate::detector::RhythmClass;
 
+/// AAMI EC57:2012 inter-patient training split (DS1) — 22 MIT-BIH
+/// records reserved for training morphology classifiers (de Chazal et
+/// al. 2004, AAMI EC57:2012). CricketBrain is zero-training so DS1 is
+/// not required for evaluation, but is exposed here for symmetry and
+/// future ablation work.
+pub const AAMI_DS1: &[&str] = &[
+    "101", "106", "108", "109", "112", "114", "115", "116", "118", "119", "122", "124", "201",
+    "203", "205", "207", "208", "209", "215", "220", "223", "230",
+];
+
+/// AAMI EC57:2012 inter-patient testing split (DS2) — 22 MIT-BIH
+/// records that constitute the canonical inter-patient test set in
+/// the published ECG literature.
+pub const AAMI_DS2: &[&str] = &[
+    "100", "103", "105", "111", "113", "117", "121", "123", "200", "202", "210", "212", "213",
+    "214", "219", "221", "222", "228", "231", "232", "233", "234",
+];
+
+/// Records excluded from AAMI EC57:2012 evaluation because they
+/// contain extensively paced beats (the AAMI standard removes them).
+pub const AAMI_EXCLUDED_PACED: &[&str] = &["102", "104", "107", "217"];
+
+/// Convenience: which AAMI bucket a record belongs to.
+pub fn aami_split_for(record_id: &str) -> &'static str {
+    if AAMI_DS1.contains(&record_id) {
+        "DS1"
+    } else if AAMI_DS2.contains(&record_id) {
+        "DS2"
+    } else if AAMI_EXCLUDED_PACED.contains(&record_id) {
+        "excluded_paced"
+    } else {
+        "other"
+    }
+}
+
 /// AAMI 5-class beat groupings (per AAMI EC57:2012, Moody & Mark 2001).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AamiClass {
@@ -291,6 +326,35 @@ mod tests {
         let win = RateRegimeWindow::default();
         assert!(rate_regime_truth(&rr, 0, &win).is_none());
         assert!(rate_regime_truth(&rr, 1, &win).is_none());
+    }
+
+    #[test]
+    fn aami_splits_disjoint_and_complete() {
+        // DS1 ∩ DS2 = ∅
+        for r in AAMI_DS1 {
+            assert!(!AAMI_DS2.contains(r), "{} appears in both DS1 and DS2", r);
+            assert!(
+                !AAMI_EXCLUDED_PACED.contains(r),
+                "{} is in DS1 but also excluded",
+                r
+            );
+        }
+        for r in AAMI_DS2 {
+            assert!(!AAMI_EXCLUDED_PACED.contains(r));
+        }
+        // 22 + 22 + 4 = 48 (full MIT-BIH record count)
+        assert_eq!(
+            AAMI_DS1.len() + AAMI_DS2.len() + AAMI_EXCLUDED_PACED.len(),
+            48
+        );
+    }
+
+    #[test]
+    fn aami_split_for_known_records() {
+        assert_eq!(aami_split_for("101"), "DS1");
+        assert_eq!(aami_split_for("100"), "DS2");
+        assert_eq!(aami_split_for("217"), "excluded_paced");
+        assert_eq!(aami_split_for("999"), "other");
     }
 
     #[test]

@@ -6,7 +6,50 @@
 
 ---
 
-## 0a. v0.4 real-data findings (2026-04-25)
+## 0. v0.5 AAMI EC57:2012 DS2 findings (2026-04-25)
+
+Full inter-patient evaluation on the canonical AAMI DS2 split:
+22 records, 49 584 annotation beats, 42 510 detector emissions.
+
+**Pooled metrics**
+
+| | Value |
+|---|---:|
+| Pooled accuracy | 96.60 % |
+| Macro-F1 (4 classes, all with support) | 0.934 |
+| Balanced accuracy | 0.936 |
+| Recall: Normal | 0.978 |
+| Recall: Tachy | 0.946 |
+| Recall: Brady | 0.980 |
+| Recall: Irregular | 0.841 |
+
+**Honest constraints exposed by v0.5**
+
+- **CricketBrain does not beat a simple rule.** The
+  `ThresholdBurstBaseline` (band-gate + RR-window, ~50 lines)
+  reaches **97.53 %** on the same DS2 set (~1 pp above
+  CricketBrain). The neuromorphic core's value reduces to:
+  match rule-based accuracy in 928 bytes deterministically with
+  zero training. The 1-second-window rule fails badly (24.7 %),
+  so the rate-regime task itself is non-trivial — but a careful
+  classical rule is sufficient.
+- **Per-record range is wide.** 86.5 % (record 233 — frequent
+  PVCs + AF) to 100.0 % (records 100, 103, 111). PVC-rich (200,
+  214, 233) and AF-rich (232) records cap the accuracy.
+- **Irregular recall is the weakest class** at 0.841. Some AF
+  segments with relatively stable short RR have CV(RR) below 0.30
+  and get classified as Tachy or Normal — this is a definition
+  question of the rate-regime ground truth, not strictly a
+  detector error.
+- **DS1 not evaluated.** CricketBrain has no training phase, so
+  DS1/DS2 are used purely as a record list. Running on DS1 would
+  give a different statistical sample but no "training" effect.
+  v0.6+ may add DS1 for symmetry.
+- **No Pan-Tompkins / Tiny CNN reference yet.** Comparisons are
+  to two in-tree rule baselines only. External references on the
+  same DS2 set are tracked as v0.5-followup.
+
+## 0a. v0.4 real-data findings (2026-04-25, superseded)
 
 First real MIT-BIH run on records 100, 105, 200, 217, 232 — 11 375
 annotation beats. Pooled accuracy **96.08 %** (9 549 / 9 939

@@ -40,7 +40,9 @@ between current state and that bar.
 | Non-circular rate-regime ground truth (sliding RR window, distinct from detector window) | **Proven (v0.3)** |
 | Per-record + macro-pooled metrics in `cardiac_mitbih` | **Proven (v0.3)** |
 | Refuses to publish "validated" numbers without real records | **Proven (v0.3)** |
-| Real-data confusion matrix on MIT-BIH | Pending real ingestion |
+| Real-data confusion matrix on MIT-BIH | **Proven (v0.5, AAMI DS2 22 records)** |
+| AAMI EC57:2012 inter-patient record list (`AAMI_DS1` / `AAMI_DS2` / `AAMI_EXCLUDED_PACED`) | **Proven (v0.5)** |
+| Side-by-side CricketBrain vs rule baselines on real data | **Proven (v0.5)** |
 | Calibration / reliability diagrams | Planned |
 | Cross-platform reproducibility hash | Planned |
 | Public reviewer artifact bundle | Planned |
@@ -209,9 +211,9 @@ data is committed to this repo.**
 | **v0.1** synthetic benchmark hardening | Truth-based metrics + structured outputs + stress sweeps + baselines | **Done** |
 | **v0.2** reject-aware benchmark | Coverage / accuracy curve + reliability artifact | Curve done; reliability diagram pending |
 | **v0.3** MIT-BIH loader + first real-data run | Patient-aware loader, AAMI mapping, non-circular RR-window truth, refuses to fake validated numbers | **Done** |
-| **v0.4** real-data CM + per-record failure cases | First real MIT-BIH run on 5 records (100, 105, 200, 217, 232) — 11 375 beats, 96.1 % pooled accuracy, 0.79 macro-F1, 0.94 Irregular recall | **Done — published on website** |
-| **v0.4-followup** Brady class coverage + larger MIT-BIH split | Records 213, 232 segments etc. so Bradycardia ground-truth has support; expand to 10+ records | Pending |
-| **v0.5** baseline comparison on real data | Pan-Tompkins reference + Tiny CNN reference | Pending |
+| **v0.4** real-data CM + per-record failure cases | First real MIT-BIH run on 5 records (100, 105, 200, 217, 232) — 11 375 beats, 96.1 % pooled accuracy, 0.79 macro-F1, 0.94 Irregular recall | **Done** |
+| **v0.5** AAMI EC57:2012 DS2 + baselines on real data | Full 22-record DS2 inter-patient evaluation: 96.60 % pooled accuracy, macro-F1 0.934, Brady recall 0.980, all classes covered. ThresholdBurst rule: 97.53 % — CricketBrain on par, not better | **Done — published on website** |
+| **v0.5-followup** Pan-Tompkins + Tiny CNN reference baselines | Out-of-tree references on the same DS2 set | Pending |
 | **v0.6** ablations | Component contribution table (gate / AGC / preproc / privacy) | Pending |
 | **v0.7** cross-seed robustness | Mean ± std over 10 seeds for every metric | Pending |
 | **v0.8** calibration | Reliability diagram + Brier + ECE | Pending |

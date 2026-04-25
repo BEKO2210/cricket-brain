@@ -49,7 +49,8 @@ use cricket_brain_cardiac::metrics::{
     class_from_index, class_label, AggregateMetrics, ConfusionMatrix4, NUM_CLASSES,
 };
 use cricket_brain_cardiac::mitbih::{
-    aami_from_symbol, rate_regime_truth, AamiClass, PerRecordResult, PooledResult, RateRegimeWindow,
+    aami_from_symbol, aami_split_for, rate_regime_truth, AamiClass, PerRecordResult, PooledResult,
+    RateRegimeWindow, AAMI_DS1, AAMI_DS2,
 };
 use cricket_brain_cardiac::report::{
     current_command_line, json_array, json_f64, json_object, json_quote, write_csv_with_header,
@@ -63,6 +64,7 @@ struct Args {
     csv: Option<String>,
     write: bool,
     warmup: usize,
+    aami_split: Option<String>,
 }
 
 impl Args {
@@ -72,6 +74,7 @@ impl Args {
             csv: None,
             write: false,
             warmup: 2,
+            aami_split: None,
         };
         let mut iter = std::env::args().skip(1);
         while let Some(flag) = iter.next() {
@@ -82,6 +85,7 @@ impl Args {
                     a.warmup = iter.next().unwrap_or_default().parse().unwrap_or(a.warmup)
                 }
                 "--write" => a.write = true,
+                "--aami-split" => a.aami_split = iter.next(),
                 _ => {
                     eprintln!("Unknown flag: {flag}");
                     std::process::exit(2);
@@ -90,6 +94,31 @@ impl Args {
         }
         a
     }
+}
+
+/// Restrict the loaded records to a given AAMI split. Records that
+/// don't match are silently dropped; emitted record_ids are reported
+/// to stdout so the user can verify the filter actually selected
+/// what they expected.
+fn apply_aami_filter(
+    records: Vec<(String, Vec<BeatRecord>)>,
+    split: &str,
+) -> Vec<(String, Vec<BeatRecord>)> {
+    let allow: &[&str] = match split {
+        "ds1" | "DS1" => AAMI_DS1,
+        "ds2" | "DS2" => AAMI_DS2,
+        _ => {
+            eprintln!(
+                "ERROR: --aami-split must be 'ds1' or 'ds2' (got '{}')",
+                split
+            );
+            std::process::exit(2);
+        }
+    };
+    records
+        .into_iter()
+        .filter(|(id, _)| allow.contains(&id.as_str()))
+        .collect()
 }
 
 /// Group all loaded CSV beats by `record_id`. Returns
@@ -440,9 +469,9 @@ fn write_real_results(
 
 fn main() {
     let args = Args::parse();
-    println!("== Cardiac MIT-BIH (v0.3 patient-aware loader) ==");
+    println!("== Cardiac MIT-BIH (v0.5 AAMI-aware patient evaluator) ==");
 
-    let records = load_records(&args);
+    let mut records = load_records(&args);
     if records.is_empty() {
         eprintln!("ERROR: no beats loaded.");
         eprintln!(
@@ -453,6 +482,24 @@ fn main() {
         std::process::exit(1);
     }
 
+    if let Some(split) = &args.aami_split {
+        let before = records.len();
+        records = apply_aami_filter(records, split);
+        println!(
+            "  AAMI filter: --aami-split={split} kept {} of {} loaded record(s)",
+            records.len(),
+            before
+        );
+        if records.is_empty() {
+            eprintln!(
+                "ERROR: no records left after AAMI filter. Check --records-dir contains \
+                 the expected AAMI {} record IDs.",
+                split.to_uppercase()
+            );
+            std::process::exit(1);
+        }
+    }
+
     println!(
         "  loaded {} record(s), {} total beats",
         records.len(),
@@ -461,8 +508,9 @@ fn main() {
     for (id, beats) in &records {
         let aami = aami_counts_for(beats);
         println!(
-            "    record_id={:<14} beats={:>6}  AAMI N/S/V/F/Q = {}/{}/{}/{}/{}",
+            "    record_id={:<6} split={:<14} beats={:>6}  AAMI N/S/V/F/Q = {}/{}/{}/{}/{}",
             id,
+            aami_split_for(id),
             beats.len(),
             aami[0],
             aami[1],
@@ -509,10 +557,15 @@ fn main() {
     }
 
     let cmd = current_command_line();
+    let split_tag = args
+        .aami_split
+        .as_deref()
+        .map(|s| format!("_{}", s.to_uppercase()))
+        .unwrap_or_default();
     let dataset_name = if synthetic_only {
         "uc01_mitbih_synth_sample".to_string()
     } else {
-        format!("uc01_mitbih_{}_records", evaluations.len())
+        format!("uc01_mitbih{}_{}records", split_tag, evaluations.len())
     };
     let dataset_type = if synthetic_only {
         "synthetic"
@@ -532,6 +585,14 @@ fn main() {
     // Real-data limitations differ from the synthetic ones. Override the
     // default limitations field so the published JSON tells the truth.
     if !synthetic_only {
+        let split_note = match args.aami_split.as_deref() {
+            Some(s) => format!(
+                "AAMI EC57:2012 inter-patient evaluation on the {} split. CricketBrain has no \
+                 training phase, so DS1/DS2 are used purely to define a canonical record list.",
+                s.to_uppercase()
+            ),
+            None => "No AAMI split filter applied; caller chose the directory contents.".into(),
+        };
         meta.limitations = vec![
             "Real MIT-BIH Arrhythmia Database records (PhysioNet, ODC-By v1.0).".into(),
             "Rate-regime triage only — Normal / Tachy / Brady / Irregular. \
@@ -540,9 +601,7 @@ fn main() {
             "Ground truth derived from annotation RR intervals via a 5-beat sliding window \
              (mitbih::rate_regime_truth); not a clinician rhythm label."
                 .into(),
-            "No inter-patient train/test split assertion in this binary — caller chooses \
-             which directory to evaluate."
-                .into(),
+            split_note,
             "Not a medical device. Not validated for clinical use. Research / embedded \
              pre-screening prototype only."
                 .into(),

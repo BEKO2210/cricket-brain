@@ -54,3 +54,7 @@ path = "benchmarks/cardiac_reject.rs"
 [[example]]
 name = "cardiac_mitbih"
 path = "benchmarks/cardiac_mitbih.rs"
+
+[[example]]
+name = "cardiac_mitbih_baselines"
+path = "benchmarks/cardiac_mitbih_baselines.rs"

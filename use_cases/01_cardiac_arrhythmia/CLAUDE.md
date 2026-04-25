@@ -40,9 +40,65 @@ These rules apply to **every** future change in this use case:
 
 ---
 
-## v0.4 (2026-04-25) — First real MIT-BIH run
+## v0.5 (2026-04-25) — AAMI EC57:2012 DS2 inter-patient evaluation + baselines
 
 Status: **DONE — published on website.**
+
+Full AAMI DS2 ingest (22 records, 49 584 annotation beats / 42 510
+emissions). Records 100, 103, 105, 111, 113, 117, 121, 123, 200,
+202, 210, 212, 213, 214, 219, 221, 222, 228, 231, 232, 233, 234.
+Records 102/104/107/217 (paced) excluded per AAMI standard.
+
+Pooled DS2 results:
+- 41 066 / 42 510 → **96.60 % accuracy**
+- macro-F1 = 0.934, balanced acc = 0.936
+- per-class recall: Normal 0.978, Tachy **0.946**, Brady **0.980**, Irregular 0.841
+- macro-over-records = 0.961
+
+All four rate-regime classes have > 1 000 ground-truth labels —
+the v0.4 "no Brady support" caveat is now resolved.
+
+Side-by-side baseline comparison (`cardiac_mitbih_baselines`) on
+the same DS2 set:
+- CricketBrain: 96.60 % / 0.934 / 0.936
+- ThresholdBurst rule: **97.53 % / 0.952 / 0.946** (~1 pp better)
+- FrequencyRule (1-s window): 24.70 % / 0.099 / 0.250 (fails)
+
+**Honest finding:** the simple band-gate + RR-window rule beats
+CricketBrain by ~1 pp on AAMI DS2. CricketBrain's value is "match
+rule-based accuracy in 928 bytes deterministically with no
+training", not "we solve a hard problem". The trivial 1-second
+window rule fails badly so the task itself is non-trivial.
+
+New code:
+- `src/mitbih.rs`: `AAMI_DS1`, `AAMI_DS2`, `AAMI_EXCLUDED_PACED`,
+  `aami_split_for(record_id)` constants and helper.
+- `cardiac_mitbih.rs`: `--aami-split ds1|ds2` flag + AAMI-aware
+  filter + AAMI-aware metadata stamp.
+- `cardiac_mitbih_baselines.rs` (new bench): same loader,
+  CricketBrain + ThresholdBurst + FrequencyRule on every record,
+  per-record CSV + pooled summary.
+
+Result files committed:
+- `results/cardiac_mitbih_summary.json` (now AAMI DS2, 22 records)
+- `results/cardiac_mitbih_per_record.csv`
+- `results/cardiac_mitbih_failure_cases.md`
+- `results/cardiac_mitbih_baselines.csv` (new)
+
+Tests: 31 → 44 passing (+2 new for AAMI split disjointness +
+record lookup).
+
+Website: top "Real MIT-BIH Results" section now shows the full
+DS2 numbers, the per-record table for all 22 patients, the pooled
+confusion matrix, and the baseline comparison block. Homepage UC
+card switched from "v0.4 · First MIT-BIH" to "v0.5 · AAMI DS2"
+with the honest "on par with hand-coded rule, not better" framing.
+
+---
+
+## v0.4 (2026-04-25) — First real MIT-BIH run
+
+Status: **DONE.** Superseded by v0.5; pre-DS2 pilot on 5 records.
 
 Real PhysioNet records ingested via `python/download_mitbih.py` +
 `python/preprocess.py`: records 100 (normal), 105 (noisy), 200
