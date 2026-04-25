@@ -49,8 +49,8 @@ use cricket_brain_cardiac::metrics::{
     class_from_index, class_label, AggregateMetrics, ConfusionMatrix4, NUM_CLASSES,
 };
 use cricket_brain_cardiac::mitbih::{
-    aami_from_symbol, aami_split_for, rate_regime_truth, AamiClass, PerRecordResult, PooledResult,
-    RateRegimeWindow, AAMI_DS1, AAMI_DS2,
+    aami_from_symbol, aami_split_for, rate_regime_truth, rhythm_label_to_class, AamiClass,
+    PerRecordResult, PooledResult, RateRegimeWindow, AAMI_DS1, AAMI_DS2,
 };
 use cricket_brain_cardiac::report::{
     current_command_line, json_array, json_f64, json_object, json_quote, write_csv_with_header,
@@ -59,12 +59,53 @@ use cricket_brain_cardiac::report::{
 
 const RESULT_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/results");
 
+/// Source of rate-regime ground truth.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum GroundTruthMode {
+    /// Use only the 5-beat sliding RR window (legacy v0.5 behaviour).
+    Rr,
+    /// Use only the MIT-BIH rhythm-change annotations. Beats whose
+    /// rhythm label is ambiguous (e.g. `(N`, `(P`, empty) are scored
+    /// as `None` (skipped). Useful to isolate annotation-derived
+    /// performance without RR fallback.
+    Annot,
+    /// **Default.** Prefer the rhythm annotation when it
+    /// unambiguously implies a class (AFIB → Irregular, SBR → Brady,
+    /// etc.). Fall back to the RR window otherwise.
+    Hybrid,
+}
+
+impl GroundTruthMode {
+    fn from_str(s: &str) -> Self {
+        match s.to_ascii_lowercase().as_str() {
+            "rr" => GroundTruthMode::Rr,
+            "annot" | "annotation" => GroundTruthMode::Annot,
+            "hybrid" => GroundTruthMode::Hybrid,
+            _ => {
+                eprintln!(
+                    "ERROR: --ground-truth must be rr|annot|hybrid (got '{}')",
+                    s
+                );
+                std::process::exit(2);
+            }
+        }
+    }
+    fn label(self) -> &'static str {
+        match self {
+            GroundTruthMode::Rr => "rr",
+            GroundTruthMode::Annot => "annot",
+            GroundTruthMode::Hybrid => "hybrid",
+        }
+    }
+}
+
 struct Args {
     records_dir: Option<String>,
     csv: Option<String>,
     write: bool,
     warmup: usize,
     aami_split: Option<String>,
+    ground_truth: GroundTruthMode,
 }
 
 impl Args {
@@ -75,6 +116,7 @@ impl Args {
             write: false,
             warmup: 2,
             aami_split: None,
+            ground_truth: GroundTruthMode::Hybrid,
         };
         let mut iter = std::env::args().skip(1);
         while let Some(flag) = iter.next() {
@@ -86,6 +128,9 @@ impl Args {
                 }
                 "--write" => a.write = true,
                 "--aami-split" => a.aami_split = iter.next(),
+                "--ground-truth" => {
+                    a.ground_truth = GroundTruthMode::from_str(&iter.next().unwrap_or_default())
+                }
                 _ => {
                     eprintln!("Unknown flag: {flag}");
                     std::process::exit(2);
@@ -183,16 +228,29 @@ fn evaluate_record(
     beats: &[BeatRecord],
     warmup: usize,
     win: &RateRegimeWindow,
+    gt: GroundTruthMode,
 ) -> RecordEval {
-    // Pre-compute the per-beat ground-truth labels via the
-    // sliding-window helper. We use the RR intervals encoded in the
-    // CSV (annotation-derived) — never the detector's own BPM.
+    // Pre-compute the per-beat ground-truth labels.
+    //
+    // - In RR mode, we use only the 5-beat sliding window over the
+    //   annotation RR intervals — never the detector's own BPM.
+    // - In Annot mode, we use only the rhythm-change annotations
+    //   shipped in the v0.6 CSV column. Beats whose label is empty or
+    //   ambiguous (e.g. `(N`, `(P`) are scored as `None`.
+    // - In Hybrid mode (default), we prefer the rhythm annotation
+    //   when it unambiguously implies a class and fall back to the RR
+    //   window otherwise.
     let rr_ms: Vec<u32> = beats
         .iter()
         .map(|b| b.rr_interval_ms.max(1.0) as u32)
         .collect();
     let truth_per_beat: Vec<Option<RhythmClass>> = (0..beats.len())
-        .map(|i| rate_regime_truth(&rr_ms, i, win))
+        .map(|i| match gt {
+            GroundTruthMode::Rr => rate_regime_truth(&rr_ms, i, win),
+            GroundTruthMode::Annot => rhythm_label_to_class(&beats[i].rhythm_label),
+            GroundTruthMode::Hybrid => rhythm_label_to_class(&beats[i].rhythm_label)
+                .or_else(|| rate_regime_truth(&rr_ms, i, win)),
+        })
         .collect();
 
     // Build the frequency stream and run the detector.
@@ -469,7 +527,10 @@ fn write_real_results(
 
 fn main() {
     let args = Args::parse();
-    println!("== Cardiac MIT-BIH (v0.5 AAMI-aware patient evaluator) ==");
+    println!(
+        "== Cardiac MIT-BIH (v0.6 AAMI + rhythm-annotation evaluator) ==  ground_truth={}",
+        args.ground_truth.label()
+    );
 
     let mut records = load_records(&args);
     if records.is_empty() {
@@ -532,7 +593,7 @@ fn main() {
     let win = RateRegimeWindow::default();
     let evaluations: Vec<RecordEval> = records
         .iter()
-        .map(|(id, beats)| evaluate_record(id, beats, args.warmup, &win))
+        .map(|(id, beats)| evaluate_record(id, beats, args.warmup, &win, args.ground_truth))
         .collect();
 
     print_per_record_table(&evaluations);
@@ -593,14 +654,25 @@ fn main() {
             ),
             None => "No AAMI split filter applied; caller chose the directory contents.".into(),
         };
+        let gt_note = match args.ground_truth {
+            GroundTruthMode::Rr => "Ground truth: 5-beat sliding RR window only \
+                                    (mitbih::rate_regime_truth)."
+                .to_string(),
+            GroundTruthMode::Annot => "Ground truth: MIT-BIH rhythm-change annotations only \
+                 (mitbih::rhythm_label_to_class). Beats with ambiguous labels \
+                 (e.g. `(N`, `(P`) are skipped."
+                .into(),
+            GroundTruthMode::Hybrid => "Ground truth: hybrid — rhythm annotation when \
+                                        unambiguous (AFIB→Irregular, SBR→Brady, \
+                                        SVTA/VT→Tachy, etc.), else 5-beat RR window."
+                .to_string(),
+        };
         meta.limitations = vec![
             "Real MIT-BIH Arrhythmia Database records (PhysioNet, ODC-By v1.0).".into(),
             "Rate-regime triage only — Normal / Tachy / Brady / Irregular. \
              Does NOT classify AAMI N/S/V/F/Q morphology, AF, VT, AVB, BBB, ST-elevation."
                 .into(),
-            "Ground truth derived from annotation RR intervals via a 5-beat sliding window \
-             (mitbih::rate_regime_truth); not a clinician rhythm label."
-                .into(),
+            gt_note,
             split_note,
             "Not a medical device. Not validated for clinical use. Research / embedded \
              pre-screening prototype only."

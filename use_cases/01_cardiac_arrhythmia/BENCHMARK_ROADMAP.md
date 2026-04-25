@@ -43,6 +43,9 @@ between current state and that bar.
 | Real-data confusion matrix on MIT-BIH | **Proven (v0.5, AAMI DS2 22 records)** |
 | AAMI EC57:2012 inter-patient record list (`AAMI_DS1` / `AAMI_DS2` / `AAMI_EXCLUDED_PACED`) | **Proven (v0.5)** |
 | Side-by-side CricketBrain vs rule baselines on real data | **Proven (v0.5)** |
+| Clinician rhythm-annotation ground truth (`(AFIB`, `(SBR`, `(SVTA`, …) | **Proven (v0.6)** |
+| `--ground-truth annot\|rr\|hybrid` flag for transparent ablation | **Proven (v0.6)** |
+| Drift-robustness sweep (CricketBrain vs rule under carrier offset) | **Proven (v0.6) — honest negative result** |
 | Calibration / reliability diagrams | Planned |
 | Cross-platform reproducibility hash | Planned |
 | Public reviewer artifact bundle | Planned |
@@ -212,7 +215,8 @@ data is committed to this repo.**
 | **v0.2** reject-aware benchmark | Coverage / accuracy curve + reliability artifact | Curve done; reliability diagram pending |
 | **v0.3** MIT-BIH loader + first real-data run | Patient-aware loader, AAMI mapping, non-circular RR-window truth, refuses to fake validated numbers | **Done** |
 | **v0.4** real-data CM + per-record failure cases | First real MIT-BIH run on 5 records (100, 105, 200, 217, 232) — 11 375 beats, 96.1 % pooled accuracy, 0.79 macro-F1, 0.94 Irregular recall | **Done** |
-| **v0.5** AAMI EC57:2012 DS2 + baselines on real data | Full 22-record DS2 inter-patient evaluation: 96.60 % pooled accuracy, macro-F1 0.934, Brady recall 0.980, all classes covered. ThresholdBurst rule: 97.53 % — CricketBrain on par, not better | **Done — published on website** |
+| **v0.5** AAMI EC57:2012 DS2 + baselines on real data | Full 22-record DS2 inter-patient evaluation: 96.60 % pooled accuracy, macro-F1 0.934, Brady recall 0.980, all classes covered. ThresholdBurst rule: 97.53 % — CricketBrain on par, not better | **Done** |
+| **v0.6** Clinician rhythm-annotation GT + Irregular fix + drift sweep | Hybrid GT (AFIB / SBR / SVTA / VT / B / T / AFL / NOD / IVR / AB / VFL → class) + detector adds `range/RR > 0.40` rule. Irregular recall 0.19 → **0.78** under hybrid GT. Pooled accuracy 78.44 %, macro-F1 0.78. ThresholdBurst rule (same upgrade): 78.74 %. Drift sweep shows CricketBrain is NOT more drift-robust than the rule (honest negative result) | **Done — published on website** |
 | **v0.5-followup** Pan-Tompkins + Tiny CNN reference baselines | Out-of-tree references on the same DS2 set | Pending |
 | **v0.6** ablations | Component contribution table (gate / AGC / preproc / privacy) | Pending |
 | **v0.7** cross-seed robustness | Mean ± std over 10 seeds for every metric | Pending |

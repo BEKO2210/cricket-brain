@@ -204,8 +204,9 @@ for the full milestone plan.
 | **v0.2** synthetic benchmark hardening (truth-based metrics, stress sweeps, reject curve, baselines, structured outputs) | **Done** |
 | **v0.3** MIT-BIH loader + first real-data run | **Done** |
 | **v0.4** real-data CM + failure cases (5-record subset) | **Done — superseded by v0.5** |
-| **v0.5** AAMI EC57:2012 DS2 + on-data baselines | **Done — 96.60 % pooled accuracy on 22 patients; on par with hand-coded rule (97.53 %), not better. Honest finding published on website** |
-| **v0.5-followup** Pan-Tompkins + Tiny CNN reference baselines | Pending |
+| **v0.5** AAMI EC57:2012 DS2 + on-data baselines | **Done — superseded by v0.6** |
+| **v0.6** Clinician rhythm-annotation GT + Irregular fix + drift sweep | **Done — 78.44 % accuracy on DS2 / hybrid GT, Irregular recall 0.19 → 0.78. Drift sweep: honest negative result (CricketBrain not more drift-robust than rule). Published on website.** |
+| **v0.6-followup** Pan-Tompkins + Tiny CNN reference baselines | Pending |
 | **v0.6** ablation + cross-seed robustness | Pending |
 | **v1.0** reproducible benchmark report (one command, bit-stable hash, reviewer bundle) | Pending |
 

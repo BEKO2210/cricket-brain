@@ -99,9 +99,10 @@ use std::path::Path;
 /// A single preprocessed beat record from CSV.
 ///
 /// `record_id` was added in v0.3 and identifies which MIT-BIH-style
-/// patient record the beat came from. The legacy 5-column CSV format
-/// (without `record_id`) is still accepted by [`from_csv`]; missing
-/// `record_id` defaults to the empty string.
+/// patient record the beat came from. `rhythm_label` was added in
+/// v0.6 and carries the MIT-BIH rhythm annotation in effect at this
+/// beat (`(AFIB`, `(SBR`, `(N`, etc.). Both fields default to the
+/// empty string for legacy CSVs that don't carry the column.
 #[derive(Debug, Clone)]
 pub struct BeatRecord {
     pub timestamp_ms: f32,
@@ -112,16 +113,19 @@ pub struct BeatRecord {
     /// Patient / record identifier (e.g. MIT-BIH "100"). Empty for
     /// legacy CSVs that don't carry the column.
     pub record_id: String,
+    /// MIT-BIH rhythm-change annotation in effect at this beat. Empty
+    /// when the record has no rhythm annotations or the column is
+    /// missing.
+    pub rhythm_label: String,
 }
 
 /// Read a preprocessed CSV.
 ///
-/// Accepts both the legacy 5-column header
-/// `timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq` and the
-/// v0.3 6-column header
-/// `timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq,record_id`.
-/// In the legacy case `record_id` is filled with the file stem (so
-/// per-record aggregation still works).
+/// Accepts the legacy 5-column header
+/// `timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq`, the v0.3
+/// 6-column header `…,record_id`, and the v0.6 7-column header
+/// `…,record_id,rhythm_label`. Missing fields default to the empty
+/// string (file stem for `record_id`).
 pub fn from_csv(path: &str) -> Vec<BeatRecord> {
     let file = fs::File::open(path).expect("cannot open CSV");
     let reader = BufReader::new(file);
@@ -134,10 +138,12 @@ pub fn from_csv(path: &str) -> Vec<BeatRecord> {
         .to_string();
 
     let mut header_has_record_id = false;
+    let mut header_has_rhythm = false;
     for (i, line) in reader.lines().enumerate() {
         let line = line.expect("cannot read line");
         if i == 0 {
             header_has_record_id = line.split(',').any(|c| c.trim() == "record_id");
+            header_has_rhythm = line.split(',').any(|c| c.trim() == "rhythm_label");
             continue;
         }
         let cols: Vec<&str> = line.split(',').collect();
@@ -149,6 +155,11 @@ pub fn from_csv(path: &str) -> Vec<BeatRecord> {
         } else {
             fallback_id.clone()
         };
+        let rlabel = if header_has_rhythm && cols.len() >= 7 {
+            cols[6].trim().to_string()
+        } else {
+            String::new()
+        };
         records.push(BeatRecord {
             timestamp_ms: cols[0].parse().unwrap_or(0.0),
             rr_interval_ms: cols[1].parse().unwrap_or(0.0),
@@ -156,6 +167,7 @@ pub fn from_csv(path: &str) -> Vec<BeatRecord> {
             bpm: cols[3].parse().unwrap_or(0.0),
             mapped_freq: cols[4].parse().unwrap_or(0.0),
             record_id: rid,
+            rhythm_label: rlabel,
         });
     }
 
@@ -291,6 +303,25 @@ mod tests {
     }
 
     #[test]
+    fn csv_with_rhythm_label_column() {
+        let path = "/tmp/cricket_brain_test_rhythm.csv";
+        std::fs::write(
+            path,
+            "timestamp_ms,rr_interval_ms,beat_type,bpm,mapped_freq,record_id,rhythm_label\n\
+             0.0,820.0,N,73.2,2622.0,222,(N\n\
+             820.0,820.0,N,73.2,2622.0,222,(AFIB\n\
+             1640.0,400.0,N,150.0,3000.0,222,(AFIB\n",
+        )
+        .unwrap();
+        let records = from_csv(path);
+        assert_eq!(records.len(), 3);
+        assert_eq!(records[0].rhythm_label, "(N");
+        assert_eq!(records[1].rhythm_label, "(AFIB");
+        assert_eq!(records[2].rhythm_label, "(AFIB");
+        std::fs::remove_file(path).ok();
+    }
+
+    #[test]
     fn csv_with_record_id_column() {
         // Synthetic 6-column CSV. Verifies that the v0.3 header is
         // detected and `record_id` is read from the row.
@@ -346,6 +377,7 @@ mod tests {
             bpm: 73.0,
             mapped_freq: 2618.75,
             record_id: String::new(),
+            rhythm_label: String::new(),
         }];
         let stream = beats_to_frequency_stream(&records);
         // 810 ms silence + 10 ms QRS = 820 total

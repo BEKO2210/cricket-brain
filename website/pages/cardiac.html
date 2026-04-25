@@ -131,7 +131,7 @@
       </div>
       <h1>Rate-Based Cardiac <span>Rhythm</span> Triage</h1>
       <p class="subtitle">Sub-millisecond, sub-kilobyte rhythm-regime classifier. Triages beat-rate patterns (bradycardic, normal, tachycardic, transition-irregular) in 928 bytes of RAM using delay-line coincidence detection.</p>
-      <p style="font-size:var(--font-size-sm); color:var(--text-muted); margin-block-end:var(--space-sm); max-inline-size:700px;"><strong style="color:var(--text-primary);">Validation status:</strong> v0.5 AAMI EC57:2012 inter-patient evaluation on the full MIT-BIH DS2 split (22 records / 42 510 emissions) &mdash; <strong>96.60 % pooled accuracy</strong>, macro-F1 0.934, balanced accuracy 0.936, all four rate-regime classes covered. Side-by-side with a hand-coded band-gate + RR-window rule (97.53 %): CricketBrain is <em>on par</em> with a simple rule, not better. Honest numbers, full per-record breakdown and baseline comparison below.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--text-muted); margin-block-end:var(--space-sm); max-inline-size:700px;"><strong style="color:var(--text-primary);">Validation status:</strong> v0.6 AAMI EC57:2012 inter-patient evaluation on MIT-BIH DS2 (22 records) with <em>clinician rhythm-annotation ground truth</em> (AFIB / SBR / SVTA / VT / B / T &hellip;): <strong>78.4 % pooled accuracy</strong>, macro-F1 0.78, balanced accuracy 0.75. Adding a normalised RR-range rule (<code>range/RR &gt; 0.40</code>) lifted Irregular recall <strong>from 0.19 to 0.78 (4&times;)</strong> on the same data. Side-by-side with a hand-coded band-gate + RR-window rule: 78.7 % &mdash; CricketBrain is <em>on par</em>, not better. The legacy v0.5 96.6 % number used a CV-based ground truth that was partially circular; v0.6 numbers are the honest replacement.</p>
       <p style="font-size:var(--font-size-sm); color:var(--accent); margin-block-end:var(--space-lg); max-inline-size:700px;"><strong>Triage, not diagnosis.</strong> Flags beat-rate regimes only &mdash; not morphology-aware arrhythmia, not AF / VT / AVB / ST-elevation, not a substitute for clinical ECG. Targets the <em>earlier layer</em> in the monitoring chain.</p>
       <div style="display:flex; flex-wrap:wrap; gap:var(--space-md); justify-content:center;">
         <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/01_cardiac_arrhythmia" class="btn btn-primary" target="_blank" rel="noopener">View Source</a>
@@ -139,24 +139,24 @@
       </div>
     </section>
 
-    <!-- Real MIT-BIH Results (v0.5 — AAMI DS2) -->
+    <!-- Real MIT-BIH Results (v0.6 — AAMI DS2 with clinician rhythm GT) -->
     <section class="section" id="mitbih">
       <div class="content-wrap">
-        <h2 class="section-title">Real MIT-BIH <span>Results</span> &mdash; v0.5 (AAMI DS2)</h2>
-        <p class="section-subtitle">AAMI EC57:2012 inter-patient evaluation on the canonical MIT-BIH DS2 split &mdash; 22 patients, 49 584 annotation beats, 42 510 detector emissions. Ground truth is the rate-regime label derived from a 5-beat sliding window over annotation RR intervals (<a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/01_cardiac_arrhythmia/src/mitbih.rs" target="_blank" rel="noopener" style="color:var(--accent);">mitbih::rate_regime_truth</a>) &mdash; not a clinician rhythm label, never the detector's own BPM. CricketBrain has no training phase, so DS1/DS2 are used purely as a canonical record list.</p>
+        <h2 class="section-title">Real MIT-BIH <span>Results</span> &mdash; v0.6 (AAMI DS2, clinician GT)</h2>
+        <p class="section-subtitle">AAMI EC57:2012 inter-patient evaluation on the canonical MIT-BIH DS2 split &mdash; 22 patients, 49 584 annotation beats. v0.6 introduces two corrections: (1) ground truth is now a <em>hybrid</em> &mdash; the MIT-BIH clinician rhythm-change annotation (<code>(AFIB</code>, <code>(SBR</code>, <code>(SVTA</code>, <code>(B</code>, <code>(T</code>, &hellip;) when unambiguous, falling back to a 5-beat sliding RR window otherwise (<a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/01_cardiac_arrhythmia/src/mitbih.rs" target="_blank" rel="noopener" style="color:var(--accent);">mitbih::rhythm_label_to_class</a>); (2) the detector now uses an additional normalised RR-range rule (<code>range/RR &gt; 0.40</code>) so that bigeminy / trigeminy / AFIB with stable short RRs are no longer missed.</p>
 
         <div class="metric-grid" style="margin-block-end: var(--space-xl);">
           <div class="metric-card">
-            <div class="value">96.60 %</div>
-            <div class="label">Pooled accuracy (41 066 / 42 510)</div>
+            <div class="value">78.44 %</div>
+            <div class="label">Pooled accuracy (35 246 / 44 936) under hybrid GT</div>
           </div>
           <div class="metric-card">
-            <div class="value">0.934</div>
+            <div class="value">0.779</div>
             <div class="label">Macro F1 (4 classes, all with support)</div>
           </div>
           <div class="metric-card">
-            <div class="value">0.936</div>
-            <div class="label">Balanced Accuracy</div>
+            <div class="value">0.78</div>
+            <div class="label">Irregular recall (was 0.19 in v0.5)</div>
           </div>
           <div class="metric-card">
             <div class="value">22</div>
@@ -173,22 +173,22 @@
         </div>
 
         <div class="section-card">
-          <h3 style="margin-block-end: var(--space-md);">Pooled confusion matrix &mdash; full DS2</h3>
+          <h3 style="margin-block-end: var(--space-md);">Pooled confusion matrix &mdash; AAMI DS2, hybrid GT</h3>
           <div class="result-table">
             <table class="comparison-table" role="table">
               <thead>
                 <tr><th></th><th>pred Normal</th><th>pred Tachy</th><th>pred Brady</th><th>pred Irregular</th><th>recall</th></tr>
               </thead>
               <tbody>
-                <tr><td><strong>truth Normal</strong></td><td>28 265</td><td>102</td><td>95</td><td>434</td><td style="color:var(--accent);">0.978</td></tr>
-                <tr><td><strong>truth Tachy</strong></td><td>207</td><td>5 048</td><td>0</td><td>83</td><td style="color:var(--accent);">0.946</td></tr>
-                <tr><td><strong>truth Brady</strong></td><td>90</td><td>0</td><td>5 572</td><td>22</td><td style="color:var(--accent);">0.980</td></tr>
-                <tr><td><strong>truth Irregular</strong></td><td>336</td><td>75</td><td>0</td><td>2 181</td><td>0.841</td></tr>
+                <tr><td><strong>truth Normal</strong></td><td>17 813</td><td>13</td><td>79</td><td>3 382</td><td>0.837</td></tr>
+                <tr><td><strong>truth Tachy</strong></td><td>49</td><td>3 058</td><td>0</td><td>1 308</td><td>0.693</td></tr>
+                <tr><td><strong>truth Brady</strong></td><td>280</td><td>0</td><td>5 268</td><td>2 020</td><td>0.696</td></tr>
+                <tr><td><strong>truth Irregular</strong></td><td>2 227</td><td>304</td><td>28</td><td>9 107</td><td style="color:var(--accent);">0.781</td></tr>
               </tbody>
             </table>
           </div>
           <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-sm);">
-            All four rate-regime classes have &gt; 1 000 ground-truth labels &mdash; the v0.4 "no Brady support" caveat is now fixed. Normal / Tachy / Brady all hit &ge; 0.94 recall; Irregular drops to 0.84 because some AF segments with relatively stable short RR windows get pulled into Tachy or Normal.
+            <strong>The Irregular-class fix.</strong> v0.5 reported 0.84 Irregular recall against a CV-based ground truth that was partially circular with the detector's own CV rule. Under the more honest clinician-annotated hybrid GT, the v0.5 detector dropped to <strong>0.19</strong> Irregular recall &mdash; AFIB segments with stable short RR were silently misclassified. v0.6 adds <code>range/RR &gt; 0.40</code> to the classifier and lifts Irregular recall to <strong>0.78</strong> on the same data. Trade-off: Normal / Tachy / Brady recalls drop ~10&ndash;30 pp because the new rule fires more often. <em>Stable rapid AFIB cannot be reliably distinguished from sinus tachy by short-window RR features alone</em> &mdash; that is a fundamental limit of rate-regime triage and is not solved here.
           </p>
         </div>
 
@@ -238,14 +238,21 @@
                 <tr><th>System</th><th>Emissions</th><th>Accuracy</th><th>Macro F1</th><th>Balanced acc</th></tr>
               </thead>
               <tbody>
-                <tr><td><strong>CricketBrain</strong></td><td>42 510</td><td>96.60 %</td><td>0.934</td><td>0.936</td></tr>
-                <tr><td>ThresholdBurst rule (band-gate + RR-window)</td><td>42 490</td><td style="color:var(--accent);">97.53 %</td><td style="color:var(--accent);">0.952</td><td style="color:var(--accent);">0.946</td></tr>
-                <tr><td>Frequency rule (1-second window QRS counter)</td><td>8 501</td><td style="color:var(--danger);">24.70 %</td><td style="color:var(--danger);">0.099</td><td style="color:var(--danger);">0.250</td></tr>
+                <tr><td><strong>CricketBrain (v0.6)</strong></td><td>44 936</td><td>78.44 %</td><td>0.7793</td><td>0.7515</td></tr>
+                <tr><td>ThresholdBurst rule (band-gate + RR-window, same v0.6 rule)</td><td>44 920</td><td style="color:var(--accent);">78.74 %</td><td style="color:var(--accent);">0.7827</td><td style="color:var(--accent);">0.7551</td></tr>
+                <tr><td>Frequency rule (1-second window QRS counter)</td><td>9 573</td><td style="color:var(--danger);">18.21 %</td><td style="color:var(--danger);">0.0770</td><td style="color:var(--danger);">0.2500</td></tr>
               </tbody>
             </table>
           </div>
           <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-sm);">
-            <strong>Honest finding.</strong> A 50-line band-gate + RR-window rule (<a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/01_cardiac_arrhythmia/src/baselines.rs" target="_blank" rel="noopener" style="color:var(--accent);">ThresholdBurstBaseline</a>) is consistently ~1 pp better than CricketBrain on AAMI DS2. The trivial 1-second-window rule fails badly at 24.7 %, so the task is non-trivial &mdash; but the neuromorphic core does <em>not</em> beat a careful classical rule on rate-regime triage. CricketBrain's value proposition reduces to: <strong>match rule-based accuracy in 928 bytes deterministically with zero training</strong>, not "we solve a hard problem".
+            <strong>Honest finding (under hybrid clinician GT).</strong> A 50-line band-gate + RR-window rule (<a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/01_cardiac_arrhythmia/src/baselines.rs" target="_blank" rel="noopener" style="color:var(--accent);">ThresholdBurstBaseline</a>) is ~0.3 pp better than CricketBrain on AAMI DS2. The trivial 1-second-window rule fails badly at 18.2 %, so the task is non-trivial &mdash; but the neuromorphic core does <em>not</em> beat a careful classical rule on rate-regime triage. CricketBrain's value proposition is: <strong>928 bytes RAM, deterministic, zero training, the same circuit reused across UC02 bearings / UC03 marine / UC04 grid</strong>, not "we solve a hard problem".
+          </p>
+        </div>
+
+        <div class="section-card">
+          <h3 style="margin-block-end: var(--space-md);">Drift-robustness sweep &mdash; honest result</h3>
+          <p style="color:var(--text-muted); font-size:var(--font-size-sm); margin-block-end:var(--space-sm);">
+            We hypothesised CricketBrain's Gaussian tuning would degrade more gracefully than the rule's hard &plusmn;10 % band-pass under QRS carrier-frequency drift. <strong>The data did not support that hypothesis.</strong> A synthetic drift sweep (15 offsets in [&minus;20 %, +20 %]) shows the rule has clean cliffs at &plusmn;10 % (its band edge), while CricketBrain's response is non-monotonic: it works at off &isin; {0 %, &plusmn;1 %, &plusmn;5 %, +20 %} and emits zero classifications at off &isin; {&minus;3 %, &minus;7 %, &minus;10 %, +3 %, +7 %, +10 %, &plusmn;15 %}. Both systems break around the same drift band, but neither is meaningfully more robust. CSV at <a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/01_cardiac_arrhythmia/results/cardiac_drift_sweep.csv" target="_blank" rel="noopener" style="color:var(--accent);"><code>results/cardiac_drift_sweep.csv</code></a>.
           </p>
         </div>
 
@@ -374,7 +381,25 @@
     <section class="section">
       <div class="content-wrap">
         <h2 class="section-title">How It <span>Works</span></h2>
+
+        <div class="section-card" style="padding:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">The 5-neuron M&uuml;nster circuit</h3>
+          <p style="color:var(--text-muted); font-size:var(--font-size-sm); margin-block-end:var(--space-md); max-inline-size:760px;">
+            CricketBrain's core is a hardwired 5-neuron / 6-synapse delay-line coincidence detector inspired by the field cricket's auditory T-cell circuit (M&uuml;nster model). Two delay lines feed a coincidence neuron: only when both inputs arrive within the integration window does it fire. There is no matrix multiplication, no weights to train, no GPU &mdash; just timing.
+          </p>
+          <div style="overflow-x:auto;">
+            <picture>
+              <source media="(prefers-color-scheme: dark)" srcset="../../assets/circuit_inline.svg">
+              <img src="../../assets/circuit_inline.svg" alt="CricketBrain M&uuml;nster Circuit &mdash; 5 neurons, 6 synapses, delay-line coincidence detection" style="width:100%; max-width:760px; height:auto;">
+            </picture>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md); max-inline-size:760px;">
+            <strong>Why this matters for UC01.</strong> The same 5-neuron circuit is reused across UC02 (bearing vibrations), UC03 (marine acoustics) and UC04 (power-grid harmonics) by changing only <code>min_freq</code>/<code>max_freq</code>. No retraining, no new architecture &mdash; the &ldquo;Daseinsberechtigung&rdquo; is <em>cross-domain reuse in 928 bytes</em>, not state-of-the-art rate-regime accuracy on any single task. On AAMI DS2 a 50-line band-gate rule is on par with this circuit; what the circuit buys you is portability across signal domains and zero training data.
+          </p>
+        </div>
+
         <div class="section-card" style="padding:var(--space-lg); overflow-x:auto;">
+          <h3 style="margin-block-end:var(--space-md);">Cardiac detection pipeline</h3>
           <svg viewBox="0 0 900 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cardiac detection pipeline with preprocessor" style="width:100%; height:auto; min-width:600px;">
             <defs>
               <marker id="ca-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#00d4aa"/></marker>
@@ -543,7 +568,7 @@
             <table class="comparison-table" role="table">
               <thead><tr><th>System</th><th>Task</th><th>Accuracy / F1</th><th>Training data</th></tr></thead>
               <tbody>
-                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC01</strong></td><td>4 rate classes</td><td><strong>96.60 % MIT-BIH AAMI DS2 (22 records), macro-F1 0.934</strong></td><td><strong>Zero</strong></td></tr>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC01 (v0.6)</strong></td><td>4 rate classes</td><td><strong>78.4 % MIT-BIH AAMI DS2 (clinician GT), macro-F1 0.78</strong></td><td><strong>Zero</strong></td></tr>
                 <tr><td>Pan-Tompkins + rate logic</td><td>4 rate classes</td><td>~90% on MIT-BIH</td><td>Zero</td></tr>
                 <tr><td>Tiny MF-CNN (Nuzzo 2023)</td><td>5 AAMI classes</td><td>98.18% acc, F1 0.92</td><td>MIT-BIH inter-patient</td></tr>
                 <tr><td>Stanford DNN (Hannun 2019)</td><td>12 rhythm classes</td><td>F1 0.837 (beat cardiologist avg 0.780)</td><td>91 k ECGs, 53 k patients</td></tr>
@@ -551,7 +576,7 @@
               </tbody>
             </table>
           </div>
-          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">CricketBrain's 96.6 % pooled accuracy on real MIT-BIH AAMI DS2 (22-record inter-patient set) is on rate-regime triage only &mdash; and a hand-coded band-gate + RR-window rule reaches 97.5 % on the same data, so the neuromorphic core does <em>not</em> beat classical rules here. Morphology-aware CNNs (Tiny MF-CNN, Stanford DNN) tackle the harder 5- and 12-class problems with 15 KB &ndash; 40 MB RAM and labelled training data. Different problems, different operating envelopes &mdash; see <a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/01_cardiac_arrhythmia/docs/competitive_analysis.md" target="_blank" rel="noopener" style="color:var(--accent);">docs/competitive_analysis.md</a>.</p>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">CricketBrain's 78.4 % pooled accuracy on real MIT-BIH AAMI DS2 with <em>clinician rhythm-annotation ground truth</em> is on rate-regime triage only &mdash; and a hand-coded band-gate + RR-window rule reaches 78.7 % on the same data, so the neuromorphic core does <em>not</em> beat classical rules here. Morphology-aware CNNs (Tiny MF-CNN, Stanford DNN) tackle the harder 5- and 12-class problems with 15 KB &ndash; 40 MB RAM and labelled training data. Different problems, different operating envelopes &mdash; see <a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/01_cardiac_arrhythmia/docs/competitive_analysis.md" target="_blank" rel="noopener" style="color:var(--accent);">docs/competitive_analysis.md</a>.</p>
         </div>
 
         <div class="section-card" style="margin-block-start:var(--space-lg);">

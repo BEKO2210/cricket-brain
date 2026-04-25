@@ -30,10 +30,40 @@ use cricket_brain_cardiac::ecg_signal::{from_csv, from_csv_dir, BeatRecord};
 use cricket_brain_cardiac::metrics::{
     class_from_index, class_label, AggregateMetrics, ConfusionMatrix4, NUM_CLASSES,
 };
-use cricket_brain_cardiac::mitbih::{rate_regime_truth, RateRegimeWindow, AAMI_DS1, AAMI_DS2};
+use cricket_brain_cardiac::mitbih::{
+    rate_regime_truth, rhythm_label_to_class, RateRegimeWindow, AAMI_DS1, AAMI_DS2,
+};
 use cricket_brain_cardiac::report::{current_command_line, write_csv_with_header, RunMetadata};
 
 const RESULT_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/results");
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum GroundTruthMode {
+    Rr,
+    Annot,
+    Hybrid,
+}
+
+impl GroundTruthMode {
+    fn from_str(s: &str) -> Self {
+        match s.to_ascii_lowercase().as_str() {
+            "rr" => GroundTruthMode::Rr,
+            "annot" | "annotation" => GroundTruthMode::Annot,
+            "hybrid" => GroundTruthMode::Hybrid,
+            _ => {
+                eprintln!("ERROR: --ground-truth must be rr|annot|hybrid (got {s})");
+                std::process::exit(2);
+            }
+        }
+    }
+    fn label(self) -> &'static str {
+        match self {
+            GroundTruthMode::Rr => "rr",
+            GroundTruthMode::Annot => "annot",
+            GroundTruthMode::Hybrid => "hybrid",
+        }
+    }
+}
 
 struct Args {
     records_dir: Option<String>,
@@ -41,6 +71,7 @@ struct Args {
     write: bool,
     warmup: usize,
     aami_split: Option<String>,
+    ground_truth: GroundTruthMode,
 }
 
 impl Args {
@@ -51,6 +82,7 @@ impl Args {
             write: false,
             warmup: 2,
             aami_split: None,
+            ground_truth: GroundTruthMode::Hybrid,
         };
         let mut iter = std::env::args().skip(1);
         while let Some(flag) = iter.next() {
@@ -62,6 +94,9 @@ impl Args {
                 }
                 "--write" => a.write = true,
                 "--aami-split" => a.aami_split = iter.next(),
+                "--ground-truth" => {
+                    a.ground_truth = GroundTruthMode::from_str(&iter.next().unwrap_or_default())
+                }
                 _ => {
                     eprintln!("Unknown flag: {flag}");
                     std::process::exit(2);
@@ -149,6 +184,7 @@ fn score_system(
     emissions: &[Scored],
     win: &RateRegimeWindow,
     warmup: usize,
+    gt: GroundTruthMode,
 ) -> ConfusionMatrix4 {
     // Pre-compute per-beat ground truth + cumulative end steps.
     let rr_ms: Vec<u32> = beats
@@ -156,7 +192,12 @@ fn score_system(
         .map(|b| b.rr_interval_ms.max(1.0) as u32)
         .collect();
     let truth: Vec<Option<RhythmClass>> = (0..beats.len())
-        .map(|i| rate_regime_truth(&rr_ms, i, win))
+        .map(|i| match gt {
+            GroundTruthMode::Rr => rate_regime_truth(&rr_ms, i, win),
+            GroundTruthMode::Annot => rhythm_label_to_class(&beats[i].rhythm_label),
+            GroundTruthMode::Hybrid => rhythm_label_to_class(&beats[i].rhythm_label)
+                .or_else(|| rate_regime_truth(&rr_ms, i, win)),
+        })
         .collect();
 
     let mut beat_end_step: Vec<usize> = Vec::with_capacity(beats.len());
@@ -249,7 +290,10 @@ fn csv_row(record_id: &str, system: &str, agg: &AggregateMetrics, cm: &Confusion
 
 fn main() {
     let args = Args::parse();
-    println!("== Cardiac MIT-BIH Baselines (v0.5: CricketBrain vs rules on real data) ==");
+    println!(
+        "== Cardiac MIT-BIH Baselines (v0.6: CricketBrain vs rules on real data) ==  ground_truth={}",
+        args.ground_truth.label()
+    );
 
     let mut records = load_records(&args);
     if records.is_empty() {
@@ -279,7 +323,7 @@ fn main() {
     for (id, beats) in &records {
         // CricketBrain
         let cb_emissions = cricketbrain_run(beats);
-        let cb_cm = score_system(beats, &cb_emissions, &win, args.warmup);
+        let cb_cm = score_system(beats, &cb_emissions, &win, args.warmup, args.ground_truth);
         let cb_agg = AggregateMetrics::from_cm(&cb_cm);
         print_row(id, "CricketBrain", &cb_agg, &cb_cm);
         csv.push_str(&csv_row(id, "CricketBrain", &cb_agg, &cb_cm));
@@ -294,7 +338,7 @@ fn main() {
         let stream = cricket_brain_cardiac::ecg_signal::beats_to_frequency_stream(beats);
         let tb_preds = ThresholdBurstBaseline::default().run(&stream);
         let tb_emissions = baseline_run(tb_preds);
-        let tb_cm = score_system(beats, &tb_emissions, &win, args.warmup);
+        let tb_cm = score_system(beats, &tb_emissions, &win, args.warmup, args.ground_truth);
         let tb_agg = AggregateMetrics::from_cm(&tb_cm);
         print_row(id, "ThresholdBurst-rule", &tb_agg, &tb_cm);
         csv.push_str(&csv_row(id, "ThresholdBurst-rule", &tb_agg, &tb_cm));
@@ -308,7 +352,7 @@ fn main() {
         // Frequency rule
         let fr_preds = FrequencyRuleBaseline::default().run(&stream);
         let fr_emissions = baseline_run(fr_preds);
-        let fr_cm = score_system(beats, &fr_emissions, &win, args.warmup);
+        let fr_cm = score_system(beats, &fr_emissions, &win, args.warmup, args.ground_truth);
         let fr_agg = AggregateMetrics::from_cm(&fr_cm);
         print_row(id, "FrequencyRule", &fr_agg, &fr_cm);
         csv.push_str(&csv_row(id, "FrequencyRule", &fr_agg, &fr_cm));

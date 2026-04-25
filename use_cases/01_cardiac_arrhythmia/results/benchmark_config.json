@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "generated_at": "2026-04-25T09:56:19Z",
-    "git_commit": "4fdcfe7",
+    "generated_at": "2026-04-25T12:39:21Z",
+    "git_commit": "24f0948",
     "command": "target/release/examples/cardiac_eval --seed 42 --beats-per-class 30 --write",
     "dataset_type": "synthetic",
     "dataset_name": "uc01_synth_v0.2_seed42_bpc30",

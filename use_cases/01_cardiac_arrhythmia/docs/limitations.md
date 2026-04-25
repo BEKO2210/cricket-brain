@@ -6,7 +6,71 @@
 
 ---
 
-## 0. v0.5 AAMI EC57:2012 DS2 findings (2026-04-25)
+## 0. v0.6 findings — clinician GT + Irregular fix + drift sweep (2026-04-25)
+
+Three corrections shipped after critique:
+
+### (a) The Irregular recall problem
+
+The v0.5 0.84 Irregular recall was **inflated by a partially
+circular** ground truth: both the GT and the detector used CV(RR)
+> 0.30 as the "irregular" signal, so they agreed by construction.
+Under MIT-BIH clinician rhythm-change annotations (the gold
+standard), the v0.5 detector achieves only **0.19** Irregular
+recall — AFIB segments with stable rapid RR are silently
+mis-called Tachy or Normal.
+
+Empirical audit on AAMI DS2:
+- AFIB beats fire `cv > 0.30` in **only 11 %** of 5-beat windows
+- pNN50 > 0.20 fires too often on Normal sinus (94 % FP rate)
+- `range/RR > 0.40` fires on **52 % of AFIB**, **98 % of bigeminy**,
+  **98 % of trigeminy**, only **34 % on Normal** — best feature found
+
+**v0.6 fix:** detector adds `range/RR > 0.40` alongside
+`cv > 0.30`. The same rule is mirrored in `ThresholdBurstBaseline`
+for fair comparison. Irregular recall lifts from 0.19 to **0.78**
+on the same hybrid GT.
+
+**Trade-off:** Normal / Tachy / Brady recalls each drop 10-30 pp
+because the new rule fires more often. Pooled accuracy goes from
+73.4 % (v0.5 detector + hybrid GT) to 78.4 % (v0.6 detector +
+hybrid GT). Macro-F1 goes from 0.70 to 0.78.
+
+**Fundamental limit:** stable rapid AFIB (CV<0.30 AND
+range/RR<0.40 simultaneously) cannot be reliably distinguished
+from sinus tachy by **any** short-window RR feature. Detecting
+stable AF clinically requires either much longer windows (Apple
+Watch uses ~30-60 s) or P-wave morphology — both outside the
+operating envelope of a 928-byte rate-regime triage core.
+
+### (b) The "Daseinsberechtigung" question
+
+We hypothesised CricketBrain's Gaussian tuning would degrade more
+gracefully than the rule's hard ±10 % band-pass under QRS
+carrier-frequency drift. The v0.6 `cardiac_drift_sweep` benchmark
+sweeps off ∈ [−20 %, +20 %] and compares both systems.
+
+**Honest negative result:** the rule has clean cliffs at ±10 %
+(its band edge). CricketBrain's response is **non-monotonic** —
+works at off ∈ {0, ±1 %, ±5 %, +20 %}, emits zero classifications
+at off ∈ {±3 %, ±7 %, ±10 %, ±15 %, −20 %}. Both break around the
+same drift magnitude; neither is meaningfully more drift-robust.
+
+Real value proposition restated honestly:
+- 928 bytes RAM (deterministic, deeply embeddable)
+- Zero training (no GPU, no labelled data)
+- Same 5-neuron circuit reused across UC02 / UC03 / UC04 — that
+  is the "Daseinsberechtigung", not state-of-the-art accuracy on
+  any single task
+
+### (c) Visualization
+
+Cardiac website page now embeds the 5-neuron Münster circuit SVG
+at the top of "How It Works".
+
+---
+
+## 0a. v0.5 AAMI EC57:2012 DS2 findings (2026-04-25, superseded by v0.6)
 
 Full inter-patient evaluation on the canonical AAMI DS2 split:
 22 records, 49 584 annotation beats, 42 510 detector emissions.
