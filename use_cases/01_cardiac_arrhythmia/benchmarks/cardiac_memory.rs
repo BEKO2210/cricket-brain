@@ -18,7 +18,10 @@ fn main() {
 
     println!("  CricketBrain core RAM:    {} bytes", ram);
     println!("  metrics.json expected:    928 bytes");
-    println!("  Match:                    {}", if ram == 928 { "YES" } else { "MISMATCH" });
+    println!(
+        "  Match:                    {}",
+        if ram == 928 { "YES" } else { "MISMATCH" }
+    );
     println!();
 
     // Measure CardiacDetector struct overhead (approximate)
@@ -30,7 +33,13 @@ fn main() {
     // Comparison
     println!("\n  For reference:");
     println!("  - Arduino Uno total RAM:  2048 bytes");
-    println!("  - Detector fits:          {} ({:.0}% of Arduino RAM)",
-             if struct_size + ram < 2048 { "YES" } else { "NO" },
-             (struct_size + ram) as f64 / 2048.0 * 100.0);
+    println!(
+        "  - Detector fits:          {} ({:.0}% of Arduino RAM)",
+        if struct_size + ram < 2048 {
+            "YES"
+        } else {
+            "NO"
+        },
+        (struct_size + ram) as f64 / 2048.0 * 100.0
+    );
 }

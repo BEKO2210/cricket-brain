@@ -4,6 +4,211 @@
 
 ---
 
+## 0. Working rules (v0.2 hardening)
+
+These rules apply to **every** future change in this use case:
+
+1. **Benchmark-first, not marketing.** Treat UC01 as a research
+   benchmark suite. Do not enlarge website claims, market sizes, or
+   accuracy headlines without a corresponding result file in
+   `results/` produced by a fresh `cargo run --release --example …
+   --write` invocation.
+2. **Never invent results.** No fake MIT-BIH numbers, no "improved
+   accuracy" without a regenerated result file, no hand-edited CSV
+   metrics. Hardcoded benchmark scores in docs are tolerated **only**
+   when explicitly labelled "example" and tied to a documented seed
+   and command.
+3. **Truth-based metrics only.** New benchmarks must use
+   `evaluate::run_and_score` (or an equivalent that takes external
+   ground truth). The legacy `ConfusionMatrix::from_predictions`
+   path is preserved for traceability and must not be re-introduced
+   into v0.2-or-later result files.
+4. **Document every benchmark change.** When code changes affect
+   results, update at minimum:
+   - `README.md` (sample tables and command lines)
+   - `BENCHMARK_ROADMAP.md` (state transitions of milestones / claims)
+   - `docs/methodology.md` (definitions, conventions)
+   - `docs/limitations.md` (new failure modes)
+   - `docs/results.md` (versioned legacy log)
+5. **Conservative medical claims.** No diagnosis. No "FDA
+   plausible". No "validated on patients". Triage / pre-screening /
+   research only.
+6. **Repository scope:** changes for UC01 stay inside
+   `use_cases/01_cardiac_arrhythmia/`. Touching `website/`, root
+   `README.md`, or `MASTER_PLAN.md` is allowed *only* to fix wrong /
+   stale numbers or commands; do not enlarge marketing copy.
+
+---
+
+## v0.5 (2026-04-25) — AAMI EC57:2012 DS2 inter-patient evaluation + baselines
+
+Status: **DONE — published on website.**
+
+Full AAMI DS2 ingest (22 records, 49 584 annotation beats / 42 510
+emissions). Records 100, 103, 105, 111, 113, 117, 121, 123, 200,
+202, 210, 212, 213, 214, 219, 221, 222, 228, 231, 232, 233, 234.
+Records 102/104/107/217 (paced) excluded per AAMI standard.
+
+Pooled DS2 results:
+- 41 066 / 42 510 → **96.60 % accuracy**
+- macro-F1 = 0.934, balanced acc = 0.936
+- per-class recall: Normal 0.978, Tachy **0.946**, Brady **0.980**, Irregular 0.841
+- macro-over-records = 0.961
+
+All four rate-regime classes have > 1 000 ground-truth labels —
+the v0.4 "no Brady support" caveat is now resolved.
+
+Side-by-side baseline comparison (`cardiac_mitbih_baselines`) on
+the same DS2 set:
+- CricketBrain: 96.60 % / 0.934 / 0.936
+- ThresholdBurst rule: **97.53 % / 0.952 / 0.946** (~1 pp better)
+- FrequencyRule (1-s window): 24.70 % / 0.099 / 0.250 (fails)
+
+**Honest finding:** the simple band-gate + RR-window rule beats
+CricketBrain by ~1 pp on AAMI DS2. CricketBrain's value is "match
+rule-based accuracy in 928 bytes deterministically with no
+training", not "we solve a hard problem". The trivial 1-second
+window rule fails badly so the task itself is non-trivial.
+
+New code:
+- `src/mitbih.rs`: `AAMI_DS1`, `AAMI_DS2`, `AAMI_EXCLUDED_PACED`,
+  `aami_split_for(record_id)` constants and helper.
+- `cardiac_mitbih.rs`: `--aami-split ds1|ds2` flag + AAMI-aware
+  filter + AAMI-aware metadata stamp.
+- `cardiac_mitbih_baselines.rs` (new bench): same loader,
+  CricketBrain + ThresholdBurst + FrequencyRule on every record,
+  per-record CSV + pooled summary.
+
+Result files committed:
+- `results/cardiac_mitbih_summary.json` (now AAMI DS2, 22 records)
+- `results/cardiac_mitbih_per_record.csv`
+- `results/cardiac_mitbih_failure_cases.md`
+- `results/cardiac_mitbih_baselines.csv` (new)
+
+Tests: 31 → 44 passing (+2 new for AAMI split disjointness +
+record lookup).
+
+Website: top "Real MIT-BIH Results" section now shows the full
+DS2 numbers, the per-record table for all 22 patients, the pooled
+confusion matrix, and the baseline comparison block. Homepage UC
+card switched from "v0.4 · First MIT-BIH" to "v0.5 · AAMI DS2"
+with the honest "on par with hand-coded rule, not better" framing.
+
+---
+
+## v0.4 (2026-04-25) — First real MIT-BIH run
+
+Status: **DONE.** Superseded by v0.5; pre-DS2 pilot on 5 records.
+
+Real PhysioNet records ingested via `python/download_mitbih.py` +
+`python/preprocess.py`: records 100 (normal), 105 (noisy), 200
+(PVCs), 217 (paced), 232 (AF). 11 375 annotation beats total.
+
+Pooled results on the 5-record set:
+
+- 9 549 correct / 9 939 emissions → **96.08 % accuracy**
+- Macro-F1 = 0.793, balanced accuracy = 0.819
+- Per-class recall: Normal 0.971, Tachy 0.570, **Irregular 0.916**
+- Bradycardia: zero ground-truth support in this subset → no claim.
+- AAMI N/S/V/F/Q distributions reported per record (traceability).
+
+Result files committed:
+- `results/cardiac_mitbih_summary.json` (real-data limitations
+  override; synthetic-skeleton path superseded)
+- `results/cardiac_mitbih_per_record.csv`
+- `results/cardiac_mitbih_failure_cases.md`
+
+Bench fix: `cardiac_mitbih` now overrides `RunMetadata.limitations`
+on real-data runs, so `synthetic_generator_version` notes don't
+leak into MIT-BIH summaries.
+
+Website: `pages/cardiac.html` got a new top "Real MIT-BIH Results
+(v0.4)" section with per-record table + pooled CM + honest
+"Bradycardia not yet evaluated" note. Homepage UC card switched
+from "Synthetic Demo" badge to "v0.4 · First MIT-BIH" with the
+real numbers in the bullet list.
+
+---
+
+## v0.3 (2026-04-25) — MIT-BIH loader + patient-aware eval
+
+Status: **DONE.**
+
+New module:
+
+- `src/mitbih.rs` — AAMI 5-class symbol mapping (Moody & Mark 2001),
+  non-circular `rate_regime_truth` sliding window (5 beats by
+  default, distinct from the detector's 8-beat window), and
+  `PerRecordResult` / `PooledResult` aggregation primitives.
+
+CSV format extension:
+
+- `BeatRecord` gains a `record_id` field. The loader auto-detects 5-col
+  vs 6-col headers; legacy files fall back to file stem.
+- New `ecg_signal::from_csv_dir(dir)` returns `Vec<(record_id, beats)>`
+  grouped and time-sorted.
+- `python/preprocess.py` emits the v0.3 6-col format for both real
+  records (`record_id = "100"`, `"212"`, ...) and the synthetic
+  sample (`record_id = "synth_normal" | "synth_tachy" | "synth_brady"`).
+
+Bench rewrite — `benchmarks/cardiac_mitbih.rs`:
+
+- `--records-dir <dir>` for multi-record evaluation, `--csv <path>`
+  for single-file mode.
+- For each record: detector emissions paired with rate-regime truth
+  derived from the **annotation RR intervals** via the 5-beat
+  sliding window (no circularity with the detector's own BPM).
+- Per-record + macro-pooled summary; AAMI N/S/V/F/Q distributions
+  reported per record for traceability only.
+- **Refuses to write any `cardiac_mitbih_summary.json` when every
+  loaded record_id starts with `synth_`** — instead writes
+  `cardiac_mitbih_skeleton_only.json` with a clear "no real records"
+  status and the next-step command.
+
+Tests: 31 → 42 passing (+11 new for AAMI symbols, rate-regime
+window, pooled aggregation, 6-col CSV header, multi-record loader).
+
+---
+
+## v0.2 (2026-04-25) — Benchmark hardening
+
+Status: **DONE.**
+
+New modules:
+
+- `src/metrics.rs` — 4-class confusion matrix, per-class P/R/F1/specificity,
+  macro-F1, weighted-F1, balanced accuracy, reject-aware coverage curve.
+- `src/synthetic.rs` — labelled synthetic generator with seedable
+  variability (HRV, baseline wander, amplitude jitter, morphology
+  jitter, missing QRS, motion-artifact bursts, in-band noise).
+- `src/evaluate.rs` — pairs detector emissions with ground-truth segments.
+- `src/baselines.rs` — `ThresholdBurstBaseline`, `FrequencyRuleBaseline`.
+- `src/report.rs` — JSON / CSV writer with metadata header
+  (`generated_at`, `git_commit`, `seed`, `synthetic_generator_version`,
+  `limitations`).
+
+New benches:
+
+- `cardiac_eval` — truth-based 4-class metrics, JSON + CSV + failure
+  cases markdown.
+- `cardiac_stress_sweep` — 7-dimension stress sweeps, per-dimension CSVs.
+- `cardiac_baselines` — CricketBrain vs both rule baselines on 5 scenarios.
+- `cardiac_reject` — coverage / accuracy curve.
+- `cardiac_mitbih` — MIT-BIH skeleton (refuses to publish "validated"
+  numbers until real ingestion lands).
+
+Documentation:
+
+- `BENCHMARK_ROADMAP.md` (new, top-level)
+- `docs/methodology.md` (new)
+- `README.md` (rewritten benchmarks section, structure block, results table)
+- `docs/results.md` (marked legacy, points to v0.2 outputs)
+- `docs/limitations.md` (added v0.2 audit findings as § 0)
+
+Tests: 31 unit tests pass after the change (was 17).
+
+---
+
 ## 1. Analysis of examples/sentinel_ecg_monitor.rs
 
 The existing demo (116 lines) does:

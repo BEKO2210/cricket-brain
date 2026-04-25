@@ -5,12 +5,13 @@ Preprocess MIT-BIH Arrhythmia Database for CricketBrain cardiac detector.
 Reads raw wfdb records, extracts R-peak annotations, computes R-R intervals,
 and maps them to frequency-domain input for CricketBrain.
 
-Output CSV columns:
+Output CSV columns (v0.3 — 6-col format, backward-compat aware loader):
     timestamp_ms   — annotation sample index / (sample_rate / 1000)
     rr_interval_ms — R-R interval in milliseconds
     beat_type      — AAMI beat annotation (N, S, V, F, Q)
     bpm            — instantaneous heart rate (60000 / rr_ms)
     mapped_freq    — frequency for CricketBrain input
+    record_id      — MIT-BIH record identifier ("100", "212", "synth_normal", ...)
 
 Train/Test split:
     Records 100-119: Training set
@@ -97,6 +98,7 @@ def process_record(record_num: int, output_dir: Path) -> int:
             "beat_type": aami,
             "bpm": f"{bpm:.1f}",
             "mapped_freq": f"{mapped_freq:.1f}",
+            "record_id": str(record_num),
         })
 
     # Write CSV
@@ -105,7 +107,8 @@ def process_record(record_num: int, output_dir: Path) -> int:
 
     with open(csv_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=["timestamp_ms", "rr_interval_ms",
-                                                "beat_type", "bpm", "mapped_freq"])
+                                                "beat_type", "bpm", "mapped_freq",
+                                                "record_id"])
         writer.writeheader()
         writer.writerows(rows)
 
@@ -113,57 +116,42 @@ def process_record(record_num: int, output_dir: Path) -> int:
 
 
 def generate_synthetic(output_path: Path, n_per_class: int = 50):
-    """Generate synthetic sample CSV without needing real data download."""
+    """Generate synthetic sample CSV without needing real data download.
+
+    The synthetic sample uses the v0.3 6-column format with explicit
+    `record_id = "synth_<class>"`. The string prefix `synth_` is what
+    the `cardiac_mitbih` bench uses to refuse to publish "validated"
+    numbers — synthetic record IDs are visible to the loader.
+    """
     os.makedirs(output_path.parent, exist_ok=True)
 
     rows = []
     t = 0.0
 
-    # Normal sinus: RR ~820 ms, ~73 BPM
-    for _ in range(n_per_class):
-        rr = 820.0
-        bpm = 60000.0 / rr
-        freq = 2000.0 + (bpm - 40.0) * (3000.0 / 160.0)
-        rows.append({
-            "timestamp_ms": f"{t:.1f}",
-            "rr_interval_ms": f"{rr:.1f}",
-            "beat_type": "N",
-            "bpm": f"{bpm:.1f}",
-            "mapped_freq": f"{freq:.1f}",
-        })
-        t += rr
-
-    # Tachycardia: RR ~400 ms, ~150 BPM
-    for _ in range(n_per_class):
-        rr = 400.0
-        bpm = 60000.0 / rr
-        freq = 2000.0 + (bpm - 40.0) * (3000.0 / 160.0)
-        rows.append({
-            "timestamp_ms": f"{t:.1f}",
-            "rr_interval_ms": f"{rr:.1f}",
-            "beat_type": "N",
-            "bpm": f"{bpm:.1f}",
-            "mapped_freq": f"{freq:.1f}",
-        })
-        t += rr
-
-    # Bradycardia: RR ~1500 ms, ~40 BPM
-    for _ in range(n_per_class):
-        rr = 1500.0
-        bpm = 60000.0 / rr
-        freq = 2000.0 + (bpm - 40.0) * (3000.0 / 160.0)
-        rows.append({
-            "timestamp_ms": f"{t:.1f}",
-            "rr_interval_ms": f"{rr:.1f}",
-            "beat_type": "N",
-            "bpm": f"{bpm:.1f}",
-            "mapped_freq": f"{freq:.1f}",
-        })
-        t += rr
+    blocks = [
+        # (rr_ms, record_id)
+        (820.0, "synth_normal"),     # Normal sinus ~73 BPM
+        (400.0, "synth_tachy"),      # Tachycardia ~150 BPM
+        (1500.0, "synth_brady"),     # Bradycardia ~40 BPM
+    ]
+    for rr, rid in blocks:
+        for _ in range(n_per_class):
+            bpm = 60000.0 / rr
+            freq = 2000.0 + (bpm - 40.0) * (3000.0 / 160.0)
+            rows.append({
+                "timestamp_ms": f"{t:.1f}",
+                "rr_interval_ms": f"{rr:.1f}",
+                "beat_type": "N",
+                "bpm": f"{bpm:.1f}",
+                "mapped_freq": f"{freq:.1f}",
+                "record_id": rid,
+            })
+            t += rr
 
     with open(output_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=["timestamp_ms", "rr_interval_ms",
-                                                "beat_type", "bpm", "mapped_freq"])
+                                                "beat_type", "bpm", "mapped_freq",
+                                                "record_id"])
         writer.writeheader()
         writer.writerows(rows)
 

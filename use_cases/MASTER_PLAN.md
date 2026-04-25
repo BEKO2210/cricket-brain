@@ -181,28 +181,60 @@ Each use case follows the same 10-run progression:
 
 ---
 
-## 7. v0.2 Priority Backlog — Real-Data Validation
+## 7. v0.2 Priority Backlog — Benchmark-First Hardening
 
-All three completed use cases currently benchmark on **synthetic
-signals**. The next-highest-value work is not a fourth use case but
-**real-data validation** of the existing three, in this order:
+The original v0.2 plan called for real-data validation across the
+four completed use cases. UC01 specifically has been re-scoped to a
+**benchmark-first hardening track** instead, because the v0.1
+results were partly produced by a circular ground-truth path. Real
+data is still planned, but only on top of a methodologically clean
+synthetic suite.
 
-1. **UC02 Bearings — real CWRU `.mat` files** (easiest; dataset is
-   already used by the Python preprocess pipeline, just needs the
-   end-to-end run). Highest credibility-per-hour payoff.
-2. **UC03 Marine — real MBARI MARS hydrophone segments** (AWS Open
-   Data). Harder because labelling / preprocessing requires
-   domain knowledge.
-3. **UC01 Cardiac — real MIT-BIH records** (most regulatory care
-   required; frame as "rate-based triage demo", not clinical).
+### UC01 Cardiac — benchmark hardening track
 
-Each validation should add a `docs/real_data_results.md` alongside the
-existing synthetic `docs/results.md` so the distinction stays visible.
-Until real-data rows exist, *all accuracy claims carry a "synthetic-
-window accuracy" qualifier*.
+Position: *deterministic, KB-class ECG rhythm-pattern triage core
+for research and embedded pre-screening; not a diagnostic medical
+device.* See
+[01_cardiac_arrhythmia/BENCHMARK_ROADMAP.md](01_cardiac_arrhythmia/BENCHMARK_ROADMAP.md)
+for the full milestone plan.
+
+| Milestone | Status |
+|---|---|
+| **v0.1** synthetic results (legacy, partly circular) | Done, marked legacy |
+| **v0.2** synthetic benchmark hardening (truth-based metrics, stress sweeps, reject curve, baselines, structured outputs) | **Done** |
+| **v0.3** MIT-BIH loader + first real-data run | **Done** |
+| **v0.4** real-data CM + failure cases (5-record subset) | **Done — superseded by v0.5** |
+| **v0.5** AAMI EC57:2012 DS2 + on-data baselines | **Done — 96.60 % pooled accuracy on 22 patients; on par with hand-coded rule (97.53 %), not better. Honest finding published on website** |
+| **v0.5-followup** Pan-Tompkins + Tiny CNN reference baselines | Pending |
+| **v0.6** ablation + cross-seed robustness | Pending |
+| **v1.0** reproducible benchmark report (one command, bit-stable hash, reviewer bundle) | Pending |
+
+### UC02 / UC03 — real-data validation backlog (unchanged)
+
+1. **UC02 Bearings — real CWRU `.mat` files**
+2. **UC03 Marine — real MBARI MARS hydrophone segments**
+
+Each validation should add a `docs/real_data_results.md` alongside
+the existing synthetic `docs/results.md` so the distinction stays
+visible. Until real-data rows exist, *all accuracy claims carry a
+"synthetic-window accuracy" qualifier*.
+
+### Working rules (apply to every use case going forward)
+
+- Benchmark-first; marketing-last. No widening of accuracy claims
+  without a regenerated result file.
+- No invented results. No fake MIT-BIH numbers. Hardcoded benchmark
+  scores in docs only with the "example" label and a documented seed.
+- Truth-based metrics only — no circular
+  `ConfusionMatrix::from_predictions` paths in v0.2-or-later result
+  files.
+- Document the benchmark change everywhere it propagates: README,
+  CLAUDE.md, BENCHMARK_ROADMAP, methodology, limitations, results.
 
 ---
 
-*Last updated: 2026-04-24 — UC04 Power Grid complete (10/10 runs);
-4 of 10 use cases done; real-data validation is the next v0.2
-priority across all four.*
+*Last updated: 2026-04-25 — UC01 v0.2 benchmark hardening complete
+(truth-based metrics, 7-dimension stress sweeps, reject curve, two
+rule baselines, structured JSON/CSV with metadata, MIT-BIH loader
+skeleton); 4 of 10 use cases done; UC01 real-data validation now
+gated on the v0.3 milestone of UC01's BENCHMARK_ROADMAP.*

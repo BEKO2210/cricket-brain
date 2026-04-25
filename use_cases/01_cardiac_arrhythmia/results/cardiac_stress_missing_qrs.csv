@@ -1,0 +1,17 @@
+# generated_at: 2026-04-25T09:56:19Z
+# git_commit: 4fdcfe7
+# command: target/release/examples/cardiac_stress_sweep --seed 42 --beats-per-class 20 --write
+# dataset_type: synthetic
+# dataset_name: uc01_synth_v0.2_seed42_bpc20
+# synthetic_generator_version: 0.2.0
+# seed: 42
+# sample_rate_hz: 1000
+# window_size_ms: 1
+# limitations: Synthetic ECG only — no real-patient validation yet. | Frequency-encoded inputs; not a clinical waveform analyser. | Rate-regime triage only; no morphology, no AF, no VT, no ST analysis. | Not a medical device. Research / embedded prototype only.
+dimension,parameter,value,total,correct,accuracy,macro_f1,weighted_f1,balanced_accuracy,recall_Normal,recall_Tachy,recall_Brady,recall_Irregular,precision_Normal,precision_Tachy,precision_Brady,precision_Irregular
+baseline,clean,0,70,51,0.728571,0.729134,0.728704,0.736111,1.000000,0.777778,0.722222,0.444444,0.592593,1.000000,0.928571,0.533333
+missing_qrs,drop_prob,0,70,51,0.728571,0.729134,0.728704,0.736111,1.000000,0.777778,0.722222,0.444444,0.592593,1.000000,0.928571,0.533333
+missing_qrs,drop_prob,0.05,69,51,0.739130,0.747922,0.745258,0.745915,1.000000,0.666667,0.705882,0.611111,0.666667,1.000000,1.000000,0.523810
+missing_qrs,drop_prob,0.1,62,34,0.548387,0.519659,0.519581,0.537255,0.666667,0.066667,0.533333,0.882353,0.833333,1.000000,1.000000,0.365854
+missing_qrs,drop_prob,0.2,49,19,0.387755,0.360714,0.366278,0.367965,0.250000,0.090909,0.416667,0.714286,1.000000,1.000000,0.555556,0.277778
+missing_qrs,drop_prob,0.4,38,11,0.289474,0.305861,0.313437,0.295960,0.300000,0.111111,0.272727,0.500000,1.000000,1.000000,0.428571,0.148148

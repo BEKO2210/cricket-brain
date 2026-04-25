@@ -1,0 +1,18 @@
+# generated_at: 2026-04-25T09:56:19Z
+# git_commit: 4fdcfe7
+# command: target/release/examples/cardiac_stress_sweep --seed 42 --beats-per-class 20 --write
+# dataset_type: synthetic
+# dataset_name: uc01_synth_v0.2_seed42_bpc20
+# synthetic_generator_version: 0.2.0
+# seed: 42
+# sample_rate_hz: 1000
+# window_size_ms: 1
+# limitations: Synthetic ECG only — no real-patient validation yet. | Frequency-encoded inputs; not a clinical waveform analyser. | Rate-regime triage only; no morphology, no AF, no VT, no ST analysis. | Not a medical device. Research / embedded prototype only.
+dimension,parameter,value,total,correct,accuracy,macro_f1,weighted_f1,balanced_accuracy,recall_Normal,recall_Tachy,recall_Brady,recall_Irregular,precision_Normal,precision_Tachy,precision_Brady,precision_Irregular
+baseline,clean,0,70,51,0.728571,0.729134,0.728704,0.736111,1.000000,0.777778,0.722222,0.444444,0.592593,1.000000,0.928571,0.533333
+baseline_wander,wander_hz,0,70,51,0.728571,0.729134,0.728704,0.736111,1.000000,0.777778,0.722222,0.444444,0.592593,1.000000,0.928571,0.533333
+baseline_wander,wander_hz,50,70,48,0.685714,0.685957,0.684294,0.694444,1.000000,0.666667,0.722222,0.388889,0.592593,1.000000,0.866667,0.437500
+baseline_wander,wander_hz,100,70,48,0.685714,0.685957,0.684294,0.694444,1.000000,0.666667,0.722222,0.388889,0.592593,1.000000,0.866667,0.437500
+baseline_wander,wander_hz,200,67,50,0.746269,0.747384,0.745272,0.750000,1.000000,0.529412,0.705882,0.764706,0.800000,1.000000,0.857143,0.541667
+baseline_wander,wander_hz,400,46,10,0.217391,0.089286,0.077640,0.250000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.217391
+baseline_wander,wander_hz,800,33,9,0.272727,0.107143,0.116883,0.250000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.272727

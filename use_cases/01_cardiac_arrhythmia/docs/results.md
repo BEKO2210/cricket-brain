@@ -1,8 +1,20 @@
-# UC01 Cardiac Arrhythmia — Benchmark Results
+# UC01 Cardiac Arrhythmia — Benchmark Results (v0.1, legacy)
 
 **Date:** 2026-04-10 | **CricketBrain v3.0.0** | **Dataset:** Synthetic (150 beats)
 
 > **NOT A MEDICAL DEVICE.** Research prototype only.
+
+> **v0.2 update.** The numbers on this page are the **legacy v0.1
+> results** and are preserved for historical traceability. They were
+> produced by the circular `ConfusionMatrix::from_predictions` path
+> (ground truth derived from the detector's own BPM estimate). The
+> v0.2 suite uses **explicit, externally-defined ground-truth
+> labels**; see [methodology.md](methodology.md) §1 and the live
+> result files under [`../results/`](../results/). The
+> [BENCHMARK_ROADMAP.md](../BENCHMARK_ROADMAP.md) documents the gap
+> between the v0.1 numbers and what they mean under the v0.2
+> definition (in short: the truth-based 4-class accuracy is closer
+> to **87 %** with macro-F1 ≈ **0.88**, not 92.5 % / 0.962).
 
 ---
 

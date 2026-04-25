@@ -34,3 +34,27 @@ path = "benchmarks/cardiac_memory.rs"
 [[example]]
 name = "cardiac_stress"
 path = "benchmarks/cardiac_stress.rs"
+
+[[example]]
+name = "cardiac_eval"
+path = "benchmarks/cardiac_eval.rs"
+
+[[example]]
+name = "cardiac_stress_sweep"
+path = "benchmarks/cardiac_stress_sweep.rs"
+
+[[example]]
+name = "cardiac_baselines"
+path = "benchmarks/cardiac_baselines.rs"
+
+[[example]]
+name = "cardiac_reject"
+path = "benchmarks/cardiac_reject.rs"
+
+[[example]]
+name = "cardiac_mitbih"
+path = "benchmarks/cardiac_mitbih.rs"
+
+[[example]]
+name = "cardiac_mitbih_baselines"
+path = "benchmarks/cardiac_mitbih_baselines.rs"

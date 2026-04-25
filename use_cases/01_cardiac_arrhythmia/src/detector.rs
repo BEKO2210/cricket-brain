@@ -140,7 +140,9 @@ impl CardiacDetector {
             Some(pp) => pp.filter(input_freq),
             None => input_freq,
         };
-        let output = self.brain.step_with_telemetry(clean_freq, &mut self.telemetry);
+        let output = self
+            .brain
+            .step_with_telemetry(clean_freq, &mut self.telemetry);
         self.step_count += 1;
         self.steps_since_spike += 1;
 
@@ -169,8 +171,7 @@ impl CardiacDetector {
             //
             // A real QRS: ~2-5 spike steps, energy ~2.0+
             // A noise spike: 1 step, energy ~0.7-0.9
-            let valid_beat = self.burst_len >= self.min_burst_ms
-                && self.burst_energy > 0.5;
+            let valid_beat = self.burst_len >= self.min_burst_ms && self.burst_energy > 0.5;
 
             if valid_beat {
                 // Record RR interval from previous validated beat
@@ -213,8 +214,8 @@ impl CardiacDetector {
             return RhythmClass::NormalSinus;
         }
 
-        let mean_rr = self.rr_intervals.iter().sum::<usize>() as f32
-            / self.rr_intervals.len() as f32;
+        let mean_rr =
+            self.rr_intervals.iter().sum::<usize>() as f32 / self.rr_intervals.len() as f32;
         let bpm = 60_000.0 / mean_rr;
 
         // Variability: coefficient of variation of RR intervals
@@ -258,8 +259,8 @@ impl CardiacDetector {
         if self.rr_intervals.is_empty() {
             return 0.0;
         }
-        let mean_rr = self.rr_intervals.iter().sum::<usize>() as f32
-            / self.rr_intervals.len() as f32;
+        let mean_rr =
+            self.rr_intervals.iter().sum::<usize>() as f32 / self.rr_intervals.len() as f32;
         60_000.0 / mean_rr
     }
 
@@ -496,9 +497,7 @@ mod tests {
 
     #[test]
     fn classify_stream_synthetic() {
-        let beats = ecg_signal::from_csv(
-            "data/processed/sample_record.csv",
-        );
+        let beats = ecg_signal::from_csv("data/processed/sample_record.csv");
         assert!(beats.len() >= 100, "Need enough beats: got {}", beats.len());
 
         let mut det = CardiacDetector::new();
@@ -514,14 +513,16 @@ mod tests {
 
     #[test]
     fn confusion_matrix_accuracy() {
-        let beats = ecg_signal::from_csv(
-            "data/processed/sample_record.csv",
-        );
+        let beats = ecg_signal::from_csv("data/processed/sample_record.csv");
         let mut det = CardiacDetector::new();
         let preds = det.classify_stream(&beats);
         let cm = ConfusionMatrix::from_predictions(&preds, &beats);
 
         assert!(cm.total > 0, "Should have predictions");
-        assert!(cm.accuracy() > 0.5, "Accuracy should be >50%: {:.1}%", cm.accuracy() * 100.0);
+        assert!(
+            cm.accuracy() > 0.5,
+            "Accuracy should be >50%: {:.1}%",
+            cm.accuracy() * 100.0
+        );
     }
 }
