@@ -5,6 +5,16 @@
 > **Validation status:** Synthetic P-QRS-T waveforms only. Real MIT-BIH
 > dataset validation is planned for v0.2 — see
 > [MASTER_PLAN.md](../MASTER_PLAN.md).
+>
+> **Triage, not diagnosis.** CricketBrain takes a single rate / RR-
+> interval time-series and flags one of four beat-rate regimes
+> (bradycardic / normal / tachycardic / transition-irregular). It does
+> **not** perform morphology-aware arrhythmia diagnosis (no AF, VT,
+> AVB, BBB, ST-elevation), no QT analysis, no calibrated ECG
+> measurement. **Not a substitute** for clinical ECG, Holter analysis,
+> or any FDA/CE-cleared device — it targets the **earlier layer** in
+> the monitoring chain: cheap, always-on rate-regime screening before
+> a clinical analyser is consulted.
 
 > **NOT A MEDICAL DEVICE.** This application is a research prototype for educational
 > and experimental purposes only. Do not use for clinical diagnosis, patient monitoring,

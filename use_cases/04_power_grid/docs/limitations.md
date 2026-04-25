@@ -4,6 +4,30 @@
 
 ---
 
+## 0. Triage, Not Metrology — the Headline Disclaimer
+
+CricketBrain UC04 detects **frequency-pattern signatures of harmonic-
+like events**, *not* calibrated harmonic amplitudes, THD, phase,
+sag/swell or IEC 61000-4-30 Class-A power-quality quantities. The
+output is an **alarm flag**, suitable as a front-end to an IEC-
+compliant analyser that quantifies the event on dispatch.
+
+Specifically out of scope:
+
+- No individual harmonic amplitudes (volts, amperes, percent)
+- No total-harmonic-distortion (THD) computation
+- No interharmonics, supraharmonics, or IEC 61000-4-7 binning
+- No voltage RMS, sag, swell, transient or interruption detection
+- No phase / sequence / unbalance analysis
+- No certified IEC/IEEE PQ measurement compliance
+
+The detector's value is in the **earlier layer of the measurement
+chain**: cheap, always-on, embedded triage *before* a Class-A
+instrument is dispatched. It is **not** a replacement for any PQM or
+PMU.
+
+---
+
 ## 1. Categorical, Not Precise
 
 The detector reports **categories** (Nominal vs each harmonic vs
@@ -113,9 +137,12 @@ Real EPFL PMU validation is the v0.2 priority milestone.
 | Continuous edge monitoring (< 1 mW) | **Yes** | Partial | No (mains) |
 | Training data required | **Zero** | No | No |
 | Sub-µs compute per step | **Yes** | No | No |
-| Cost per node | **< $5** | $50-500 | $500-5000 |
+| List-price tier (compute only) | **< $5 BoM target** | $50-500 board | $500-5000 instrument |
 
-CricketBrain's niche: **wide-deployment edge triage** — a cheap
-distributed sensor on every distribution-transformer secondary, raising
-flags that a centralised PQM analyses in detail. For a fully sourced
-comparison see [docs/competitive_analysis.md](competitive_analysis.md).
+CricketBrain's niche is the **earlier layer of the measurement chain**:
+a cheap, embedded triage front-end (compute fits in a 4 KB SRAM target
+— full deployable BOM, sensor chain, certification and field-trial
+costs are TBD) that flags potential events for a downstream Class-A
+PQM to quantify on dispatch. **Not a replacement** for any IEC-
+compliant instrument. For a fully sourced comparison see
+[docs/competitive_analysis.md](competitive_analysis.md).

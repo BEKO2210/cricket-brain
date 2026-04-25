@@ -5,6 +5,18 @@
 > **Validation status:** Synthetic CWRU-frequency signals only. Real
 > CWRU `.mat` accelerometer-file validation is the top-priority
 > milestone for v0.2 — see [MASTER_PLAN.md](../MASTER_PLAN.md).
+>
+> **Triage, not metrology.** CricketBrain takes a single dominant
+> vibration-frequency time-series and flags which bearing-defect
+> frequency band is currently dominant (BPFO / BPFI / BSF / Normal).
+> It does **not** measure calibrated vibration amplitudes (ISO 10816
+> velocity), does **not** estimate fault severity (0.007" vs 0.021"
+> defect), does **not** perform envelope analysis, sideband-harmonic
+> tracking or remaining-useful-life (RUL) prediction. **Not a
+> substitute** for SKF IMx, Emerson AMS or any condition-monitoring
+> suite — it targets the **earlier layer** in the maintenance chain:
+> cheap, always-on fault-frequency screening *before* a maintenance
+> analyser is dispatched.
 
 ---
 

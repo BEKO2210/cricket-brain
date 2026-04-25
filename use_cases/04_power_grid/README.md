@@ -1,41 +1,51 @@
-# CricketBrain Application: Power-Grid Harmonic & Stability Triage
+# CricketBrain Application: Power-Grid Harmonic-Pattern Triage
 
 > **Status:** v0.1.0 research prototype | **CricketBrain v3.0.0** | **License:** AGPL-3.0 | **Date:** 2026-04-24
 >
-> **Validation status:** Synthetic 50 Hz PMU-style streams only. Real
-> EPFL Smart-Grid PMU validation is planned for v0.2 — see
+> **Validation status:** Synthetic 50 Hz frequency-pattern streams only.
+> Real EPFL Smart-Grid PMU validation is planned for v0.2 — see
 > [MASTER_PLAN.md](../MASTER_PLAN.md).
+>
+> **What this detects vs. what it does not.** CricketBrain takes a single
+> dominant-frequency time-series as input and flags which harmonic-frequency
+> band is currently dominant. It does **not** measure calibrated harmonic
+> amplitudes, THD, phase, sag/swell or IEC 61000-4-30 Class-A power-quality
+> quantities. Treat the output as **harmonic-like frequency-pattern triage,
+> not calibrated harmonic metrology**.
 
 ---
 
 ## Overview
 
-A 4-channel **power-quality triage core** for distribution-grid
-monitoring. CricketBrain's ResonatorBank classifies each PMU window
-into one of five `GridEvent` categories — Outage / Nominal / 2nd / 3rd
-/ 4th harmonic — in 3,800 bytes of RAM with zero training data.
+A 4-channel **harmonic-pattern triage core** for distribution-grid
+event detection. CricketBrain's ResonatorBank flags each PMU window as
+one of five `GridEvent` categories — Outage / Nominal / 2nd / 3rd / 4th
+harmonic dominant — in 3,800 bytes of RAM with zero training data.
 
-**What it is:** An ultra-cheap, wide-deployment screening sensor that
-flags harmonic distortion and outages on every distribution-transformer
-secondary, leaving precision measurement to a co-deployed PMU or
-commercial PQM.
+**What it is:** A wide-deployment first-screen front-end for cheap
+embedded triage nodes that flags potential harmonic-distortion or
+outage events for a downstream IEC 61000-4-30 Class-A analyser to
+quantify.
 
-**What it is NOT:** An IEC 61000-4-30 Class A measurement instrument,
-a PMU, a sag/swell/voltage analyser, or a phase/sequence analyser. See
-[What this detector does NOT do](#what-this-detector-does-not-do).
+**What it is NOT:** An IEC 61000-4-30 Class-A measurement instrument,
+a PMU, a sag/swell/voltage analyser, a phase/sequence analyser, an
+amplitude / THD / phase / interharmonic / supraharmonic measuring
+device. See [What this detector does NOT do](#what-this-detector-does-not-do).
 
 ### Market context
 
-Smart-grid monitoring is a ~$100 B annual segment (BloombergNEF,
-2024 estimate). **Target hardware:** STM32F0 ($2 MCU) on a CT-secondary-
-harvested edge sensor.
+Smart-grid monitoring is a ~$100 B annual segment (BloombergNEF, 2024
+estimate). **Hardware target:** designed for **<$5-class embedded
+triage nodes** mounted at distribution-transformer secondaries
+(STM32F0+ / ESP32). *Hardware BOM, certification path and field-trial
+deployment costs are pending and not part of this v0.1 release.*
 
 ---
 
-## Benchmark Results (2026-04-24, synthetic 50 Hz PMU-style streams)
+## Benchmark Results (2026-04-24, synthetic 50 Hz frequency-pattern streams)
 
-All numbers below are measured on **synthetic 50 Hz grid signals** —
-not on real EPFL PMU recordings. Real-data validation is pending.
+All numbers below are measured on **synthetic 50 Hz signals** — not on
+real EPFL PMU recordings. Real-data validation is pending.
 
 ### Classification Performance (`sample_grid.csv`, 200 synthetic windows)
 
@@ -228,17 +238,30 @@ See [data/SOURCES.md](data/SOURCES.md) for download instructions.
 
 ## What this detector does NOT do
 
+**Measurement class — explicitly not in scope:**
+
+- **No calibrated harmonic amplitudes.** CricketBrain reports *which*
+  harmonic band is dominant, not *how strong* it is in volts or
+  amperes. A 1 % H3 distortion and a 25 % H3 distortion both produce
+  the same `ThirdHarmonic` label.
+- **No THD computation.** No total-harmonic-distortion percentage,
+  no individual line amplitudes h0-h50, no IEC 61000-4-7
+  10-min / 3-s grouping bins.
+- **No interharmonics or supraharmonics.** Only the four canonical
+  channels at 50 / 100 / 150 / 200 Hz.
 - **No exact frequency measurement.** 49.5-50.5 Hz all → `Nominal`.
   For ±0.005 Hz precision use a dedicated PMU.
-- **No voltage / sag-swell / transient classification.** Frequency-only.
+- **No voltage / sag-swell / transient classification.** Frequency-only
+  input — no RMS, no envelope, no impulse detection.
 - **No phase / sequence / unbalance analysis.** Single-stream input.
-- **No 50+ harmonic line spectrum.** 4 channels only.
-- **No IEC 61000-4-30 Class A compliance.** Triage class, not
-  measurement class.
-- **No real EPFL PMU data validation yet** (top-priority v0.2 milestone).
-- **Not a replacement** for Schneider PowerLogic, Fluke 1770, or any
-  PMU. This is a **first-screen edge sensor** that flags what a real
-  PQM analyses.
+- **No IEC 61000-4-30 Class-A compliance.** Triage class, not
+  measurement class. Not certified to any IEC/IEEE PQ standard.
+- **No real EPFL PMU data validation yet** — top-priority v0.2 milestone.
+
+**The mental model:** CricketBrain triages frequency-pattern signatures
+of harmonic-like events; it does not measure harmonics. The output is
+an **alarm flag** that an IEC-Class-A instrument can quantify on
+dispatch.
 
 See [docs/limitations.md](docs/limitations.md) for full analysis and
 [docs/competitive_analysis.md](docs/competitive_analysis.md) for the
@@ -249,37 +272,49 @@ analysers and TinyML PQ classifiers.
 
 ## How It Compares (2026-04-24)
 
-> **Disclaimer — these systems do not all perform the same task.**
-> CricketBrain triages 5 categorical events. PMUs measure exact
-> frequency. Commercial PQMs add sag/swell/voltage chain. Classical
-> FFT analysers report 50+ harmonic lines. The comparison is one of
-> **operating envelope** (RAM, power, latency, deployment cost),
-> not of shared accuracy.
+> **CricketBrain is not a replacement for Class-A PQ analysers or PMUs.**
+> It targets the **earlier layer in the measurement chain**: cheap,
+> always-on event triage *before* expensive measurement equipment is
+> dispatched. Fluke 1770 / Schneider PowerLogic / Schweitzer SEL-487E
+> remain the right tools for IEC-compliant amplitude, THD, sag/swell,
+> phase and synchrophasor measurement; CricketBrain is the front-end
+> that decides *when* those tools should look.
+>
+> The systems below do not perform the same task — read the table as an
+> *operating-envelope* comparison (RAM, power, latency, target tier),
+> not a shared-accuracy comparison.
 
 Short version — full breakdown with citations in
 [docs/competitive_analysis.md](docs/competitive_analysis.md):
 
-| System | RAM | Latency | Avg power @ 1 Hz | Cost / node |
-|--------|----:|--------:|-----------------:|------------:|
-| **CricketBrain UC04** | **3.7 KB** | **0.13-0.34 µs/step** | **< 0.5 µW** | **< $5** |
-| Classical FFT (Cortex-M4) | 64-256 KB | 1-5 ms | ~500 µW | $50-100 |
-| Commercial PQM (Schneider/Fluke) | MB-class | 50-200 ms | 5-10 W | $2,000-5,000 |
-| PMU (Schweitzer/GE/ABB) | 1-4 MB | 20 ms | 10-20 W | $10,000+ |
+| System | RAM | Latency | Avg power @ 1 Hz | Tier |
+|--------|----:|--------:|-----------------:|------|
+| **CricketBrain UC04** (event triage) | **3.7 KB** | **0.13-0.34 µs/step** | **< 0.5 µW compute** | <$5 embedded triage node (BOM TBD) |
+| Classical FFT analyser (Cortex-M4 + DSP libs) | 64-256 KB | 1-5 ms | ~500 µW | Substation gateway, $50-100 board |
+| Commercial PQM (Schneider PowerLogic, Fluke 1770) | MB-class Linux | 50-200 ms | 5-10 W mains | IEC-Class-A measurement, $2 k-5 k |
+| PMU (Schweitzer / GE / ABB, IEEE C37.118) | 1-4 MB | 20 ms | 10-20 W mains | ±0.005 Hz, $10 k+ |
 
-CricketBrain's niche: **wide-deployment edge triage** — a $5 sensor on
-every distribution-transformer secondary, raising flags that a
-centralised PQM analyses in detail.
+The cost / RAM / power ranges are order-of-magnitude tier indicators
+from vendor datasheets, *not* a one-to-one head-to-head benchmark; per-
+deployment economics depend on hardware BOM, certification, sensors,
+network and labour costs that are out of scope for this v0.1 release.
 
 ---
 
 ## Honest Limitations
 
-1. **Categorical, not precise** — does not measure exact frequency.
-2. **No voltage / sag-swell** — frequency input only.
-3. **No phase / sequence / unbalance** — single-stream input.
-4. **Single-label by default** — v0.2 `step_multi` recovers
+1. **Triage, not metrology** — flags which harmonic band is dominant,
+   does **not** quantify amplitude, THD or phase.
+2. **Categorical, not precise** — 49.5-50.5 Hz all → Nominal; no
+   ±0.005 Hz precision.
+3. **No voltage / sag-swell / transient / interharmonic / supraharmonic
+   detection** — frequency input only.
+4. **No phase / sequence / unbalance analysis** — single-stream input.
+5. **Single-label by default** — v0.2 `step_multi` recovers
    simultaneous fundamental + harmonic.
-5. **Synthetic data only in v0.1** — real EPFL PMU validation pending.
+6. **Synthetic data only in v0.1** — real EPFL PMU validation pending.
+7. **Not certified to any IEC/IEEE standard.** Pre-screen front-end
+   only.
 
 Full analysis: [docs/limitations.md](docs/limitations.md).
 

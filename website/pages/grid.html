@@ -63,9 +63,10 @@
   <main id="main-content">
     <!-- Hero -->
     <section class="grid-hero">
-      <h1>Power-Grid <span>Harmonic</span> Triage</h1>
-      <p class="subtitle">4-channel ResonatorBank classifies PMU streams into Outage / Nominal / 2nd / 3rd / 4th harmonic. 20 neurons in 3,800 bytes &mdash; a $5 sensor on every distribution-transformer secondary.</p>
-      <p style="font-size:var(--font-size-sm); color:var(--text-muted); margin-block-end:var(--space-lg); max-inline-size:700px;"><strong style="color:var(--text-primary);">Validation status:</strong> synthetic 50 Hz PMU-style streams only. Real EPFL Smart-Grid PMU validation is planned.</p>
+      <h1>Power-Grid <span>Harmonic-Pattern</span> Triage</h1>
+      <p class="subtitle">4-channel ResonatorBank flags which harmonic-frequency band is dominant in a PMU stream &mdash; Outage / Nominal / 2nd / 3rd / 4th harmonic. 20 neurons in 3,800 bytes, designed for &lt;$5-class embedded triage nodes mounted at distribution-transformer secondaries.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--text-muted); margin-block-end:var(--space-sm); max-inline-size:740px;"><strong style="color:var(--text-primary);">Validation status:</strong> synthetic 50 Hz frequency-pattern streams only. Real EPFL Smart-Grid PMU validation is planned. Hardware BOM, certification path and field-trial costs are pending and not part of this v0.1 release.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--accent); margin-block-end:var(--space-lg); max-inline-size:740px;"><strong>Triage, not metrology.</strong> Detects frequency-pattern signatures of harmonic-like events. Does <em>not</em> measure calibrated harmonic amplitudes, THD, phase, sag/swell or IEC&nbsp;61000-4-30 Class-A power-quality quantities.</p>
       <div style="display:flex; flex-wrap:wrap; gap:var(--space-md); justify-content:center;">
         <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/04_power_grid" class="btn btn-primary" target="_blank" rel="noopener">View Source</a>
         <a href="../index.html#use-cases" class="btn btn-secondary">All Use Cases</a>
@@ -185,23 +186,23 @@
     <section class="section">
       <div class="content-wrap">
         <h2 class="section-title">How It <span>Compares</span></h2>
-        <p class="section-subtitle">Against classical FFT-based PQ analysers, TinyML PQ classifiers, commercial PQMs (Schneider PowerLogic, Fluke 1770) and PMUs (Schweitzer, GE, ABB). All numbers from vendor datasheets, IEC/IEEE standards or peer-reviewed papers.</p>
+        <p class="section-subtitle"><strong>CricketBrain is not a replacement for Class-A PQ analysers or PMUs.</strong> It targets the <em>earlier layer in the measurement chain</em>: cheap, always-on event triage <em>before</em> expensive measurement equipment is dispatched. Fluke 1770 / Schneider PowerLogic / Schweitzer SEL-487E remain the right tools for IEC-compliant amplitude, THD, sag/swell, phase and synchrophasor measurement &mdash; CricketBrain is the front-end that decides <em>when</em> those tools should look. The systems below do not perform the same task; the table is an <em>operating-envelope</em> indicator, not a head-to-head deployment-cost benchmark.</p>
 
         <div class="section-card">
-          <h3 style="margin-block-end:var(--space-sm);">RAM, Latency &amp; Cost per Node</h3>
+          <h3 style="margin-block-end:var(--space-sm);">RAM, Latency &amp; Tier</h3>
           <div class="result-table">
             <table class="comparison-table" role="table">
-              <thead><tr><th>System</th><th>RAM</th><th>Latency</th><th>Avg power @ 1 Hz</th><th>Cost / node</th></tr></thead>
+              <thead><tr><th>System</th><th>RAM</th><th>Latency</th><th>Avg power @ 1 Hz</th><th>Tier indication</th></tr></thead>
               <tbody>
-                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC04</strong></td><td><strong>3.7 KB</strong></td><td><strong>0.13-0.34 &micro;s/step</strong></td><td><strong>&lt; 0.5 &micro;W compute</strong></td><td><strong>&lt; $5</strong></td></tr>
-                <tr><td>Classical FFT (Cortex-M4)</td><td>64-256 KB</td><td>1-5 ms</td><td>~500 &micro;W</td><td>$50-100</td></tr>
-                <tr><td>TinyML PQ classifier (CNN)</td><td>20-100 KB</td><td>50-200 ms</td><td>5-30 mW</td><td>$50-500</td></tr>
-                <tr><td>Commercial PQM (Schneider/Fluke)</td><td>MB-class</td><td>50-200 ms</td><td>5-10 W (mains)</td><td>$2,000-5,000</td></tr>
-                <tr><td>PMU (Schweitzer/GE/ABB)</td><td>1-4 MB</td><td>20 ms</td><td>10-20 W (mains)</td><td>$10,000+</td></tr>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC04</strong> (event triage)</td><td><strong>3.7 KB</strong></td><td><strong>0.13-0.34 &micro;s/step</strong></td><td><strong>&lt; 0.5 &micro;W compute</strong></td><td>&lt;$5 embedded triage node (BOM TBD)</td></tr>
+                <tr><td>Classical FFT analyser (Cortex-M4 + DSP libs)</td><td>64-256 KB</td><td>1-5 ms</td><td>~500 &micro;W</td><td>Substation gateway, $50-100 board</td></tr>
+                <tr><td>TinyML PQ classifier (CNN, MFCC)</td><td>20-100 KB</td><td>50-200 ms</td><td>5-30 mW</td><td>Cortex-M4F+/M7 module, $50-500</td></tr>
+                <tr><td>Commercial PQM (Schneider PowerLogic, Fluke 1770)</td><td>MB-class Linux</td><td>50-200 ms</td><td>5-10 W mains</td><td>IEC-Class-A measurement, $2 k-5 k</td></tr>
+                <tr><td>PMU (Schweitzer / GE / ABB, IEEE C37.118)</td><td>1-4 MB</td><td>20 ms</td><td>10-20 W mains</td><td>±0.005 Hz synchrophasor, $10 k+</td></tr>
               </tbody>
             </table>
           </div>
-          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">CricketBrain is 10-1,000&times; cheaper per deployed node and is the only option that fits a 4 KB SRAM target on harvester power.</p>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">List-price bands and power figures are order-of-magnitude tier indicators from vendor datasheets, <em>not</em> a one-to-one head-to-head benchmark. The other systems are full instruments with sensor chains, certification and data-logging built in &mdash; CricketBrain is the compute core only. Per-deployment economics depend on hardware BOM, certification, sensors, network and labour costs that are out of scope for this v0.1 release.</p>
         </div>
 
         <div class="section-card" style="margin-block-start:var(--space-lg);">

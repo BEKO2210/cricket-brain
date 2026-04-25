@@ -68,7 +68,7 @@
         <span aria-hidden="true">&#9881;</span> v3.0.0 — Stable Research Release
       </div>
       <h1>Cricket<span class="text-accent">Brain</span></h1>
-      <p class="hero-subtitle">Adaptive neuromorphic signal processing. Hardwired core + optional STDP plasticity. Inspired by 200 million years of cricket evolution.</p>
+      <p class="hero-subtitle">Ultra-low-memory neuromorphic signal core for narrow-band, frequency-stable event triage. Hardwired core + optional STDP plasticity. Inspired by 200 million years of cricket evolution. <em>Not a general-purpose AI classifier &mdash; targets the earlier layer in the measurement chain, before expensive analysers are dispatched.</em></p>
       <div class="hero-actions">
         <a href="#simulation" class="btn btn-primary">Live Simulation</a>
         <a href="https://github.com/BEKO2210/cricket-brain" class="btn btn-secondary" target="_blank" rel="noopener">View Source</a>
@@ -354,7 +354,7 @@
             <article class="version-card uc-live">
               <span class="version-badge" style="background:color-mix(in srgb, var(--danger) 15%, transparent); color:var(--danger);">Synthetic Demo</span>
               <h3>Rate-Based Cardiac Rhythm Triage</h3>
-              <p>Beat-rate regime classifier (bradycardic / normal / tachycardic / irregular). Not a morphology-aware diagnostic.</p>
+              <p>Beat-rate regime flags only (bradycardic / normal / tachycardic / irregular). Triage, not diagnosis &mdash; not a substitute for clinical ECG.</p>
               <ul>
                 <li>92.5% synthetic accuracy, d' = 6.18 (SDT, log-linear)</li>
                 <li>0.126 &micro;s/step, 928 bytes RAM</li>
@@ -369,7 +369,7 @@
             <article class="version-card uc-live">
               <span class="version-badge" style="background:color-mix(in srgb, #3b82f6 15%, transparent); color:#3b82f6;">Synthetic Demo</span>
               <h3>Bearing Fault-Frequency Triage</h3>
-              <p>4-channel ResonatorBank classifies BPFO / BPFI / BSF dominant fault frequencies. Real CWRU <code>.mat</code> validation pending.</p>
+              <p>4-channel ResonatorBank flags which BPFO / BPFI / BSF defect frequency is dominant. Triage, not metrology &mdash; not a substitute for SKF IMx. Real CWRU validation pending.</p>
               <ul>
                 <li>93.0% synthetic accuracy, d' = 6.18 (SDT, log-linear)</li>
                 <li>3,712 bytes RAM, 20 neurons</li>
@@ -384,7 +384,7 @@
             <article class="version-card uc-live">
               <span class="version-badge" style="background:color-mix(in srgb, #00d4aa 15%, transparent); color:#00d4aa;">Synthetic Demo</span>
               <h3>Marine Acoustic Event Triage</h3>
-              <p>Frequency-stable events: fin-whale pulses, blue-whale A-calls, ship cavitation, humpback tonals. Real MARS validation pending.</p>
+              <p>Flags frequency-stable events &mdash; fin-whale pulses, blue-whale A-calls, ship cavitation, humpback tonals. Triage, not species ID &mdash; not a substitute for PAMGuard. Real MARS validation pending.</p>
               <ul>
                 <li>90.0% synthetic accuracy, d' = 6.18 (SDT, log-linear)</li>
                 <li>3,712 bytes RAM, 20 neurons</li>
@@ -399,8 +399,8 @@
           <a href="pages/grid.html" class="uc-card-link">
             <article class="version-card uc-live">
               <span class="version-badge" style="background:color-mix(in srgb, #f59e0b 15%, transparent); color:#f59e0b;">Synthetic Demo</span>
-              <h3>Power-Grid Harmonic Triage</h3>
-              <p>50 Hz fundamental + 2nd / 3rd / 4th harmonic + outage triage on PMU streams. Real EPFL validation pending.</p>
+              <h3>Power-Grid Harmonic-Pattern Triage</h3>
+              <p>Flags which harmonic-frequency band is dominant on PMU streams (50 / 100 / 150 / 200 Hz + Outage). Triage, not metrology &mdash; not a substitute for Class-A PQ analysers or PMUs. Real EPFL validation pending.</p>
               <ul>
                 <li>90.0% synthetic accuracy, d' = 6.18 (SDT, log-linear)</li>
                 <li>3,712 bytes RAM, 20 neurons</li>
