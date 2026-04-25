@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CricketBrain Power-Grid Triage — 3,800 bytes RAM, 4-channel ResonatorBank, 90% synthetic accuracy. EPFL-style PMU stream harmonic & outage detection on a $2 STM32.">
+  <meta name="theme-color" content="#0a0f1c" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
+  <meta property="og:title" content="Power-Grid Harmonic & Stability Triage — CricketBrain">
+  <meta property="og:description" content="4-channel neuromorphic PMU triage in 3,800 bytes. Outage / Nominal / 2nd / 3rd / 4th harmonic at 0.2 µs/step on a $2 STM32F0.">
+  <title>Power-Grid Harmonic Triage — CricketBrain</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="stylesheet" href="../css/style.css?v=3.0.0">
+  <style>
+    .grid-hero {
+      min-block-size: 50vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: var(--space-2xl) var(--space-lg); position: relative; overflow: hidden;
+    }
+    .grid-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(245,158,11,0.08) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 40% at 80% 80%, rgba(239,68,68,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .grid-hero h1 { font-size: var(--font-size-hero); margin-block-end: var(--space-md); }
+    .grid-hero h1 span { color: #f59e0b; }
+    .grid-hero .subtitle { font-size: clamp(var(--font-size-base), 2vw, var(--font-size-xl)); color: var(--text-secondary); max-inline-size: 720px; margin-block-end: var(--space-xl); }
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-md); max-inline-size: 900px; margin-inline: auto; }
+    .metric-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-lg); text-align: center; transition: all var(--transition-base); }
+    .metric-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+    .metric-card .value { font-size: var(--font-size-3xl); font-weight: 800; color: var(--accent); font-family: var(--font-mono); }
+    .metric-card .label { font-size: var(--font-size-xs); color: var(--text-muted); margin-block-start: var(--space-2xs); }
+    .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-xl); margin-block-end: var(--space-xl); }
+    .license-note { background: color-mix(in srgb, var(--highlight) 8%, var(--bg-card)); border: 1px solid color-mix(in srgb, var(--highlight) 25%, transparent); border-radius: var(--radius-md); padding: var(--space-md); font-size: var(--font-size-sm); color: var(--text-secondary); }
+    .license-note strong { color: var(--highlight); }
+    @media (max-width: 640px) { .grid-hero h1 { font-size: var(--font-size-3xl); } .metric-grid { grid-template-columns: repeat(2, 1fr); } .metric-card .value { font-size: var(--font-size-2xl); } }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="../index.html" class="logo" aria-label="CricketBrain Home">Cricket<span>Brain</span></a>
+      <nav class="main-nav" id="main-nav" role="navigation" aria-label="Navigation">
+        <a href="../index.html">Home</a>
+        <a href="../index.html#benchmarks">Benchmarks</a>
+        <a href="cardiac.html">Cardiac</a>
+        <a href="bearings.html">Bearings</a>
+        <a href="marine.html">Marine</a>
+        <a href="whitepaper.html">Whitepaper</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme"><span aria-hidden="true" id="theme-icon">&#9790;</span></button>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false"><span aria-hidden="true">&#9776;</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- Hero -->
+    <section class="grid-hero">
+      <h1>Power-Grid <span>Harmonic</span> Triage</h1>
+      <p class="subtitle">4-channel ResonatorBank classifies PMU streams into Outage / Nominal / 2nd / 3rd / 4th harmonic. 20 neurons in 3,800 bytes &mdash; a $5 sensor on every distribution-transformer secondary.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--text-muted); margin-block-end:var(--space-lg); max-inline-size:700px;"><strong style="color:var(--text-primary);">Validation status:</strong> synthetic 50 Hz PMU-style streams only. Real EPFL Smart-Grid PMU validation is planned.</p>
+      <div style="display:flex; flex-wrap:wrap; gap:var(--space-md); justify-content:center;">
+        <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/04_power_grid" class="btn btn-primary" target="_blank" rel="noopener">View Source</a>
+        <a href="../index.html#use-cases" class="btn btn-secondary">All Use Cases</a>
+      </div>
+    </section>
+
+    <!-- Key Metrics -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Key <span>Metrics</span></h2>
+        <p class="section-subtitle">Measured 2026-04-24 on synthetic 50 Hz PMU-style frequency streams spanning outage, healthy fundamental, 2nd / 3rd / 4th-harmonic distortion.</p>
+        <div class="metric-grid">
+          <div class="metric-card"><div class="value">90.0%</div><div class="label">Synthetic-window accuracy (200 windows)</div></div>
+          <div class="metric-card"><div class="value">6.18</div><div class="label">d' Sensitivity (SDT, log-linear)</div></div>
+          <div class="metric-card"><div class="value">0.900</div><div class="label">Macro F1 Score</div></div>
+          <div class="metric-card"><div class="value">3,800</div><div class="label">Bytes RAM (20 neurons)</div></div>
+          <div class="metric-card"><div class="value">0.23</div><div class="label">&micro;s / step (avg)</div></div>
+          <div class="metric-card"><div class="value">5</div><div class="label">Event Classes</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Per-Class Results -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Classification <span>Results</span></h2>
+        <div class="section-card">
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Event</th><th>Frequency</th><th>TP</th><th>FP</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+              <tbody>
+                <tr><td>Outage</td><td>&mdash;</td><td>19</td><td>1</td><td>0.950</td><td>0.950</td><td>0.950</td></tr>
+                <tr><td>Nominal</td><td>50 Hz</td><td>19</td><td>3</td><td>0.864</td><td>0.950</td><td>0.905</td></tr>
+                <tr><td>2nd Harmonic</td><td>100 Hz</td><td>17</td><td>3</td><td>0.850</td><td>0.850</td><td>0.850</td></tr>
+                <tr><td>3rd Harmonic</td><td>150 Hz</td><td>17</td><td>3</td><td>0.850</td><td>0.850</td><td>0.850</td></tr>
+                <tr><td>4th Harmonic</td><td>200 Hz</td><td>18</td><td>0</td><td>1.000</td><td>0.900</td><td>0.947</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stress Tests -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Real-World &amp; <span>Stress Tests</span></h2>
+
+        <div class="section-card">
+          <h3 style="margin-block-end:var(--space-sm);">Factory Startup (3rd-harmonic VFD load)</h3>
+          <p style="color:var(--text-secondary); font-size:var(--font-size-sm);">Nominal grid &rarr; sudden 3rd-harmonic burst from a starting variable-frequency drive &rarr; recovery to nominal. The H3-window ratio scales linearly with disturbance length.</p>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Disturbance length</th><th>H3 windows</th><th>Total</th><th>H3 ratio</th></tr></thead>
+              <tbody>
+                <tr><td>200 steps</td><td>4</td><td>30</td><td>13.3%</td></tr>
+                <tr><td>400 steps</td><td>8</td><td>30</td><td>26.7%</td></tr>
+                <tr><td>600 steps</td><td>12</td><td>30</td><td>40.0%</td></tr>
+                <tr><td>800 steps</td><td>16</td><td>30</td><td>53.3%</td></tr>
+                <tr><td>1200 steps</td><td>24</td><td>36</td><td>66.7%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Rolling Brownouts (load-shedding cycles)</h3>
+          <p style="color:var(--text-secondary); font-size:var(--font-size-sm);">Each scheduled dip produces exactly one Outage window &mdash; clean separation from the nominal majority.</p>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Dips</th><th>Dip length</th><th>Outage windows</th><th>Nominal</th><th>Outage %</th></tr></thead>
+              <tbody>
+                <tr><td>2</td><td>60</td><td>2</td><td>38</td><td>5.0%</td></tr>
+                <tr><td>4</td><td>80</td><td>4</td><td>36</td><td>10.0%</td></tr>
+                <tr><td>6</td><td>100</td><td>6</td><td>34</td><td>15.0%</td></tr>
+                <tr><td>10</td><td>120</td><td>10</td><td>30</td><td>25.0%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Noise Resilience <span style="font-size:var(--font-size-sm); color:var(--text-muted); font-weight:400;">&mdash; synthetic random-spike transients only</span></h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Synthetic noise %</th><th>Accuracy</th><th>Verdict</th></tr></thead>
+              <tbody>
+                <tr><td>0%</td><td>100%</td><td>OK on synthetic random-spike noise</td></tr>
+                <tr><td>10%</td><td>100%</td><td>OK on synthetic random-spike noise</td></tr>
+                <tr><td>30%</td><td>100%</td><td>OK on synthetic random-spike noise</td></tr>
+                <tr><td>50%</td><td>98%</td><td>OK on synthetic random-spike noise</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">These numbers characterise behaviour under <em>synthetic random-spike noise</em> only. Real PMU recordings additionally exhibit sustained broadband interference, DC-offset drift, and inter-harmonics &mdash; real-data validation pending.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Remaining Limitations</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Limitation</th><th>Status</th><th>Impact</th></tr></thead>
+              <tbody>
+                <tr><td>Categorical, not precise</td><td>By design</td><td>49.5-50.5 Hz all &rarr; Nominal. Use a PMU for ±0.005 Hz</td></tr>
+                <tr><td>No voltage / sag-swell</td><td>By design</td><td>Frequency-only input</td></tr>
+                <tr><td>No phase / sequence / unbalance</td><td>By design</td><td>Single-stream input</td></tr>
+                <tr><td>Single-label output</td><td style="color:var(--accent);">Mitigated v0.2</td><td><code>step_multi()</code> reports Fund + H3 simultaneously</td></tr>
+                <tr><td>Synthetic data only</td><td>Open</td><td>Real EPFL PMU validation pending</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Compares -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">How It <span>Compares</span></h2>
+        <p class="section-subtitle">Against classical FFT-based PQ analysers, TinyML PQ classifiers, commercial PQMs (Schneider PowerLogic, Fluke 1770) and PMUs (Schweitzer, GE, ABB). All numbers from vendor datasheets, IEC/IEEE standards or peer-reviewed papers.</p>
+
+        <div class="section-card">
+          <h3 style="margin-block-end:var(--space-sm);">RAM, Latency &amp; Cost per Node</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>System</th><th>RAM</th><th>Latency</th><th>Avg power @ 1 Hz</th><th>Cost / node</th></tr></thead>
+              <tbody>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC04</strong></td><td><strong>3.7 KB</strong></td><td><strong>0.13-0.34 &micro;s/step</strong></td><td><strong>&lt; 0.5 &micro;W compute</strong></td><td><strong>&lt; $5</strong></td></tr>
+                <tr><td>Classical FFT (Cortex-M4)</td><td>64-256 KB</td><td>1-5 ms</td><td>~500 &micro;W</td><td>$50-100</td></tr>
+                <tr><td>TinyML PQ classifier (CNN)</td><td>20-100 KB</td><td>50-200 ms</td><td>5-30 mW</td><td>$50-500</td></tr>
+                <tr><td>Commercial PQM (Schneider/Fluke)</td><td>MB-class</td><td>50-200 ms</td><td>5-10 W (mains)</td><td>$2,000-5,000</td></tr>
+                <tr><td>PMU (Schweitzer/GE/ABB)</td><td>1-4 MB</td><td>20 ms</td><td>10-20 W (mains)</td><td>$10,000+</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">CricketBrain is 10-1,000&times; cheaper per deployed node and is the only option that fits a 4 KB SRAM target on harvester power.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">When to Pick Which</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Scenario</th><th>Recommendation</th></tr></thead>
+              <tbody>
+                <tr><td>Wide-deployment edge sensor on every distribution transformer</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>Substation-class harmonic-amplitude analysis (50+ lines)</td><td>Classical FFT analyser</td></tr>
+                <tr><td>IEC 61000-4-30 Class A compliance + sag/swell + voltage</td><td>Schneider PowerLogic / Fluke 1770</td></tr>
+                <tr><td>±0.005 Hz precision, IEEE C37.118 (PMU class)</td><td>Schweitzer / GE / ABB PMU</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">Full sourced breakdown: <a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/04_power_grid/docs/competitive_analysis.md" target="_blank" rel="noopener">docs/competitive_analysis.md</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dataset & License -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Dataset &amp; <span>License</span></h2>
+        <div class="section-card">
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Field</th><th>Value</th></tr></thead>
+              <tbody>
+                <tr><td>Dataset</td><td>EPFL Smart-Grid Distribution Test Network</td></tr>
+                <tr><td>License</td><td>CC BY 4.0</td></tr>
+                <tr><td>URL</td><td><a href="https://www.epfl.ch/labs/desl-pwrs/smart-grid/" target="_blank" rel="noopener">epfl.ch/labs/desl-pwrs/smart-grid/</a></td></tr>
+                <tr><td>Equipment</td><td>OpenPMU + EPFL synchrophasor units</td></tr>
+                <tr><td>Sampling</td><td>50 frame/s synchrophasor + 50 kHz aux waveform</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="license-note" style="margin-block-start:var(--space-lg);">
+            <strong>License:</strong> CricketBrain source is <strong>AGPL-3.0</strong>. Commercial use requires paid license (<a href="https://github.com/BEKO2210/cricket-brain/blob/main/COMMERCIAL.md" target="_blank" rel="noopener">details</a>). EPFL data is <strong>CC BY 4.0</strong> &mdash; attribution required.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Quick <span>Start</span></h2>
+        <div style="max-inline-size:720px; margin-inline:auto;">
+          <div class="code-block">
+            <div class="code-block-header"><span>Terminal</span><button class="copy-btn" type="button" aria-label="Copy">Copy</button></div>
+            <pre><code><span class="command">cd</span> use_cases/04_power_grid
+<span class="command">cargo run</span> <span class="flag">--release</span>                                <span class="comment"># Synthetic demo</span>
+<span class="command">cargo run</span> <span class="flag">--release --</span> --factory                       <span class="comment"># Factory-startup transient</span>
+<span class="command">cargo run</span> <span class="flag">--release --</span> --brownout                      <span class="comment"># Rolling brownout</span>
+<span class="command">cargo run</span> <span class="flag">--release --</span> --csv data/processed/sample_grid.csv <span class="comment"># CSV mode</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> grid_sdt                <span class="comment"># SDT benchmark</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> grid_stress             <span class="comment"># Stress test</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-compact">
+      <div class="footer-links">
+        <a href="../index.html">Home</a>
+        <a href="cardiac.html">Cardiac</a>
+        <a href="bearings.html">Bearings</a>
+        <a href="marine.html">Marine</a>
+        <a href="whitepaper.html">Whitepaper</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <div class="footer-bottom"><span>&copy; 2026 Belkis Aslani</span></div>
+    </div>
+  </footer>
+  <script src="../js/app.js?v=3.0.0"></script>
+</body>
+</html>

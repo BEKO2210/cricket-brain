@@ -1,0 +1,29 @@
+[package]
+name = "cricket-brain-grid"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Power-grid harmonic and stability triage using CricketBrain — 50 Hz fundamental + 2nd/3rd/4th harmonic detection on PMU streams"
+license = "AGPL-3.0-only"
+publish = false
+
+[workspace]
+
+[dependencies]
+cricket-brain = { path = "../.." }
+
+[[example]]
+name = "grid_sdt"
+path = "benchmarks/grid_sdt.rs"
+
+[[example]]
+name = "grid_latency"
+path = "benchmarks/grid_latency.rs"
+
+[[example]]
+name = "grid_memory"
+path = "benchmarks/grid_memory.rs"
+
+[[example]]
+name = "grid_stress"
+path = "benchmarks/grid_stress.rs"
