@@ -2,50 +2,71 @@
 
 **Date:** 2026-04-24 | **CricketBrain v3.0.0 (UC04)**
 
-> **Disclaimer — not the same task.** CricketBrain triages 5
-> categorical events on a single dominant-frequency stream. PMU-class
-> instruments measure exact frequency to ±0.005 Hz, full RMS, phase,
-> sequence components and individual harmonic amplitudes. Commercial
-> power-quality monitors (Schneider PowerLogic, Fluke 1770) add
-> sag/swell/transient classification. Accuracy numbers are **not
-> directly comparable** — read the tables as an *operating-envelope*
-> comparison (RAM, power, latency, training-data requirement,
-> deployment cost).
+> **CricketBrain is not a replacement for Class-A power-quality
+> analysers or PMUs.** It targets a different layer of the measurement
+> chain: cheap, always-on **event triage** *before* expensive
+> measurement equipment is dispatched. Fluke 1770 / Schneider
+> PowerLogic / Schweitzer SEL-487E remain the right tools for
+> IEC-compliant amplitude, THD, sag/swell, phase and synchrophasor
+> measurement.
+>
+> **Disclaimer — not the same task.** CricketBrain takes a single
+> dominant-frequency time-series and flags one of 5 categorical events.
+> PMU-class instruments measure exact frequency to ±0.005 Hz, full RMS,
+> phase, sequence components and individual harmonic amplitudes h0-h50.
+> Commercial power-quality monitors (Fluke 1770, Schneider PowerLogic,
+> ABB QM200) add sag/swell/transient classification, IEC 61000-4-7
+> harmonic / interharmonic / supraharmonic binning, and IEC 61000-4-30
+> Class-A compliance. Accuracy numbers are **not directly comparable** —
+> read the tables as an *operating-envelope* comparison (RAM, power,
+> latency, target-tier indication), not a shared-accuracy comparison
+> and not a head-to-head BOM economics study.
 
 How does CricketBrain compare to **classical FFT-based PQ analysers**,
 to **commercial power-quality monitors**, to **PMUs**, and to
 **TinyML** approaches for grid monitoring? All numbers below come from
-vendor datasheets, IEC/IEEE standards, or peer-reviewed papers.
+vendor datasheets, IEC/IEEE standards, or peer-reviewed papers — the
+ranges are tier indicators, not deployment quotes.
 
 ---
 
 ## TL;DR
 
-| Budget | Who wins | Why |
+| Operating envelope | Best fit | Why |
 |--------|----------|-----|
-| **< $5 per node, < 1 mW, fleet of thousands** | **CricketBrain** | 3.7 KB RAM, 0.13 µs/step, zero training data |
-| **$50-500 substation analyser** | Classical FFT PQ analyser | Full spectrum (50 lines), < 0.1 % THD precision |
-| **PMU class** (synchronous-island detection, ±0.005 Hz) | **Schweitzer / GE / ABB PMU** | IEEE C37.118 compliant |
-| **Commercial PQM** (sag/swell/voltage) | **Schneider PowerLogic, Fluke 1770** | Full IEC 61000-4-30 Class A |
+| Embedded triage tier (kB RAM, µW power, fleet-scale) | **CricketBrain** | 3.7 KB RAM, 0.13 µs/step, zero training data |
+| Substation analyser tier (Cortex-M4+, 100 KB+ RAM) | Classical FFT PQ analyser | Full spectrum (50 lines), < 0.1 % THD precision |
+| Class-A measurement / sag-swell / voltage chain | **Schneider PowerLogic, Fluke 1770** | IEC 61000-4-30 Class A, full PQ feature set |
+| Synchrophasor / ±0.005 Hz / WAMS | **Schweitzer / GE / ABB PMU** | IEEE C37.118 compliant |
 
-CricketBrain's niche is the **first-screen, ubiquitous, edge-cheap
-deployment** — a $5 sensor on every distribution-transformer secondary
-that flags abnormalities for a $5,000 PQM to analyse.
+CricketBrain's niche is the **earliest layer of the measurement
+chain** — a cheap, embedded triage front-end that flags potential
+events for a downstream Class-A PQM to quantify on dispatch. **Not
+a replacement** for any IEC-compliant instrument.
 
 ---
 
-## 1. RAM & Cost per Node
+## 1. RAM & Tier Indication
 
-| System | RAM | Hardware | Approx cost / node |
-|--------|----:|----------|------------------:|
-| **CricketBrain UC04** | **3.7 KB** | STM32F0 + voltage divider | **< $5** |
+| System | RAM | Hardware tier | List price band |
+|--------|----:|---------------|----------------:|
+| **CricketBrain UC04** (event triage) | **3.7 KB** | STM32F0 + voltage divider (compute only) | <$5 BoM target [†] |
 | Classical FFT analyser (e.g. STM32F4 + DSP libs) | 64-256 KB | Cortex-M4 board | $50-100 |
 | Commercial PQM (Schneider PowerLogic ION8650) | MB-class | Embedded Linux | ~$2,000 |
-| Fluke 1770 series | MB-class | Industrial PC | ~$5,000 |
+| Fluke 1770 series PQ analyser | MB-class | Industrial PC | ~$5,000 |
 | PMU (Schweitzer SEL-487E, GE N60) | 1-4 MB | Custom hardened | ~$10,000+ |
 
-CricketBrain is **10-1,000 ×** cheaper per deployed node and is the
-only option that fits a 4 KB SRAM target.
+[†] **Compute target only.** CricketBrain itself fits in a 4 KB SRAM
+target. The full deployable cost of a field-grade triage node depends
+on enclosure, voltage / current sensors, isolation, certification,
+network, mounting and labour — none of which is part of this v0.1
+release. The "<$5" figure refers to the MCU + supporting compute BOM,
+*not* an installed-cost quote.
+
+The other systems in the table are full instruments with sensor
+chains, certification and data-logging built in. The comparison is
+therefore one of **what each tier is good at**, not a one-to-one
+deployment-cost benchmark.
 
 ---
 
@@ -100,9 +121,10 @@ models, but they need labelled corpora and Cortex-M7+ hardware.
 | IEEE C37.118 (PMU) | ±0.005 Hz, ±1 % TVE | **No** — triage class, not measurement class |
 
 CricketBrain is **not a substitute** for any IEC/IEEE-compliant
-instrument. It is a triage front-end: cheap, ubiquitous, and event-
-flagging — leaving precision measurement to the dedicated tools it
-alarms.
+instrument. It targets the **earlier layer in the measurement chain**:
+cheap, always-on event triage *before* expensive measurement equipment
+is dispatched. The downstream Class-A PQM still owns the certified
+amplitude, THD, phase, sag/swell and synchrophasor measurement.
 
 ---
 

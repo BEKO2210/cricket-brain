@@ -67,8 +67,9 @@
     <!-- Hero -->
     <section class="marine-hero">
       <h1>Marine Acoustic <span>Event Triage</span></h1>
-      <p class="subtitle">4-channel ResonatorBank detects frequency-stable acoustic events &mdash; fin-whale pulses, blue-whale A-calls, ship cavitation, humpback tonal components &mdash; in 3,800 bytes. Designed as a sub-mW triage front-end for a solar-powered smart buoy.</p>
+      <p class="subtitle">4-channel ResonatorBank flags which frequency-stable acoustic event is dominant on a hydrophone stream &mdash; fin-whale pulses, blue-whale A-calls, ship cavitation, humpback tonal components &mdash; in 3,800 bytes. Designed as a sub-mW triage front-end for a solar-powered smart buoy.</p>
       <p style="font-size:var(--font-size-sm); color:var(--text-muted); margin-block-end:var(--space-sm); max-inline-size:700px;"><strong style="color:var(--text-primary);">Validation status:</strong> synthetic MBARI-style hydrophone streams only. Real MARS archive validation is planned.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--accent); margin-block-end:var(--space-sm); max-inline-size:700px;"><strong>Triage, not species ID.</strong> Flags acoustic-frequency signatures only &mdash; no source localisation (TDOA / bearing), no rich-spectrogram analysis (humpback song phrases, dolphin whistles), not a substitute for PAMGuard or full-size marine CNNs. Targets the <em>earlier layer</em> in the bioacoustic monitoring chain.</p>
       <p style="font-size:var(--font-size-sm); color:var(--accent); margin-block-end:var(--space-lg);"><strong>v0.2 update:</strong> wider Gaussian tuning recovers boundary frequencies &middot; multi-label output flags whale <em>and</em> ship simultaneously</p>
       <div style="display:flex; flex-wrap:wrap; gap:var(--space-md); justify-content:center;">
         <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/03_marine_acoustic" class="btn btn-primary" target="_blank" rel="noopener">View Source</a>

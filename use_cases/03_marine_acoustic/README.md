@@ -5,6 +5,19 @@
 > **Validation status:** Synthetic MBARI-style hydrophone streams
 > only. Real MARS archive validation is planned — see
 > [MASTER_PLAN.md](../MASTER_PLAN.md).
+>
+> **Triage, not species identification.** CricketBrain takes a single
+> dominant-frequency time-series from a hydrophone and flags one of
+> five frequency-stable acoustic events (Ambient / FinWhale-20Hz /
+> BlueWhale-80Hz / ShipNoise-140Hz / Humpback-200Hz). It does **not**
+> perform full species identification, source localisation (TDOA /
+> bearing), distance / range estimation, or rich-spectrogram analysis
+> (humpback song phrases, dolphin whistles, sperm-whale clicks). **Not
+> a substitute** for PAMGuard, full-size marine CNNs, or any certified
+> bioacoustic analysis pipeline — it targets the **earlier layer** in
+> the monitoring chain: cheap, sub-mW, always-on event triage on a
+> solar-powered smart buoy *before* recordings are sent to a shore
+> analysis station.
 
 ---
 
