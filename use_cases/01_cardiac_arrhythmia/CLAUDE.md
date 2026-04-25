@@ -40,9 +40,43 @@ These rules apply to **every** future change in this use case:
 
 ---
 
+## v0.4 (2026-04-25) — First real MIT-BIH run
+
+Status: **DONE — published on website.**
+
+Real PhysioNet records ingested via `python/download_mitbih.py` +
+`python/preprocess.py`: records 100 (normal), 105 (noisy), 200
+(PVCs), 217 (paced), 232 (AF). 11 375 annotation beats total.
+
+Pooled results on the 5-record set:
+
+- 9 549 correct / 9 939 emissions → **96.08 % accuracy**
+- Macro-F1 = 0.793, balanced accuracy = 0.819
+- Per-class recall: Normal 0.971, Tachy 0.570, **Irregular 0.916**
+- Bradycardia: zero ground-truth support in this subset → no claim.
+- AAMI N/S/V/F/Q distributions reported per record (traceability).
+
+Result files committed:
+- `results/cardiac_mitbih_summary.json` (real-data limitations
+  override; synthetic-skeleton path superseded)
+- `results/cardiac_mitbih_per_record.csv`
+- `results/cardiac_mitbih_failure_cases.md`
+
+Bench fix: `cardiac_mitbih` now overrides `RunMetadata.limitations`
+on real-data runs, so `synthetic_generator_version` notes don't
+leak into MIT-BIH summaries.
+
+Website: `pages/cardiac.html` got a new top "Real MIT-BIH Results
+(v0.4)" section with per-record table + pooled CM + honest
+"Bradycardia not yet evaluated" note. Homepage UC card switched
+from "Synthetic Demo" badge to "v0.4 · First MIT-BIH" with the
+real numbers in the bullet list.
+
+---
+
 ## v0.3 (2026-04-25) — MIT-BIH loader + patient-aware eval
 
-Status: **DONE — infrastructure ready; awaiting PhysioNet ingestion.**
+Status: **DONE.**
 
 New module:
 

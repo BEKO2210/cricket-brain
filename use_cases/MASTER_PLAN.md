@@ -202,8 +202,8 @@ for the full milestone plan.
 |---|---|
 | **v0.1** synthetic results (legacy, partly circular) | Done, marked legacy |
 | **v0.2** synthetic benchmark hardening (truth-based metrics, stress sweeps, reject curve, baselines, structured outputs) | **Done** |
-| **v0.3** MIT-BIH loader + first real-data run | Skeleton only |
-| **v0.4** real-data CM + failure cases | Pending |
+| **v0.3** MIT-BIH loader + first real-data run | **Done** |
+| **v0.4** real-data CM + failure cases (5-record subset published) | **Done — 96.1 % pooled accuracy, results on website** |
 | **v0.5** baseline comparison on real data (Pan-Tompkins, Tiny CNN reference) | Pending |
 | **v0.6** ablation + cross-seed robustness | Pending |
 | **v1.0** reproducible benchmark report (one command, bit-stable hash, reviewer bundle) | Pending |

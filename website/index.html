@@ -347,19 +347,19 @@
     <section id="use-cases" class="section">
       <div class="content-wrap">
         <h2 class="section-title" data-animate="fade-up">Use <span>Cases</span></h2>
-        <p class="section-subtitle" data-animate="fade-up">Research prototypes built on CricketBrain. Each case includes benchmarks, source code, honest limitations and a validation-status badge. All current accuracy numbers are on synthetic signals; real-dataset validation is the v0.2 roadmap priority.</p>
+        <p class="section-subtitle" data-animate="fade-up">Research prototypes built on CricketBrain. Each case includes benchmarks, source code, honest limitations and a validation-status badge. UC01 has its first real MIT-BIH run (v0.4, 5 records / 96.1 % pooled accuracy); the other UCs remain synthetic-only and are tracked for real-data validation.</p>
 
         <div class="version-grid" data-animate="fade-up" data-stagger="true">
           <a href="pages/cardiac.html" class="uc-card-link">
             <article class="version-card uc-live">
-              <span class="version-badge" style="background:color-mix(in srgb, var(--danger) 15%, transparent); color:var(--danger);">Synthetic Demo</span>
+              <span class="version-badge" style="background:color-mix(in srgb, var(--accent) 15%, transparent); color:var(--accent);">v0.4 &middot; First MIT-BIH</span>
               <h3>Rate-Based Cardiac Rhythm Triage</h3>
               <p>Beat-rate regime flags only (bradycardic / normal / tachycardic / irregular). Triage, not diagnosis &mdash; not a substitute for clinical ECG.</p>
               <ul>
-                <li>92.5% synthetic accuracy, d' = 6.18 (SDT, log-linear)</li>
-                <li>0.126 &micro;s/step, 928 bytes RAM</li>
-                <li>17 tests, noise-resilient preprocessor</li>
-                <li>Wearable health segment (~$50B, Grand View 2024)</li>
+                <li><strong>96.1 % pooled accuracy on 5 MIT-BIH records</strong> (11 375 beats, real PhysioNet data)</li>
+                <li>0.94 Irregular recall on AF / ectopic-rich segments</li>
+                <li>~0.13 &micro;s/step, 928 bytes RAM, zero training</li>
+                <li>42 tests, deterministic, no inter-patient leakage</li>
               </ul>
               <span class="uc-cta">View Demo &rarr;</span>
             </article>

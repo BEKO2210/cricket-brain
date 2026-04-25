@@ -1,0 +1,16 @@
+# generated_at: 2026-04-25T10:38:27Z
+# git_commit: 5bbd377
+# command: target/release/examples/cardiac_mitbih --records-dir /tmp/mitbih_all --write
+# dataset_type: mitbih_csv
+# dataset_name: uc01_mitbih_5_records
+# synthetic_generator_version: 0.2.0
+# seed: 0
+# sample_rate_hz: 1000
+# window_size_ms: 1
+# limitations: Real MIT-BIH Arrhythmia Database records (PhysioNet, ODC-By v1.0). | Rate-regime triage only — Normal / Tachy / Brady / Irregular. Does NOT classify AAMI N/S/V/F/Q morphology, AF, VT, AVB, BBB, ST-elevation. | Ground truth derived from annotation RR intervals via a 5-beat sliding window (mitbih::rate_regime_truth); not a clinician rhythm label. | No inter-patient train/test split assertion in this binary — caller chooses which directory to evaluate. | Not a medical device. Not validated for clinical use. Research / embedded pre-screening prototype only.
+record_id,n_beats,n_emissions,n_ground_truth,n_correct,accuracy,macro_f1,recall_Normal,recall_Tachy,recall_Brady,recall_Irregular,aami_N,aami_S,aami_V,aami_F,aami_Q
+100,2272,2269,2266,2266,1.000000,1.000000,1.000000,0.000000,0.000000,0.000000,2238,33,1,0,0
+105,2556,2553,2370,2306,0.972996,0.453540,0.991793,0.066667,0.000000,0.225000,2511,0,41,0,4
+200,2594,2591,1897,1725,0.909331,0.799318,0.933938,0.666667,0.000000,0.840000,1738,30,824,2,0
+217,2207,2204,2088,2057,0.985153,0.724307,0.994163,0.000000,0.000000,0.406250,244,0,162,0,1801
+232,1746,1743,1318,1195,0.906677,0.888101,0.742664,0.000000,0.000000,0.989714,365,1381,0,0,0

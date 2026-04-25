@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "generated_at": "2026-04-25T10:38:27Z",
+    "git_commit": "5bbd377",
+    "command": "target/release/examples/cardiac_mitbih --records-dir /tmp/mitbih_all --write",
+    "dataset_type": "mitbih_csv",
+    "dataset_name": "uc01_mitbih_5_records",
+    "synthetic_generator_version": "0.2.0",
+    "seed": 0,
+    "classes": ["Normal", "Tachy", "Brady", "Irregular"],
+    "window_size_ms": 1,
+    "sample_rate_hz": 1000,
+    "limitations": ["Real MIT-BIH Arrhythmia Database records (PhysioNet, ODC-By v1.0).", "Rate-regime triage only — Normal / Tachy / Brady / Irregular. Does NOT classify AAMI N/S/V/F/Q morphology, AF, VT, AVB, BBB, ST-elevation.", "Ground truth derived from annotation RR intervals via a 5-beat sliding window (mitbih::rate_regime_truth); not a clinician rhythm label.", "No inter-patient train/test split assertion in this binary — caller chooses which directory to evaluate.", "Not a medical device. Not validated for clinical use. Research / embedded pre-screening prototype only."]
+  },
+  "status": {"v": "real_data"},
+  "pooled": {"n_records": 5, "total_beats": 11375, "micro_accuracy": 0.960761, "macro_accuracy_over_records": 0.954831, "macro_f1": 0.793082, "weighted_f1": 0.961699, "balanced_accuracy": 0.818988},
+  "per_record": [{"record_id": "100", "n_beats": 2272, "n_emissions": 2269, "n_ground_truth": 2266, "n_correct": 2266, "accuracy": 1.000000, "macro_f1": 1.000000, "aami_counts": {"N": 2238, "S": 33, "V": 1, "F": 0, "Q": 0}}, {"record_id": "105", "n_beats": 2556, "n_emissions": 2553, "n_ground_truth": 2370, "n_correct": 2306, "accuracy": 0.972996, "macro_f1": 0.453540, "aami_counts": {"N": 2511, "S": 0, "V": 41, "F": 0, "Q": 4}}, {"record_id": "200", "n_beats": 2594, "n_emissions": 2591, "n_ground_truth": 1897, "n_correct": 1725, "accuracy": 0.909331, "macro_f1": 0.799318, "aami_counts": {"N": 1738, "S": 30, "V": 824, "F": 2, "Q": 0}}, {"record_id": "217", "n_beats": 2207, "n_emissions": 2204, "n_ground_truth": 2088, "n_correct": 2057, "accuracy": 0.985153, "macro_f1": 0.724307, "aami_counts": {"N": 244, "S": 0, "V": 162, "F": 0, "Q": 1801}}, {"record_id": "232", "n_beats": 1746, "n_emissions": 1743, "n_ground_truth": 1318, "n_correct": 1195, "accuracy": 0.906677, "macro_f1": 0.888101, "aami_counts": {"N": 365, "S": 1381, "V": 0, "F": 0, "Q": 0}}]
+}

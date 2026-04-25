@@ -519,7 +519,7 @@ fn main() {
     } else {
         "mitbih_csv"
     };
-    let meta = RunMetadata::new(
+    let mut meta = RunMetadata::new(
         &cmd,
         dataset_type,
         &dataset_name,
@@ -528,6 +528,26 @@ fn main() {
         1,
         1000,
     );
+
+    // Real-data limitations differ from the synthetic ones. Override the
+    // default limitations field so the published JSON tells the truth.
+    if !synthetic_only {
+        meta.limitations = vec![
+            "Real MIT-BIH Arrhythmia Database records (PhysioNet, ODC-By v1.0).".into(),
+            "Rate-regime triage only — Normal / Tachy / Brady / Irregular. \
+             Does NOT classify AAMI N/S/V/F/Q morphology, AF, VT, AVB, BBB, ST-elevation."
+                .into(),
+            "Ground truth derived from annotation RR intervals via a 5-beat sliding window \
+             (mitbih::rate_regime_truth); not a clinician rhythm label."
+                .into(),
+            "No inter-patient train/test split assertion in this binary — caller chooses \
+             which directory to evaluate."
+                .into(),
+            "Not a medical device. Not validated for clinical use. Research / embedded \
+             pre-screening prototype only."
+                .into(),
+        ];
+    }
 
     if synthetic_only {
         write_skeleton_only_status(&meta, &records);

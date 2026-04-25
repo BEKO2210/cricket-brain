@@ -208,8 +208,9 @@ data is committed to this repo.**
 |---|---|---|
 | **v0.1** synthetic benchmark hardening | Truth-based metrics + structured outputs + stress sweeps + baselines | **Done** |
 | **v0.2** reject-aware benchmark | Coverage / accuracy curve + reliability artifact | Curve done; reliability diagram pending |
-| **v0.3** MIT-BIH loader + first real-data run | Patient-aware loader, AAMI mapping, non-circular RR-window truth, refuses to fake validated numbers | **Done — infrastructure ready; awaiting PhysioNet ingestion** |
-| **v0.4** real-data confusion matrix + failure cases | Inter-patient split, MIT-BIH `results/`, automated failure md | Pending |
+| **v0.3** MIT-BIH loader + first real-data run | Patient-aware loader, AAMI mapping, non-circular RR-window truth, refuses to fake validated numbers | **Done** |
+| **v0.4** real-data CM + per-record failure cases | First real MIT-BIH run on 5 records (100, 105, 200, 217, 232) — 11 375 beats, 96.1 % pooled accuracy, 0.79 macro-F1, 0.94 Irregular recall | **Done — published on website** |
+| **v0.4-followup** Brady class coverage + larger MIT-BIH split | Records 213, 232 segments etc. so Bradycardia ground-truth has support; expand to 10+ records | Pending |
 | **v0.5** baseline comparison on real data | Pan-Tompkins reference + Tiny CNN reference | Pending |
 | **v0.6** ablations | Component contribution table (gate / AGC / preproc / privacy) | Pending |
 | **v0.7** cross-seed robustness | Mean ± std over 10 seeds for every metric | Pending |

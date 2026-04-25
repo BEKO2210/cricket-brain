@@ -6,7 +6,40 @@
 
 ---
 
-## 0. v0.2 audit findings (new)
+## 0a. v0.4 real-data findings (2026-04-25)
+
+First real MIT-BIH run on records 100, 105, 200, 217, 232 — 11 375
+annotation beats. Pooled accuracy **96.08 %** (9 549 / 9 939
+emissions), macro-F1 **0.793**, balanced accuracy **0.819**.
+Per-class recall (where ground truth has support): Normal 0.971,
+Tachy 0.570, Irregular 0.916.
+
+Honest constraints uncovered:
+
+- **Tachycardia recall is only 57 % in this set.** Most fast-RR
+  windows in MIT-BIH are part of AF episodes, which the rate-regime
+  ground truth (CV(RR) > 0.30) labels Irregular. The detector
+  agrees with that labelling, so "Tachy → Irregular" is the
+  dominant tachy mis-call, not a free-running speed mistake. This
+  is a definition of the rate-regime ground truth, not a detector
+  failure per se.
+- **Bradycardia has zero ground-truth support in this subset.** No
+  performance claim is possible. Adding records that are
+  predominantly slow (213, parts of 232) is a v0.4-followup item.
+- **Per-record variability matters.** Record 100 (mostly normal)
+  scored 100 %; records 200 (PVCs) and 232 (AF) dropped to ~91 %.
+  Single headline numbers hide this — the README and website show
+  the per-record breakdown.
+- **No inter-patient train/test split is asserted yet.** The
+  benchmark accepts a directory and treats it pooled; the user is
+  responsible for splitting train/test patients. AAMI EC57:2012
+  inter-patient evaluation will be added in v0.5.
+- **Sample size is small (5 records / 11 375 beats).** Cross-record
+  variance is real — a single seed / record selection is not a
+  population estimate. The roadmap calls for cross-seed robustness
+  (v0.7) and 10+ records (v0.4-followup).
+
+## 0b. v0.2 audit findings
 
 The v0.2 benchmark hardening replaced the legacy circular confusion
 matrix with truth-based metrics and added 7-dimension stress sweeps,
@@ -112,23 +145,26 @@ This means it **cannot detect:**
 
 ---
 
-## 5. Synthetic Data Only
+## 5. Real-data coverage (v0.4 update)
 
-All benchmarks were run on **synthetic P-QRS-T waveforms** with:
-- Perfect timing (zero jitter)
-- Uniform RR intervals within each segment
-- Clean frequency transitions
-- No physiological variability
+The synthetic-only blanket caveat that lived here in v0.1/v0.2 is
+now partly superseded: v0.4 ships a first real MIT-BIH run on 5
+records (100, 105, 200, 217, 232) — 11 375 annotation beats —
+with **96.08 % pooled accuracy** and per-class recall {Normal 0.97,
+Tachy 0.57, Irregular 0.92, Brady undefined}. See § 0a above.
 
-Real ECG data (MIT-BIH) has:
-- Natural beat-to-beat variability (HRV)
-- Ectopic beats (PVCs, PACs)
-- Motion artifacts
-- Baseline wander
-- Electrode noise
-- Paced rhythms
+What is still constrained:
 
-The 92.5% accuracy on synthetic data is an **upper bound** — real-world accuracy will be lower.
+- **Sample is 5 of 48 MIT-BIH records.** AAMI EC57:2012 inter-patient
+  evaluation requires a curated record split which v0.4 does not
+  enforce. A 10–20 record evaluation with explicit train/test
+  patient disjointness is on the v0.5 roadmap milestone.
+- **Bradycardia ground truth is missing** in this subset. Cannot
+  claim performance on slow rhythms.
+- **MIT-BIH only.** No AHA database, no Long-Term ST DB, no Apnea
+  ECG, no real wearable traces.
+- **Single-channel.** MIT-BIH ships a 2-lead signal but the
+  pipeline currently uses one annotation series per record.
 
 ---
 

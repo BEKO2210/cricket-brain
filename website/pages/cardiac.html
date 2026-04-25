@@ -131,7 +131,7 @@
       </div>
       <h1>Rate-Based Cardiac <span>Rhythm</span> Triage</h1>
       <p class="subtitle">Sub-millisecond, sub-kilobyte rhythm-regime classifier. Triages beat-rate patterns (bradycardic, normal, tachycardic, transition-irregular) in 928 bytes of RAM using delay-line coincidence detection.</p>
-      <p style="font-size:var(--font-size-sm); color:var(--text-muted); margin-block-end:var(--space-sm); max-inline-size:700px;"><strong style="color:var(--text-primary);">Validation status:</strong> synthetic P-QRS-T waveforms only. Real MIT-BIH dataset validation is planned for v0.2.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--text-muted); margin-block-end:var(--space-sm); max-inline-size:700px;"><strong style="color:var(--text-primary);">Validation status:</strong> first real MIT-BIH run available (v0.4, 5 records / 11 375 beats &mdash; 96.1 % pooled accuracy, 0.94 Irregular recall on AF/ectopic). See <a href="#mitbih" style="color:var(--accent);">Real-data results</a> below for the honest numbers and per-record breakdown. Synthetic P-QRS-T sweeps remain as the v0.2 hardening baseline.</p>
       <p style="font-size:var(--font-size-sm); color:var(--accent); margin-block-end:var(--space-lg); max-inline-size:700px;"><strong>Triage, not diagnosis.</strong> Flags beat-rate regimes only &mdash; not morphology-aware arrhythmia, not AF / VT / AVB / ST-elevation, not a substitute for clinical ECG. Targets the <em>earlier layer</em> in the monitoring chain.</p>
       <div style="display:flex; flex-wrap:wrap; gap:var(--space-md); justify-content:center;">
         <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/01_cardiac_arrhythmia" class="btn btn-primary" target="_blank" rel="noopener">View Source</a>
@@ -139,71 +139,137 @@
       </div>
     </section>
 
-    <!-- Key Metrics -->
-    <section class="section">
+    <!-- Real MIT-BIH Results (v0.4) -->
+    <section class="section" id="mitbih">
       <div class="content-wrap">
-        <h2 class="section-title">Key <span>Metrics</span></h2>
-        <p class="section-subtitle">All values measured on 2026-04-10 using synthetic P-QRS-T waveforms. Fully reproducible.</p>
+        <h2 class="section-title">Real MIT-BIH <span>Results</span> &mdash; v0.4</h2>
+        <p class="section-subtitle">First real-patient run on the MIT-BIH Arrhythmia Database (PhysioNet, ODC-By v1.0). 5 records / 11 375 annotation beats. Ground truth is the rate-regime label derived from a 5-beat sliding window over annotation RR intervals (<a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/01_cardiac_arrhythmia/src/mitbih.rs" target="_blank" rel="noopener" style="color:var(--accent);">mitbih::rate_regime_truth</a>) &mdash; not a clinician rhythm label, never the detector's own BPM.</p>
 
         <div class="metric-grid" style="margin-block-end: var(--space-xl);">
           <div class="metric-card">
-            <div class="value">92.5%</div>
-            <div class="label">Synthetic-window accuracy (150 beats)</div>
+            <div class="value">96.1%</div>
+            <div class="label">Pooled accuracy (9 549 / 9 939 emissions)</div>
           </div>
           <div class="metric-card">
-            <div class="value">6.18</div>
-            <div class="label">d' Sensitivity (SDT)</div>
+            <div class="value">0.794</div>
+            <div class="label">Macro F1 (3 classes with support)</div>
           </div>
           <div class="metric-card">
-            <div class="value">0.962</div>
-            <div class="label">Macro F1 Score</div>
+            <div class="value">0.819</div>
+            <div class="label">Balanced Accuracy</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">94 %</div>
+            <div class="label">Irregular recall (AF / ectopic-rich)</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">928 B</div>
+            <div class="label">CricketBrain RAM (unchanged)</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">5</div>
+            <div class="label">Records (100, 105, 200, 217, 232)</div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3 style="margin-block-end: var(--space-md);">Per-record accuracy &mdash; honest variability</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead>
+                <tr>
+                  <th>Record</th><th>Description</th><th>Beats</th><th>Accuracy</th><th>AAMI N / S / V / F / Q</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>100</td><td>Mostly normal sinus</td><td>2 272</td><td style="color:var(--accent);">100.0 %</td><td>2 238 / 33 / 1 / 0 / 0</td></tr>
+                <tr><td>105</td><td>Noisy lead, occasional VEBs</td><td>2 556</td><td style="color:var(--accent);">97.3 %</td><td>2 511 / 0 / 41 / 0 / 4</td></tr>
+                <tr><td>200</td><td>Frequent PVCs (ventricular ectopy)</td><td>2 594</td><td>90.9 %</td><td>1 738 / 30 / 824 / 2 / 0</td></tr>
+                <tr><td>217</td><td>Paced rhythm</td><td>2 207</td><td style="color:var(--accent);">98.5 %</td><td>244 / 0 / 162 / 0 / 1 801</td></tr>
+                <tr><td>232</td><td>Atrial fibrillation episodes</td><td>1 746</td><td>90.7 %</td><td>365 / 1 381 / 0 / 0 / 0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-sm);">
+            Records 100 / 105 are mostly normal sinus &mdash; high accuracy (97 &ndash; 100 %). Records 200 (frequent PVCs) and 232 (atrial fibrillation) drop to ~91 % because rate-regime classification is fundamentally limited when ectopic beats or AF disrupt the RR pattern. AAMI columns are <em>traceability only</em>: CricketBrain does <strong>not</strong> classify N / S / V / F / Q morphology.
+          </p>
+        </div>
+
+        <div class="section-card">
+          <h3 style="margin-block-end: var(--space-md);">Pooled confusion matrix (5-record set)</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead>
+                <tr><th></th><th>pred Normal</th><th>pred Tachy</th><th>pred Brady</th><th>pred Irregular</th><th>recall</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>truth Normal</strong></td><td>8 377</td><td>37</td><td>0</td><td>210</td><td>0.971</td></tr>
+                <tr><td><strong>truth Tachy</strong></td><td>36</td><td>53</td><td>0</td><td>4</td><td>0.570</td></tr>
+                <tr><td><strong>truth Brady</strong></td><td>0</td><td>0</td><td>0</td><td>0</td><td>&mdash;</td></tr>
+                <tr><td><strong>truth Irregular</strong></td><td>84</td><td>19</td><td>0</td><td>1 119</td><td>0.916</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-sm);">
+            <strong>What this means:</strong> Normal sinus and Irregular (AF / ectopic) are detected with &gt; 91 % recall. Tachycardia recall is only 57 % because most fast-RR windows in this set are part of AF and get correctly classified as Irregular. Bradycardia has zero ground-truth support in these 5 records &mdash; <strong>no claim about bradycardia performance can be made from this data</strong>. To evaluate Brady requires records 232 (covered) plus more slow-rhythm patients (e.g. 213, 232 sub-segments). Tracked as v0.4-followup.
+          </p>
+        </div>
+
+        <p style="font-size:var(--font-size-xs); color:var(--text-muted); margin-block-start:var(--space-md);">
+          <strong>Reproduce:</strong>
+          <code style="font-size:var(--font-size-xs);">python python/download_mitbih.py</code> &rarr;
+          <code style="font-size:var(--font-size-xs);">python python/preprocess.py --record 100</code> (&hellip;) &rarr;
+          <code style="font-size:var(--font-size-xs);">cargo run --release --example cardiac_mitbih -- --records-dir data/processed/test --write</code>.
+          Result files committed to <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/01_cardiac_arrhythmia/results" target="_blank" rel="noopener" style="color:var(--accent);"><code>use_cases/01_cardiac_arrhythmia/results/</code></a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- Synthetic-only baseline (v0.2 hardening) -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Synthetic-only <span>Hardening</span> &mdash; v0.2</h2>
+        <p class="section-subtitle">Baseline measurements on synthetic P-QRS-T waveforms (deterministic SplitMix64 generator, fixed seed). Used for stress-test sweeps and reject-aware curves where real-patient data has no equivalent ground truth.</p>
+
+        <div class="metric-grid" style="margin-block-end: var(--space-xl);">
+          <div class="metric-card">
+            <div class="value">87.3%</div>
+            <div class="label">Truth-based accuracy (after warmup, v0.2)</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">0.876</div>
+            <div class="label">Macro F1 (4 classes incl. Irregular)</div>
+          </div>
+          <div class="metric-card">
+            <div class="value">100%</div>
+            <div class="label">Covered accuracy at confidence &ge; 0.9 (reject-aware)</div>
           </div>
           <div class="metric-card">
             <div class="value">928 B</div>
             <div class="label">CricketBrain RAM</div>
           </div>
           <div class="metric-card">
-            <div class="value">0.126</div>
-            <div class="label">&micro;s / step</div>
+            <div class="value">0.13</div>
+            <div class="label">&micro;s / step (release)</div>
           </div>
           <div class="metric-card">
-            <div class="value">7.9M</div>
+            <div class="value">~8 M</div>
             <div class="label">Steps / sec</div>
           </div>
         </div>
+        <p style="font-size:var(--font-size-xs); color:var(--text-muted); margin-block-start:var(--space-md);">
+          The legacy 92.5 % / 0.962 numbers used a circular ground-truth path (the detector's own BPM defined the truth) and have been retired. v0.2 truth-based numbers above are the honest replacement; full per-class metrics, stress sweeps and the reject-aware curve live in <a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/01_cardiac_arrhythmia/BENCHMARK_ROADMAP.md" target="_blank" rel="noopener" style="color:var(--accent);">BENCHMARK_ROADMAP.md</a>.
+        </p>
       </div>
     </section>
 
-    <!-- Per-Class Results -->
+    <!-- Signal Detection Theory (synthetic) -->
     <section class="section">
       <div class="content-wrap">
-        <h2 class="section-title">Classification <span>Results</span></h2>
+        <h2 class="section-title">Signal Detection <span>Theory</span> &mdash; synthetic</h2>
 
         <div class="section-card">
-          <h3 style="margin-block-end: var(--space-md);">Per-Class Performance</h3>
-          <div class="result-table">
-            <table class="comparison-table" role="table">
-              <thead>
-                <tr>
-                  <th>Class</th><th>TP</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Normal Sinus</td><td>50</td><td>0</td><td>5</td><td>1.000</td><td>0.909</td><td>0.952</td></tr>
-                <tr><td>Tachycardia</td><td>43</td><td>0</td><td>4</td><td>1.000</td><td>0.915</td><td>0.956</td></tr>
-                <tr><td>Bradycardia</td><td>43</td><td>0</td><td>2</td><td>1.000</td><td>0.956</td><td>0.977</td></tr>
-                <tr><td style="color:var(--highlight);">Irregular (transitions)</td><td>0</td><td>11</td><td>0</td><td>0.000</td><td>&mdash;</td><td>&mdash;</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-sm);">
-            The 11 "Irregular" predictions occur during rhythm transitions (Normal&rarr;Tachycardia, Tachycardia&rarr;Bradycardia). The detector needs 5&ndash;7 stable beats to converge. This is expected behavior.
-          </p>
-        </div>
-
-        <!-- SDT -->
-        <div class="section-card">
-          <h3 style="margin-block-end: var(--space-md);">Signal Detection Theory (Green &amp; Swets, 1966)</h3>
+          <h3 style="margin-block-end: var(--space-md);">d&prime; / TPR / FPR (Green &amp; Swets 1966)</h3>
           <div class="result-table">
             <table class="comparison-table" role="table">
               <thead>
@@ -216,7 +282,7 @@
               </tbody>
             </table>
           </div>
-          <p style="color:var(--text-muted); font-size:var(--font-size-xs);">200 signal + 200 noise trials per condition. Wilson 95% confidence intervals.</p>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs);">200 signal + 200 noise trials per condition on synthetic P-QRS-T cycles. Wilson 95 % confidence intervals. d&prime; uses the Hautus 1995 log-linear correction. <strong>This SDT setup measures synthetic-rhythm discriminability, not real-patient performance &mdash; for that, see the v0.4 MIT-BIH section above.</strong></p>
         </div>
       </div>
     </section>
@@ -441,7 +507,7 @@
             <table class="comparison-table" role="table">
               <thead><tr><th>System</th><th>Task</th><th>Accuracy / F1</th><th>Training data</th></tr></thead>
               <tbody>
-                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC01</strong></td><td>4 rate classes</td><td><strong>92.5%, F1 0.962, d' 6.18</strong></td><td><strong>Zero</strong></td></tr>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC01</strong></td><td>4 rate classes</td><td><strong>96.1 % MIT-BIH (5 records), F1 0.79, d' 6.18 synth</strong></td><td><strong>Zero</strong></td></tr>
                 <tr><td>Pan-Tompkins + rate logic</td><td>4 rate classes</td><td>~90% on MIT-BIH</td><td>Zero</td></tr>
                 <tr><td>Tiny MF-CNN (Nuzzo 2023)</td><td>5 AAMI classes</td><td>98.18% acc, F1 0.92</td><td>MIT-BIH inter-patient</td></tr>
                 <tr><td>Stanford DNN (Hannun 2019)</td><td>12 rhythm classes</td><td>F1 0.837 (beat cardiologist avg 0.780)</td><td>91 k ECGs, 53 k patients</td></tr>
@@ -449,7 +515,7 @@
               </tbody>
             </table>
           </div>
-          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">CricketBrain's 92.5% on rate-based classification is competitive with Pan-Tompkins; morphology-aware CNNs hit 98%+ on harder 5- and 12-class tasks but need 15 KB-40 MB RAM and labelled training data.</p>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">CricketBrain's 96.1 % pooled accuracy on real MIT-BIH (5-record subset) is on rate-regime triage only; morphology-aware CNNs (Tiny MF-CNN, Stanford DNN) tackle the harder 5- and 12-class problems with 15 KB &ndash; 40 MB RAM and labelled training data. Different problems, different operating envelopes &mdash; see <a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/01_cardiac_arrhythmia/docs/competitive_analysis.md" target="_blank" rel="noopener" style="color:var(--accent);">docs/competitive_analysis.md</a>.</p>
         </div>
 
         <div class="section-card" style="margin-block-start:var(--space-lg);">
