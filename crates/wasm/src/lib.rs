@@ -4,6 +4,8 @@ use cricket_brain::error_codes;
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
+pub mod bearing;
+
 #[derive(Debug, Clone, Serialize)]
 pub struct TelemetryEvent {
     pub kind: String,
