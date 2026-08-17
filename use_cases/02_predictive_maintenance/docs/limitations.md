@@ -94,15 +94,25 @@ Real CWRU data would test: signal-to-noise ratio, spectral leakage, harmonic int
 
 ---
 
-## 6. CricketBrain vs. Traditional Approaches
+## 6. CricketBrain vs. Traditional, TinyML & Deep Learning
 
-| Capability | CricketBrain | Envelope Analysis | Deep Learning |
-|-----------|:---:|:---:|:---:|
-| Fixed-speed fault detection | Yes | Yes | Yes |
-| Variable-speed detection | No | With order tracking | Yes |
-| Fault severity estimation | No | Yes (amplitude) | Yes |
-| Multiple simultaneous faults | No | Limited | Yes |
-| Training data required | No | No | Yes (large datasets) |
-| Runs on MCU ($0.50) | Yes | Sometimes | No |
-| Sub-microsecond latency | Yes | No | No |
-| Explainable decisions | Yes | Yes | Partially |
+| Capability | CricketBrain | Envelope | Lite CNN ([src](https://pmc.ncbi.nlm.nih.gov/articles/PMC10054387/)) | ResNet-50 | SKF IMx |
+|-----------|:---:|:---:|:---:|:---:|:---:|
+| RAM | **3.7 KB** | < 5 KB | ~100 KB | > 1 GB GPU | PC-class |
+| Model size | ~25 KB flash | < 10 KB | 600 KB fp32 (153 K params) | 96 MB (23.9 M params) | 10-100 MB |
+| Inference time | **0.13 µs/step** | 1-10 ms | 120-140 ms | ~3 s | — |
+| Average power @ 1 Hz | **< 1 µW compute** | ~500 µW | ~14 mW | — | ~10 W (mains) |
+| Training data | **Zero** | Zero | CWRU full | ImageNet + CWRU | vendor corpora |
+| CWRU accuracy | 93.0 % synthetic | 95-98 % | **99.95 %** | **99.95 %** | — |
+| Fixed-speed fault detection | Yes | Yes | Yes | Yes | Yes |
+| Variable-speed (RPM-compensated) | **Yes** (`set_rpm()`) | with order tracking | Partial | Yes | **Yes** |
+| Fault severity estimation | No | Yes (amplitude) | **Yes** | Yes | **Yes** |
+| Multiple simultaneous faults | No | Limited | **Yes** | Yes | Yes |
+| Runs on $2 STM32F0 | **Yes** | Yes | No | No | No |
+| Wireless self-powered tag (< 1 mW) | **Yes** | No | No | No | No |
+| Sub-µs compute per step | **Yes** | No | No | No | No |
+| Explainable / auditable | **Yes** | Yes | Partial | No | Yes |
+
+Full sourced breakdown (Hakim 2023 Lite CNN vs ResNet-50 table,
+FaultNet, CNN-Transformer, envelope-analysis power figures):
+[docs/competitive_analysis.md](competitive_analysis.md).

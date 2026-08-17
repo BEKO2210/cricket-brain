@@ -2,9 +2,9 @@
 //! Criterion benchmarks for cardiac arrhythmia detector.
 //! Date: 2026-04-10
 
-use criterion::{criterion_group, criterion_main, Criterion};
 use cricket_brain_cardiac::detector::CardiacDetector;
 use cricket_brain_cardiac::ecg_signal;
+use criterion::{criterion_group, criterion_main, Criterion};
 
 fn bench_step_throughput(c: &mut Criterion) {
     let mut det = CardiacDetector::new();
@@ -25,9 +25,7 @@ fn bench_classify_stream(c: &mut Criterion) {
     let mut det = CardiacDetector::new();
 
     c.bench_function("cardiac_classify_150beats", |b| {
-        b.iter(|| {
-            det.classify_stream(&beats)
-        })
+        b.iter(|| det.classify_stream(&beats))
     });
 }
 
@@ -45,5 +43,10 @@ fn bench_tachy_detection(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, bench_step_throughput, bench_classify_stream, bench_tachy_detection);
+criterion_group!(
+    benches,
+    bench_step_throughput,
+    bench_classify_stream,
+    bench_tachy_detection
+);
 criterion_main!(benches);

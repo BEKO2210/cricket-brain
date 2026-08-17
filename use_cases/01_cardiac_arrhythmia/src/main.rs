@@ -53,12 +53,19 @@ fn run_scenario(
     for (i, (class, bpm, conf, step)) in classifications.iter().enumerate() {
         println!(
             "  Beat {}: {} | BPM={:.0} | Confidence={:.2} | Step={}",
-            i + 1, class, bpm, conf, step
+            i + 1,
+            class,
+            bpm,
+            conf,
+            step
         );
     }
 
     let last = &classifications[classifications.len() - 1];
-    println!("  Final: {} (BPM={:.0}, Conf={:.2})\n", last.0, last.1, last.2);
+    println!(
+        "  Final: {} (BPM={:.0}, Conf={:.2})\n",
+        last.0, last.1, last.2
+    );
 }
 
 fn run_csv_mode(csv_path: &str) {
@@ -82,7 +89,11 @@ fn run_csv_mode(csv_path: &str) {
     for (i, r) in results.iter().enumerate() {
         println!(
             "  [{:>4}] {} | BPM={:.0} | Conf={:.2} | Step={}",
-            i + 1, r.rhythm, r.bpm, r.confidence, r.step
+            i + 1,
+            r.rhythm,
+            r.bpm,
+            r.confidence,
+            r.step
         );
     }
 
@@ -111,18 +122,8 @@ fn run_synthetic_demo() {
         5,
         &mut detector,
     );
-    run_scenario(
-        "Tachycardia",
-        &ecg_signal::tachycardia(),
-        5,
-        &mut detector,
-    );
-    run_scenario(
-        "Bradycardia",
-        &ecg_signal::bradycardia(),
-        5,
-        &mut detector,
-    );
+    run_scenario("Tachycardia", &ecg_signal::tachycardia(), 5, &mut detector);
+    run_scenario("Bradycardia", &ecg_signal::bradycardia(), 5, &mut detector);
 
     // Mixed scenario
     println!("--- Mixed: Normal → Tachycardia Transition ---");

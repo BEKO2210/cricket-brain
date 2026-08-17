@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "generated_at": "2026-04-25T10:33:12Z",
+    "git_commit": "3c3579d",
+    "command": "use_cases/01_cardiac_arrhythmia/target/release/examples/cardiac_mitbih --write",
+    "dataset_type": "synthetic",
+    "dataset_name": "uc01_mitbih_synth_sample",
+    "synthetic_generator_version": "0.2.0",
+    "seed": 0,
+    "classes": ["Normal", "Tachy", "Brady", "Irregular"],
+    "window_size_ms": 1,
+    "sample_rate_hz": 1000,
+    "limitations": ["Synthetic ECG only — no real-patient validation yet.", "Frequency-encoded inputs; not a clinical waveform analyser.", "Rate-regime triage only; no morphology, no AF, no VT, no ST analysis.", "Not a medical device. Research / embedded prototype only."]
+  },
+  "status": {"v": "skeleton_only", "reason": "all loaded record_ids are synthetic", "n_records_seen": 3, "n_beats_seen": 150},
+  "record_ids": ["synth_brady", "synth_normal", "synth_tachy"],
+  "next_step": "Run python python/download_mitbih.py and python python/preprocess.py to populate data/processed/{train,test}/, then re-run with --records-dir <those>."
+}

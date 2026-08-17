@@ -45,7 +45,12 @@ impl EcgPreprocessor {
     /// - `band_width`: fractional tolerance (0.15 = ±15%)
     /// - `min_consecutive`: minimum steps for temporal consistency (default 3)
     /// - `window_size`: moving average window (default 3)
-    pub fn new(band_center: f32, band_width: f32, min_consecutive: usize, window_size: usize) -> Self {
+    pub fn new(
+        band_center: f32,
+        band_width: f32,
+        min_consecutive: usize,
+        window_size: usize,
+    ) -> Self {
         Self {
             band_center,
             band_width,
@@ -106,7 +111,8 @@ impl EcgPreprocessor {
         let gated_freq = if inband && self.consecutive_inband >= self.min_consecutive {
             // Signal has been in-band long enough — pass through
             input_freq
-        } else if !inband && self.consecutive_inband >= self.min_consecutive
+        } else if !inband
+            && self.consecutive_inband >= self.min_consecutive
             && self.steps_since_inband <= self.gap_tolerance
         {
             // Brief out-of-band gap within a validated burst — pass the tracking freq
@@ -203,10 +209,10 @@ mod tests {
         // P(3100,12) + gap(4) + QRS(4500,10) + gap(4) + T(3400,14)
         let mut input = Vec::new();
         input.extend(std::iter::repeat(3100.0f32).take(12)); // P wave
-        input.extend(std::iter::repeat(0.0f32).take(4));      // gap
-        input.extend(std::iter::repeat(4500.0f32).take(10));   // QRS
-        input.extend(std::iter::repeat(0.0f32).take(4));       // gap
-        input.extend(std::iter::repeat(3400.0f32).take(14));   // T wave
+        input.extend(std::iter::repeat(0.0f32).take(4)); // gap
+        input.extend(std::iter::repeat(4500.0f32).take(10)); // QRS
+        input.extend(std::iter::repeat(0.0f32).take(4)); // gap
+        input.extend(std::iter::repeat(3400.0f32).take(14)); // T wave
 
         let output = pp.filter_stream(&input);
 
@@ -217,7 +223,11 @@ mod tests {
         let qrs_start = 16;
         assert_eq!(output[qrs_start], 0.0, "QRS step 0 suppressed");
         assert_eq!(output[qrs_start + 1], 0.0, "QRS step 1 suppressed");
-        assert!(output[qrs_start + 3] > 4000.0, "QRS step 3 passes: {}", output[qrs_start + 3]);
+        assert!(
+            output[qrs_start + 3] > 4000.0,
+            "QRS step 3 passes: {}",
+            output[qrs_start + 3]
+        );
 
         // T wave should pass (out of QRS band)
         assert!(output[30] > 3000.0, "T wave passes: {}", output[30]);
@@ -229,10 +239,10 @@ mod tests {
         // 50 steps: mostly silence, with scattered noise spikes and one real QRS
         let mut input = vec![0.0f32; 50];
         // Noise spikes (single step)
-        input[5] = 4600.0;   // in-band noise
-        input[12] = 4400.0;  // in-band noise
-        input[25] = 4500.0;  // in-band noise
-        // Real QRS (sustained 10 steps)
+        input[5] = 4600.0; // in-band noise
+        input[12] = 4400.0; // in-band noise
+        input[25] = 4500.0; // in-band noise
+                            // Real QRS (sustained 10 steps)
         for i in 35..45 {
             input[i] = 4500.0;
         }
@@ -245,7 +255,15 @@ mod tests {
         assert_eq!(output[25], 0.0, "Noise spike at 25 rejected");
 
         // Real QRS should pass (after 3 steps warm-up)
-        assert!(output[38] > 4000.0, "Real QRS at step 38 passes: {}", output[38]);
-        assert!(output[42] > 4000.0, "Real QRS at step 42 passes: {}", output[42]);
+        assert!(
+            output[38] > 4000.0,
+            "Real QRS at step 38 passes: {}",
+            output[38]
+        );
+        assert!(
+            output[42] > 4000.0,
+            "Real QRS at step 42 passes: {}",
+            output[42]
+        );
     }
 }

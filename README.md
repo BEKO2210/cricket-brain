@@ -25,7 +25,6 @@
 
 *Hardwired core + adaptive plasticity. Inspired by 200 million years of cricket evolution.*
 
-[Quick Start](#-quick-start) | [Benchmarks](#-benchmarks) | [Science](#-scientific-validation) | [Docs](https://docs.rs/cricket-brain) | [Deutsch](#-auf-deutsch)
 
 </div>
 
@@ -33,7 +32,15 @@
 
 ## What is CricketBrain?
 
-CricketBrain is a **neuromorphic signal processor** that recognizes temporal patterns in real-time using delay-line coincidence detection — the same mechanism the field cricket (*Gryllus bimaculatus*) uses to find mates in noisy environments.
+CricketBrain is an **ultra-low-memory neuromorphic signal core for
+narrow-band, frequency-stable event detection** — modelled on the
+delay-line coincidence detection the field cricket
+(*Gryllus bimaculatus*) uses to find mates in noisy environments.
+
+It is optimised for deterministic, narrow-band temporal pattern
+detection under extreme RAM and power constraints. **It is not a
+general-purpose AI classifier** and not intended as a replacement for
+full-spectrum DSP, CNNs, or clinical / industrial certified systems.
 
 > **Hardwired core architecture with optional adaptive plasticity.**
 > 5 neurons, 6 synapses, STDP learning, homeostatic regulation — **97 ns/step** in **~1 KB RAM**.
@@ -190,6 +197,84 @@ cd crates/wasm && wasm-pack build --target web     # WASM   →  npm package
 
 ---
 
+## Verified Results
+
+The following results were reproduced locally on Windows using the public examples and benchmark commands in this repository.
+
+### Local verification highlights
+
+| Scenario | Result | What it shows |
+|----------|--------|---------------|
+| **Live roundtrip** | `"HELLO WORLD"` → **EXACT MATCH** | End-to-end encoding, spike processing, and decoding work correctly |
+| **Frequency discrimination** | Strong response at **4200–4800 Hz**, peak at **4500 Hz** | Tight frequency selectivity around the cricket carrier band |
+| **Morse alphabet** | All **A–Z** produce stable spike signatures | Reliable temporal-symbol encoding |
+| **Multi-frequency tokens** | `"RUST"` detected at **100% accuracy on the synthetic benchmark** | Parallel token discrimination across frequency bands |
+| **Sequence prediction** | Correct prefix-based next-token prediction | Topology-based temporal memory without gradient training |
+| **Scale predictor** | **1,280 neurons**, **0.31 MB RAM**, **1.12e8 neuron-ops/sec** | Efficient scaling for structured sequence tasks |
+| **Large scale test** | **40,960 neurons**, **14.22 MB RAM**, **8.02e7 neuron-ops/sec** | High throughput on commodity CPU hardware |
+| **ECG sentinel demo** | **0.141615 us/step**, performance gate **PASS** | Real-time suitability for edge monitoring workloads |
+| **Latency profile** | **0.103475 us/step** baseline | Extremely low per-step overhead in optimized mode |
+
+### Classical baseline comparison
+
+Under the included synthetic benchmark suite, CricketBrain achieved:
+
+- **TPR = 1.000**
+- **FPR = 0.000**
+- across **all tested SNR levels from -10 dB to +30 dB**
+
+Compared methods:
+- Matched Filter
+- Goertzel
+- IIR Bandpass
+- CricketBrain
+
+This indicates that CricketBrain is especially strong on **noise-robust temporal pattern detection** in the benchmark conditions defined by this repository.
+
+### Circuit ablation findings
+
+The ablation study shows an important architectural result:
+
+- **LN3 removal causes a major performance collapse**
+- LN2 and LN5 removal had little effect in the tested setup
+- delay-line / coincidence-related ablations did **not** reduce performance in the same benchmark regime
+
+This suggests:
+
+- **LN3 is currently the dominant functional component in the tested task**
+- some biologically inspired mechanisms may require **harder or more targeted benchmarks** to fully demonstrate their contribution
+
+### Interpretation
+
+These results support the claim that CricketBrain is:
+
+- **fast**
+- **memory-efficient**
+- **deterministic**
+- **effective for temporal pattern recognition on edge-class hardware**
+
+They do **not yet** prove universal superiority over all classical or learned methods on all datasets.  
+What they do show is that CricketBrain is a serious and reproducible **neuromorphic signal-processing architecture** with unusually strong efficiency and very promising benchmark behavior.
+
+### Reproduce locally
+
+```bash
+cargo run --example live_demo -- "HELLO WORLD"
+cargo run --example frequency_discrimination
+cargo run --example morse_alphabet
+cargo run --example multi_freq_demo -- "RUST"
+cargo run --example sequence_predict
+cargo run --release --example scale_predict
+cargo run --release --example sentinel_ecg_monitor
+cargo run --release --example baselines
+cargo run --release --example ablation_study
+cargo run --release --example research_gen -- --seed 1337
+cargo run --release --example scale_test
+cargo run --release --example profile_speed
+cargo bench
+```
+---
+
 ## Benchmarks
 
 <table>
@@ -212,6 +297,33 @@ Tested against 3 classical detectors under **identical conditions** ([source](ex
 | Matched Filter | 0.000 | 0.000 | Needs high SNR (>10 dB) |
 
 > CricketBrain achieves **perfect detection (TPR=1.0) with zero false positives (FPR=0.0)** across all SNR levels from -10 dB to +30 dB.
+
+### vs. TinyML (TensorFlow Lite Micro, Edge Impulse) and Deep Learning
+
+Numbers come from vendor docs and peer-reviewed papers — no marketing claims.
+
+| Property | CricketBrain | Classical DSP | TinyML (TFLite Micro / Edge Impulse) | Deep Learning (GPU / Jetson) |
+|----------|:---:|:---:|:---:|:---:|
+| RAM | **~1 KB** | < 5 KB | 10–100 KB | > 100 MB |
+| Model / flash | ~20 KB | < 10 KB | 22–500 KB | 10 MB – 100 GB |
+| Latency | **0.175 µs/step** | 1–10 ms | 54–225 ms ([Edge Impulse docs](https://docs.edgeimpulse.com/knowledge/metrics/inference-performance)) | 1–3000 ms |
+| Active power | ~15 mW (STM32F0) | ~50 mW (M4) | 50–100 mW (M4F/M7) | 5–200 W |
+| Average power @ 1 Hz decisions | **< 1 µW compute** | ~500 µW | 5–30 mW | ~500 mW – 200 W |
+| Training data required | **Zero** | Zero | 100–10 000 clips | 10 000 h – millions |
+| Runs on $2 STM32F0 (4 KB SRAM) | **Yes** | Yes | Tight | No |
+| Runs on < 1 mW solar / harvester | **Yes** | Yes | No | No |
+| Complex spectrogram / multi-class (> 10) | No | No | Yes | **Yes** |
+| Deterministic / explainable | **Yes** | Yes | Partial | No |
+
+**CricketBrain's niche:** the sub-mW, sub-5 KB corner of the design
+space — where classical DSP is not expressive enough and even the
+lightest TinyML pipeline does not fit.
+
+Per-domain competitive analyses with full references:
+
+- Cardiac (Pan-Tompkins · Nuzzo 2023 Tiny MF-CNN · Hannun 2019 Stanford DNN · Apple Watch AFib) — [use_cases/01_cardiac_arrhythmia/docs/competitive_analysis.md](use_cases/01_cardiac_arrhythmia/docs/competitive_analysis.md)
+- Bearings (envelope analysis · Hakim 2023 Lite CNN · FaultNet · ResNet-50 · SKF IMx) — [use_cases/02_predictive_maintenance/docs/competitive_analysis.md](use_cases/02_predictive_maintenance/docs/competitive_analysis.md)
+- Marine (Goertzel · TFLite Micro · Edge Impulse · PAMGuard · Allen 2021 humpback CNN) — [use_cases/03_marine_acoustic/docs/competitive_analysis.md](use_cases/03_marine_acoustic/docs/competitive_analysis.md)
 
 ---
 

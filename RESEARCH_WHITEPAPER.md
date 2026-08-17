@@ -2,7 +2,7 @@
 
 **Author:** Belkis Aslani
 
-**Version:** 1.0.0 | **Date:** 2026-04-06
+**Version:** 3.0.0 | **Date:** 2026-04-06
 
 **Repository:** https://github.com/BEKO2210/cricket-brain
 

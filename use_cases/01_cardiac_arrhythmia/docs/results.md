@@ -1,8 +1,20 @@
-# UC01 Cardiac Arrhythmia — Benchmark Results
+# UC01 Cardiac Arrhythmia — Benchmark Results (v0.1, legacy)
 
 **Date:** 2026-04-10 | **CricketBrain v3.0.0** | **Dataset:** Synthetic (150 beats)
 
 > **NOT A MEDICAL DEVICE.** Research prototype only.
+
+> **v0.2 update.** The numbers on this page are the **legacy v0.1
+> results** and are preserved for historical traceability. They were
+> produced by the circular `ConfusionMatrix::from_predictions` path
+> (ground truth derived from the detector's own BPM estimate). The
+> v0.2 suite uses **explicit, externally-defined ground-truth
+> labels**; see [methodology.md](methodology.md) §1 and the live
+> result files under [`../results/`](../results/). The
+> [BENCHMARK_ROADMAP.md](../BENCHMARK_ROADMAP.md) documents the gap
+> between the v0.1 numbers and what they mean under the v0.2
+> definition (in short: the truth-based 4-class accuracy is closer
+> to **87 %** with macro-F1 ≈ **0.88**, not 92.5 % / 0.962).
 
 ---
 
@@ -30,8 +42,15 @@ The 11 "Irregular" predictions occur during rhythm transitions (Normal → Tachy
 | Bradycardia vs Normal | 6.18 | 1.000 | 0.000 | EXCELLENT |
 | Normal vs Tachycardia | 6.18 | 1.000 | 0.000 | EXCELLENT |
 
-Methodology: Green & Swets (1966). 200 trials per class, Wilson 95% CI.
+Methodology: Green & Swets (1966). 200 trials per class, Wilson 95 % CI.
 TPR 95% CI: [0.981, 1.000]. FPR 95% CI: [0.000, 0.019].
+
+**d' convention.** d' uses the **log-linear correction** for ceiling
+hit-rates and floor false-alarm rates (hits clipped to
+`[0.5/n, 1 − 0.5/n]` before the inverse-normal transform; Hautus
+1995). Without the correction, TPR = 1.000 / FPR = 0.000 cells would
+yield an undefined / infinite d'. The 6.18 value is the finite ceiling
+for n = 200 trials/class.
 
 ---
 

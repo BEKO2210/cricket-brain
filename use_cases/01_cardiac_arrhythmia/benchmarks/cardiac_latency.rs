@@ -26,7 +26,11 @@ impl LatencyStats {
     }
     fn sd_latency(&self) -> f32 {
         let m = self.mean_latency();
-        let var = self.latencies_ms.iter().map(|&l| (l - m) * (l - m)).sum::<f32>()
+        let var = self
+            .latencies_ms
+            .iter()
+            .map(|&l| (l - m) * (l - m))
+            .sum::<f32>()
             / self.latencies_ms.len().max(1) as f32;
         var.sqrt()
     }
@@ -91,24 +95,49 @@ fn main() {
     ];
 
     println!("  First-Classification Latency:");
-    println!("  {:30} {:>8} {:>8} {:>8} {:>8} {:>10}",
-             "Condition", "Mean ms", "SD ms", "Min ms", "Max ms", "µs/step");
-    println!("  {:─>30} {:─>8} {:─>8} {:─>8} {:─>8} {:─>10}", "", "", "", "", "", "");
+    println!(
+        "  {:30} {:>8} {:>8} {:>8} {:>8} {:>10}",
+        "Condition", "Mean ms", "SD ms", "Min ms", "Max ms", "µs/step"
+    );
+    println!(
+        "  {:─>30} {:─>8} {:─>8} {:─>8} {:─>8} {:─>10}",
+        "", "", "", "", "", ""
+    );
 
     for r in &results {
         if r.latencies_ms.is_empty() {
-            println!("  {:30} {:>8} {:>8} {:>8} {:>8} {:>10.3}",
-                     r.name, "N/A", "N/A", "N/A", "N/A", r.mean_us_per_step());
+            println!(
+                "  {:30} {:>8} {:>8} {:>8} {:>8} {:>10.3}",
+                r.name,
+                "N/A",
+                "N/A",
+                "N/A",
+                "N/A",
+                r.mean_us_per_step()
+            );
         } else {
-            println!("  {:30} {:>8.1} {:>8.3} {:>8.0} {:>8.0} {:>10.3}",
-                     r.name, r.mean_latency(), r.sd_latency(),
-                     r.min_latency(), r.max_latency(), r.mean_us_per_step());
+            println!(
+                "  {:30} {:>8.1} {:>8.3} {:>8.0} {:>8.0} {:>10.3}",
+                r.name,
+                r.mean_latency(),
+                r.sd_latency(),
+                r.min_latency(),
+                r.max_latency(),
+                r.mean_us_per_step()
+            );
         }
     }
 
     // Throughput summary
     let avg_us = results.iter().map(|r| r.mean_us_per_step()).sum::<f64>() / results.len() as f64;
     let steps_per_sec = 1_000_000.0 / avg_us;
-    println!("\n  Average: {:.3} µs/step = {:.1}M steps/sec", avg_us, steps_per_sec / 1_000_000.0);
-    println!("  RAM: {} bytes (from metrics.json: 928)", CardiacDetector::new().memory_usage_bytes());
+    println!(
+        "\n  Average: {:.3} µs/step = {:.1}M steps/sec",
+        avg_us,
+        steps_per_sec / 1_000_000.0
+    );
+    println!(
+        "  RAM: {} bytes (from metrics.json: 928)",
+        CardiacDetector::new().memory_usage_bytes()
+    );
 }

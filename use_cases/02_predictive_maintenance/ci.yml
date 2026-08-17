@@ -12,6 +12,10 @@ on:
     paths:
       - 'use_cases/02_predictive_maintenance/**'
 
+# Least-privilege: the job only needs to read the repo to build and test.
+permissions:
+  contents: read
+
 jobs:
   build-and-test:
     name: Build & Test UC02

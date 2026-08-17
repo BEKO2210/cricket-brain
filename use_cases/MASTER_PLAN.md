@@ -108,7 +108,8 @@ Each use case follows the same 10-run progression:
 |----|---------|---------|-----------|--------|
 | 01 Cardiac | MIT-BIH Arrhythmia | ODC-By | 360 | **COMPLETE** (10/10) |
 | 02 Bearings | CWRU Bearing | Public Domain | 12,000 | **COMPLETE** (10/10) |
-| 03 Marine | MBARI MARS | CC BY 4.0 | 256,000 | Planned |
+| 03 Marine | MBARI MARS | CC BY 4.0 | 256,000 | **COMPLETE** (10/10) |
+| 04 Grid | EPFL Smart Grid | CC BY 4.0 | 50 | **COMPLETE** (10/10) |
 | 04 Grid | EPFL Smart Grid | CC BY 4.0 | 50 | Planned |
 | 05 Network | KDD Cup 1999 | Public Domain | — | Planned |
 | 06 Agriculture | BioAcoustica | CC BY 4.0 | varies | Planned |
@@ -154,20 +155,21 @@ Each use case follows the same 10-run progression:
   - Run 10: Metrics finalization (metrics.json updated with real values)
 
 - [x] **UC02 Predictive Maintenance — ALL 10 RUNS COMPLETE** (2026-04-10)
-  - Run 1: Scaffold (Cargo.toml, ResonatorBank detector, 9 tests)
-  - Run 2: Data pipeline (Python FFT preprocess, CSV I/O, 10 tests)
-  - Run 3: CSV classification + confusion matrix (12 tests, 93% accuracy)
-  - Run 4: Benchmark suite (SDT d'=6.18, latency 0.22µs, memory 3712B)
-  - Run 5: Python evaluation (F1=0.932, 3 PNG plots)
-  - Run 6: Stress test (100% noise-robust, speed-comp FIXED 6/6 RPMs)
-  - Run 7: Website demo page (bearings.html on main site)
-  - Run 8: Full documentation (README, API reference)
-  - Run 9: CI workflow (uc02-bearings.yml, all steps verified)
-  - Run 10: Metrics finalization (metrics.json updated with real values)
+  - 4-channel ResonatorBank (FTF / BSF / BPFO / BPFI), 93.0% accuracy, d'=6.18
+  - 20 neurons / 3,712 bytes RAM, 0.13-0.26 µs/step, STM32F0 ready
+- [x] **UC03 Marine Acoustic — ALL 10 RUNS COMPLETE** (2026-04-24)
+  - 4-channel ResonatorBank (FIN 20 Hz / BLUE 80 Hz / SHIP 140 Hz / HUMP 200 Hz)
+  - 90.0% accuracy, d'=6.18, 20 tests passing (25 with v0.2)
+  - 20 neurons / 3,712 bytes RAM, 0.13-0.28 µs/step, smart-buoy ready
+  - Ship-transit tests, whale-under-ship scenario, sea-state compensation
+- [x] **UC04 Power Grid — ALL 10 RUNS COMPLETE** (2026-04-24)
+  - 4-channel ResonatorBank (FUND 50 Hz / H2 100 Hz / H3 150 Hz / H4 200 Hz)
+  - 90.0% synthetic-window accuracy, d'=6.18, 18 tests passing
+  - 20 neurons / 3,712 bytes RAM, 0.13-0.34 µs/step, < $5 / node
+  - Factory-startup, rolling brownout, off-nominal sweep tests
+  - v0.2 API from day one (`with_bandwidth`, `step_multi`)
 
 ### Planned
-- [ ] UC03 Marine Acoustic: Runs 1-10
-- [ ] UC04 Power Grid: Runs 1-10
 - [ ] UC05 Network Intrusion: Runs 1-10
 - [ ] UC06 Precision Agriculture: Runs 1-10
 - [ ] UC07 Autonomous Vehicle: Runs 1-10
@@ -177,4 +179,63 @@ Each use case follows the same 10-run progression:
 
 ---
 
-*Last updated: 2026-04-10 — UC01 complete (10/10 runs)*
+---
+
+## 7. v0.2 Priority Backlog — Benchmark-First Hardening
+
+The original v0.2 plan called for real-data validation across the
+four completed use cases. UC01 specifically has been re-scoped to a
+**benchmark-first hardening track** instead, because the v0.1
+results were partly produced by a circular ground-truth path. Real
+data is still planned, but only on top of a methodologically clean
+synthetic suite.
+
+### UC01 Cardiac — benchmark hardening track
+
+Position: *deterministic, KB-class ECG rhythm-pattern triage core
+for research and embedded pre-screening; not a diagnostic medical
+device.* See
+[01_cardiac_arrhythmia/BENCHMARK_ROADMAP.md](01_cardiac_arrhythmia/BENCHMARK_ROADMAP.md)
+for the full milestone plan.
+
+| Milestone | Status |
+|---|---|
+| **v0.1** synthetic results (legacy, partly circular) | Done, marked legacy |
+| **v0.2** synthetic benchmark hardening (truth-based metrics, stress sweeps, reject curve, baselines, structured outputs) | **Done** |
+| **v0.3** MIT-BIH loader + first real-data run | **Done** |
+| **v0.4** real-data CM + failure cases (5-record subset) | **Done — superseded by v0.5** |
+| **v0.5** AAMI EC57:2012 DS2 + on-data baselines | **Done — superseded by v0.6** |
+| **v0.6** Clinician rhythm-annotation GT + Irregular fix + drift sweep | **Done — 78.44 % accuracy on DS2 / hybrid GT, Irregular recall 0.19 → 0.78. Drift sweep: honest negative result (CricketBrain not more drift-robust than rule). Published on website.** |
+| **v0.6-followup** Pan-Tompkins + Tiny CNN reference baselines | Pending |
+| **v0.6** ablation + cross-seed robustness | Pending |
+| **v1.0** reproducible benchmark report (one command, bit-stable hash, reviewer bundle) | Pending |
+
+### UC02 / UC03 — real-data validation backlog (unchanged)
+
+1. **UC02 Bearings — real CWRU `.mat` files**
+2. **UC03 Marine — real MBARI MARS hydrophone segments**
+
+Each validation should add a `docs/real_data_results.md` alongside
+the existing synthetic `docs/results.md` so the distinction stays
+visible. Until real-data rows exist, *all accuracy claims carry a
+"synthetic-window accuracy" qualifier*.
+
+### Working rules (apply to every use case going forward)
+
+- Benchmark-first; marketing-last. No widening of accuracy claims
+  without a regenerated result file.
+- No invented results. No fake MIT-BIH numbers. Hardcoded benchmark
+  scores in docs only with the "example" label and a documented seed.
+- Truth-based metrics only — no circular
+  `ConfusionMatrix::from_predictions` paths in v0.2-or-later result
+  files.
+- Document the benchmark change everywhere it propagates: README,
+  CLAUDE.md, BENCHMARK_ROADMAP, methodology, limitations, results.
+
+---
+
+*Last updated: 2026-04-25 — UC01 v0.2 benchmark hardening complete
+(truth-based metrics, 7-dimension stress sweeps, reject curve, two
+rule baselines, structured JSON/CSV with metadata, MIT-BIH loader
+skeleton); 4 of 10 use cases done; UC01 real-data validation now
+gated on the v0.3 milestone of UC01's BENCHMARK_ROADMAP.*

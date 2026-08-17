@@ -1,20 +1,48 @@
-# CricketBrain Application: Predictive Bearing Maintenance
+# CricketBrain Application: Bearing Fault-Frequency Triage
 
-> **Status:** v0.1.0 | **CricketBrain v3.0.0** | **License:** AGPL-3.0 | **Date:** 2026-04-10
+> **Status:** v0.1.0 research prototype | **CricketBrain v3.0.0** | **License:** AGPL-3.0 | **Date:** 2026-04-10
+>
+> **Validation status:** Synthetic CWRU-frequency signals only. Real
+> CWRU `.mat` accelerometer-file validation is the top-priority
+> milestone for v0.2 — see [MASTER_PLAN.md](../MASTER_PLAN.md).
+>
+> **Triage, not metrology.** CricketBrain takes a single dominant
+> vibration-frequency time-series and flags which bearing-defect
+> frequency band is currently dominant (BPFO / BPFI / BSF / Normal).
+> It does **not** measure calibrated vibration amplitudes (ISO 10816
+> velocity), does **not** estimate fault severity (0.007" vs 0.021"
+> defect), does **not** perform envelope analysis, sideband-harmonic
+> tracking or remaining-useful-life (RUL) prediction. **Not a
+> substitute** for SKF IMx, Emerson AMS or any condition-monitoring
+> suite — it targets the **earlier layer** in the maintenance chain:
+> cheap, always-on fault-frequency screening *before* a maintenance
+> analyser is dispatched.
 
 ---
 
 ## Overview
 
-Rotating machinery (pumps, turbines, motors) develops bearing faults that produce
-characteristic vibration frequencies. CricketBrain's ResonatorBank detects these
-with 4 parallel 5-neuron circuits — one per fault type — in 3,712 bytes of RAM.
+Rotating machinery (pumps, turbines, motors) develops bearing faults
+that produce characteristic defect frequencies (BPFO, BPFI, BSF, FTF).
+CricketBrain's ResonatorBank classifies which defect frequency is
+dominant with 4 parallel 5-neuron circuits in 3,712 bytes of RAM —
+**frequency-pattern triage**, not full mechanical diagnosis.
 
-**Market Size:** $15B predictive maintenance | **Target:** STM32F0+ ($2 MCU)
+**What it is:** A fault-frequency classifier suitable as the front-end
+of a wireless, self-powered vibration tag.
+
+**What it is NOT:** An envelope-analysis severity estimator or a
+classical condition-monitoring system. See
+[What this detector does NOT do](#what-this-detector-does-not-do).
+
+### Market context
+
+Predictive-maintenance vibration monitoring is a ~$15 B annual segment
+(MarketsandMarkets, 2024 estimate). **Target MCU:** STM32F0+ ($2).
 
 ---
 
-## Benchmark Results (2026-04-10)
+## Benchmark Results (2026-04-10, synthetic SKF 6205-2RS signals)
 
 ### Classification Performance
 
@@ -26,15 +54,24 @@ with 4 parallel 5-neuron circuits — one per fault type — in 3,712 bytes of R
 | Ball Defect (BSF) | 69 | 23 | 0 | 1.000 | 0.885 | 0.939 |
 | **Macro Average** | | | | **0.932** | **0.931** | **0.932** |
 
-**Accuracy:** 93/100 = **93.0%** | **d' (SDT):** 6.18 (EXCELLENT, all conditions)
+**Synthetic-window accuracy:** 93 / 100 = **93.0 %** | **d' (SDT) [†]:** 6.18
 
-### Noise Resilience
+[†] d' uses log-linear correction for ceiling hit-rates and floor
+false-alarm rates (hits clipped to `[0.5/n, 1 − 0.5/n]` before the
+inverse-normal). Without the correction, perfect TPR = 1.000 / FPR = 0.000
+would yield an undefined / infinite d'.
 
-| Noise | Accuracy |
+### Noise Resilience (synthetic random-spike transients only)
+
+| Noise % | Accuracy |
 |------:|---------:|
-| 0–50% | **100%** |
+| 0–50 % | 100 % on synthetic random-spike noise |
 
-The 50-step energy accumulation window provides excellent noise averaging.
+The 50-step energy accumulation window averages short random
+transients. These numbers do **not** characterise behaviour under real
+accelerometer conditions (sustained broadband noise, harmonic
+interference, bearing natural frequencies, motor electrical noise).
+Real CWRU `.mat` validation is planned.
 
 ### Speed Compensation
 
@@ -221,7 +258,54 @@ See [data/SOURCES.md](data/SOURCES.md) for download instructions.
 4. **Synthetic data only** — not validated on real CWRU accelerometer signals
 5. **No amplitude analysis** — frequency-only detection, no vibration level trending
 
-See [docs/limitations.md](docs/limitations.md) for full analysis.
+See [docs/limitations.md](docs/limitations.md) for full analysis and
+[docs/competitive_analysis.md](docs/competitive_analysis.md) for the
+fully sourced breakdown against envelope analysis, TinyML CNNs
+(FaultNet, Hakim 2023 Lite CNN), ResNet-50 and commercial SKF IMx.
+
+---
+
+## What this detector does NOT do
+
+- **No severity estimation.** A 0.007" surface spall and a 0.021"
+  through-wall crack at the same defect frequency report identically.
+- **No simultaneous multi-fault reporting** in v0.1 (argmax only). v0.2
+  channel-threshold work is tracked in the MASTER_PLAN backlog.
+- **No amplitude / RMS trending.** Frequency-only detection.
+- **No real CWRU-data validation yet.** All benchmarks are on synthetic
+  fault-frequency signals; real `.mat` validation is the top-priority
+  milestone for v0.2.
+- **Not a replacement for envelope analysis, SKF IMx, or a full
+  condition-monitoring suite.** Think of this as a fault-frequency
+  triage front-end for a cheap wireless tag.
+
+---
+
+## How It Compares (2026-04-24)
+
+> **Disclaimer — these systems do not all perform the same task.**
+> CricketBrain classifies 4 defect-frequency regimes. Envelope analysis
+> adds harmonic sidebands and severity trending. Lite CNN (Hakim 2023)
+> and ResNet-50 classify 10 CWRU classes (4 fault types × 3 severities
+> + normal). SKF IMx tracks ISO 10816 vibration levels + RUL. The
+> comparison is one of **operating envelope** (RAM, power,
+> explainability, training-data requirement), not of shared accuracy.
+
+Short version — full breakdown with citations in
+[docs/competitive_analysis.md](docs/competitive_analysis.md):
+
+| System | RAM | Latency | Avg power @ 1 Hz | Training data | CWRU accuracy |
+|--------|----:|--------:|-----------------:|---------------|--------------:|
+| **CricketBrain UC02** | **3.7 KB** | **0.13-0.26 µs/step** | **< 1 µW compute** | **Zero** | 93.0% (synthetic) |
+| Classical envelope analysis | < 5 KB | 1-10 ms | ~500 µW | Zero | 95-98% |
+| Lite CNN (Hakim 2023) | ~100 KB | 120-140 ms | ~14 mW | CWRU full | 99.95% |
+| ResNet-50 | > 1 GB GPU | ~3 s | offline | ImageNet + CWRU | 99.95% |
+| SKF IMx / Emerson AMS | PC-class | — | mains (~10 W) | vendor corpora | — |
+
+CricketBrain's niche: **wireless, self-powered bolt-on vibration tag**
+on $2 STM32F0 where even the lightest TinyML CNN (~100 KB RAM, ~14 mW)
+doesn't fit. CNNs win on accuracy (99.95% vs 93%) and severity
+estimation, but need 250 × more memory and 20,000 × more compute.
 
 ---
 

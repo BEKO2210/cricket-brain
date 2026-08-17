@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CricketBrain Marine Acoustic Monitoring — 3800 bytes RAM, 4-channel ResonatorBank, 90% accuracy. MBARI MARS hydrophone fin whale, blue whale, ship noise, humpback detection.">
+  <meta name="theme-color" content="#0a0f1c" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
+  <meta property="og:title" content="Marine Acoustic Monitoring — CricketBrain">
+  <meta property="og:description" content="4-channel neuromorphic hydrophone classifier in 3,800 bytes. Fin whale, blue whale, ship noise, humpback — 0.2 µs/step on a smart buoy.">
+  <title>Marine Acoustic Monitoring — CricketBrain</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="stylesheet" href="../css/style.css?v=3.0.0">
+  <style>
+    .marine-hero {
+      min-block-size: 50vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: var(--space-2xl) var(--space-lg); position: relative; overflow: hidden;
+    }
+    .marine-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(59,130,246,0.08) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,212,170,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .marine-hero h1 { font-size: var(--font-size-hero); margin-block-end: var(--space-md); }
+    .marine-hero h1 span { color: #3b82f6; }
+    .marine-hero .subtitle { font-size: clamp(var(--font-size-base), 2vw, var(--font-size-xl)); color: var(--text-secondary); max-inline-size: 720px; margin-block-end: var(--space-xl); }
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-md); max-inline-size: 900px; margin-inline: auto; }
+    .metric-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-lg); text-align: center; transition: all var(--transition-base); }
+    .metric-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+    .metric-card .value { font-size: var(--font-size-3xl); font-weight: 800; color: var(--accent); font-family: var(--font-mono); }
+    .metric-card .label { font-size: var(--font-size-xs); color: var(--text-muted); margin-block-start: var(--space-2xs); }
+    .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-xl); margin-block-end: var(--space-xl); }
+    .result-table { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-block: var(--space-lg); }
+    .license-note { background: color-mix(in srgb, var(--highlight) 8%, var(--bg-card)); border: 1px solid color-mix(in srgb, var(--highlight) 25%, transparent); border-radius: var(--radius-md); padding: var(--space-md); font-size: var(--font-size-sm); color: var(--text-secondary); }
+    .license-note strong { color: var(--highlight); }
+    .note-box { background: color-mix(in srgb, var(--success) 8%, var(--bg-card)); border: 1px solid color-mix(in srgb, var(--success) 25%, transparent); border-radius: var(--radius-md); padding: var(--space-md); font-size: var(--font-size-sm); color: var(--text-secondary); margin-block-start: var(--space-md); }
+    .note-box strong { color: var(--success); }
+    @media (max-width: 640px) { .marine-hero h1 { font-size: var(--font-size-3xl); } .metric-grid { grid-template-columns: repeat(2, 1fr); } .metric-card .value { font-size: var(--font-size-2xl); } }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="../index.html" class="logo" aria-label="CricketBrain Home">Cricket<span>Brain</span></a>
+      <nav class="main-nav" id="main-nav" role="navigation" aria-label="Navigation">
+        <a href="../index.html">Home</a>
+        <a href="../index.html#benchmarks">Benchmarks</a>
+        <a href="cardiac.html">Cardiac</a>
+        <a href="bearings.html">Bearings</a>
+        <a href="grid.html">Grid</a>
+        <a href="whitepaper.html">Whitepaper</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme"><span aria-hidden="true" id="theme-icon">&#9790;</span></button>
+        <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false"><span aria-hidden="true">&#9776;</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- Hero -->
+    <section class="marine-hero">
+      <h1>Marine Acoustic <span>Event Triage</span></h1>
+      <p class="subtitle">4-channel ResonatorBank flags which frequency-stable acoustic event is dominant on a hydrophone stream &mdash; fin-whale pulses, blue-whale A-calls, ship cavitation, humpback tonal components &mdash; in 3,800 bytes. Designed as a sub-mW triage front-end for a solar-powered smart buoy.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--text-muted); margin-block-end:var(--space-sm); max-inline-size:700px;"><strong style="color:var(--text-primary);">Validation status:</strong> synthetic MBARI-style hydrophone streams only. Real MARS archive validation is planned.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--accent); margin-block-end:var(--space-sm); max-inline-size:700px;"><strong>Triage, not species ID.</strong> Flags acoustic-frequency signatures only &mdash; no source localisation (TDOA / bearing), no rich-spectrogram analysis (humpback song phrases, dolphin whistles), not a substitute for PAMGuard or full-size marine CNNs. Targets the <em>earlier layer</em> in the bioacoustic monitoring chain.</p>
+      <p style="font-size:var(--font-size-sm); color:var(--accent); margin-block-end:var(--space-lg);"><strong>v0.2 update:</strong> wider Gaussian tuning recovers boundary frequencies &middot; multi-label output flags whale <em>and</em> ship simultaneously</p>
+      <div style="display:flex; flex-wrap:wrap; gap:var(--space-md); justify-content:center;">
+        <a href="https://github.com/BEKO2210/cricket-brain/tree/main/use_cases/03_marine_acoustic" class="btn btn-primary" target="_blank" rel="noopener">View Source</a>
+        <a href="../index.html#use-cases" class="btn btn-secondary">All Use Cases</a>
+      </div>
+    </section>
+
+    <!-- Key Metrics -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Key <span>Metrics</span></h2>
+        <p class="section-subtitle">Measured 2026-04-24 on synthetic MBARI MARS-style hydrophone streams spanning fin whale 20-Hz pulses, blue whale A-calls, ship cavitation, and humpback song.</p>
+        <div class="metric-grid">
+          <div class="metric-card"><div class="value">90.0%</div><div class="label">Synthetic-window accuracy (200 windows)</div></div>
+          <div class="metric-card"><div class="value">6.18</div><div class="label">d' Sensitivity (SDT)</div></div>
+          <div class="metric-card"><div class="value">0.900</div><div class="label">Macro F1 Score</div></div>
+          <div class="metric-card"><div class="value">3,800</div><div class="label">Bytes RAM (20 neurons)</div></div>
+          <div class="metric-card"><div class="value">0.21</div><div class="label">&micro;s / step (avg)</div></div>
+          <div class="metric-card"><div class="value">5</div><div class="label">Event Classes</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Per-Class Results -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Classification <span>Results</span></h2>
+        <div class="section-card">
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Event</th><th>Frequency</th><th>TP</th><th>FP</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+              <tbody>
+                <tr><td>Ambient</td><td>&mdash;</td><td>19</td><td>1</td><td>0.950</td><td>0.950</td><td>0.950</td></tr>
+                <tr><td>Fin Whale</td><td>20 Hz</td><td>19</td><td>3</td><td>0.864</td><td>0.950</td><td>0.905</td></tr>
+                <tr><td>Blue Whale (A-call)</td><td>80 Hz</td><td>17</td><td>3</td><td>0.850</td><td>0.850</td><td>0.850</td></tr>
+                <tr><td>Ship Noise</td><td>140 Hz</td><td>17</td><td>3</td><td>0.850</td><td>0.850</td><td>0.850</td></tr>
+                <tr><td>Humpback Song</td><td>200 Hz</td><td>18</td><td>0</td><td>1.000</td><td>0.900</td><td>0.947</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ship Transit + Stress -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Ship Traffic &amp; <span>Stress Tests</span></h2>
+
+        <div class="section-card">
+          <h3 style="margin-block-end:var(--space-sm);">Ship Transits (vessel sailing past the hydrophone)</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Transit Length</th><th>Ship Windows</th><th>Total Windows</th><th>Ship Ratio</th></tr></thead>
+              <tbody>
+                <tr><td>500 steps</td><td>7</td><td>10</td><td>70.0%</td></tr>
+                <tr><td>1500 steps</td><td>20</td><td>30</td><td>66.7%</td></tr>
+                <tr><td>3000 steps</td><td>39</td><td>60</td><td>65.0%</td></tr>
+                <tr><td>5000 steps</td><td>59</td><td>100</td><td>59.0%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs);">Every closest-point-of-approach window is flagged as Ship Noise. Approach and recede tails produce Ambient &mdash; the physically correct answer because the ship is below the noise floor at those ranges.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Noise Resilience</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Noise Level</th><th>Accuracy</th><th>Verdict</th></tr></thead>
+              <tbody>
+                <tr><td>0%</td><td>100%</td><td>OK</td></tr>
+                <tr><td>10%</td><td>96%</td><td>OK</td></tr>
+                <tr><td>20%</td><td>90%</td><td>DEGRADED</td></tr>
+                <tr><td>30%</td><td>82%</td><td>DEGRADED</td></tr>
+                <tr><td>50%</td><td>76%</td><td>DEGRADED</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs);">The 50-step energy accumulation window averages short random transients. Sustained broadband contamination (storms, surf) above ~20 % degrades accuracy.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Sea-State Compensation</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Sea State</th><th>Ambient preserved</th><th>False-positive species</th></tr></thead>
+              <tbody>
+                <tr><td>0 (calm)</td><td>100%</td><td>0</td></tr>
+                <tr><td>2</td><td>100%</td><td>0</td></tr>
+                <tr><td>4</td><td>100%</td><td>0</td></tr>
+                <tr><td>6 (rough)</td><td>100%</td><td>0</td></tr>
+                <tr><td>8 (very rough)</td><td>100%</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="note-box"><strong>Verified:</strong> <code>det.set_sea_state(state)</code> raises the ambient threshold 25 % per step on the Douglas scale. Zero false alarms across all five states on 1000-step ambient-noise runs.</div>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Whale Under Ship Noise</h3>
+          <p style="color:var(--text-secondary); font-size:var(--font-size-sm);">Fin-whale pulses interleaved with a simultaneous ship passage (2000-step mixed recording).</p>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Event</th><th>Windows</th></tr></thead>
+              <tbody>
+                <tr><td>Fin Whale</td><td>32</td></tr>
+                <tr><td>Ship Noise</td><td>8</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs);">In the synthetic mixed scene, fin-whale pulses remain separately detectable during overlapping ship-noise windows. Real-ocean masking behaviour is pending MARS validation.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Remaining Limitations</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Limitation</th><th>Status</th><th>Impact</th></tr></thead>
+              <tbody>
+                <tr><td>Single-label output</td><td style="color:var(--accent);"><strong>Fixed in v0.2</strong></td><td><code>step_multi()</code> flags whale + ship together (100% coverage)</td></tr>
+                <tr><td>Boundary frequencies</td><td style="color:var(--accent);"><strong>Fixed in v0.2</strong></td><td><code>with_bandwidth(0.20)</code> catches 110 Hz and 170 Hz (50 Hz still Ambient)</td></tr>
+                <tr><td>No source localisation</td><td>Open</td><td>Answers <em>what</em>, not <em>where</em> or <em>how far</em></td></tr>
+                <tr><td>Synthetic data only</td><td>Open</td><td>Real MARS hydrophone data validation pending</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- v0.2 Improvements -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">v0.2 <span>Improvements</span></h2>
+        <p class="section-subtitle">Two additive, backwards-compatible API extensions address the biggest v0.1 limitations identified in review. All 20 v0.1 tests still pass; 5 new v0.2 tests cover the new paths (25 / 25 green).</p>
+
+        <div class="section-card">
+          <h3 style="margin-block-end:var(--space-sm);">1. Wider Gaussian Tuning &mdash; <code>with_bandwidth(0.20)</code></h3>
+          <p style="color:var(--text-secondary); font-size:var(--font-size-sm);">Each <code>Neuron::bandwidth</code> is writable through the public API. v0.2 widens every channel past the library's auto-clamped 0.10 so the between-channel gaps no longer fall through to Ambient.</p>
+
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Input Frequency</th><th>v0.1 (bw=0.10)</th><th>v0.2 (bw=0.20, recommended)</th><th>v0.2 (bw=0.30)</th></tr></thead>
+              <tbody>
+                <tr><td>50 Hz</td><td>Ambient</td><td>Ambient</td><td>Ambient</td></tr>
+                <tr><td>110 Hz (between Blue &amp; Ship)</td><td style="color:var(--danger);">Ambient</td><td style="color:var(--accent);">Ship Noise</td><td style="color:var(--accent);">Ship Noise</td></tr>
+                <tr><td>170 Hz (between Ship &amp; Hump)</td><td style="color:var(--danger);">Ambient</td><td style="color:var(--accent);">Humpback</td><td style="color:var(--accent);">Humpback</td></tr>
+                <tr><td>260 Hz (above Hump)</td><td>Ambient</td><td>Ambient</td><td style="color:var(--accent);">Humpback</td></tr>
+                <tr><td>15 Hz (below Fin)</td><td>Ambient</td><td>Ambient</td><td style="color:var(--accent);">Fin Whale</td></tr>
+                <tr><td>80 Hz (exact Blue)</td><td>Blue Whale</td><td>Blue Whale</td><td>Blue Whale</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4 style="margin-block-start:var(--space-lg); margin-block-end:var(--space-sm);">Bandwidth vs. CSV accuracy &mdash; sweet spot at 0.20</h4>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Bandwidth</th><th>CSV Accuracy</th><th>Verdict</th></tr></thead>
+              <tbody>
+                <tr><td>0.10 (v0.1 default)</td><td>90.0%</td><td>strict &mdash; drops boundary signals</td></tr>
+                <tr><td>0.15</td><td>90.0%</td><td>partial recovery</td></tr>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>0.20 (v0.2 recommended)</strong></td><td><strong>90.0%</strong></td><td><strong>catches 110 Hz + 170 Hz, no regression</strong></td></tr>
+                <tr><td>0.22</td><td>89.0%</td><td>slight regression starts</td></tr>
+                <tr><td>0.25</td><td style="color:var(--danger);">79.0%</td><td>200 Hz channel picks up 260 Hz noise</td></tr>
+                <tr><td>0.30</td><td style="color:var(--danger);">75.0%</td><td>too wide &mdash; false positives on ambient</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">2. Multi-Label Output &mdash; <code>step_multi()</code></h3>
+          <p style="color:var(--text-secondary); font-size:var(--font-size-sm);">Thresholds every channel independently and returns a <code>MultiLabelDecision</code> listing <em>all</em> active sources &mdash; so a fin whale calling through a simultaneous ship passage produces the label <code>[FinWhale, ShipNoise]</code>.</p>
+
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Whale-under-ship scene (2,000 steps)</th><th>Windows flagging BOTH species</th><th>Coverage</th></tr></thead>
+              <tbody>
+                <tr><td>v0.1 single-label</td><td style="color:var(--danger);">0 / 40</td><td style="color:var(--danger);">0%</td></tr>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>v0.2 multi-label (bw=0.20)</strong></td><td style="color:var(--accent);"><strong>40 / 40</strong></td><td style="color:var(--accent);"><strong>100%</strong></td></tr>
+                <tr><td>v0.2 multi-label (bw=0.30)</td><td style="color:var(--accent);">40 / 40</td><td style="color:var(--accent);">100%</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">Regression check: zero false-positive species on 2,000 steps of pure ambient ocean at bandwidth 0.20 &mdash; the multi-label path is strictly additive.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Usage</h3>
+          <div class="code-block">
+            <div class="code-block-header"><span>Rust</span><button class="copy-btn" type="button" aria-label="Copy">Copy</button></div>
+            <pre><code><span class="comment">// v0.2: wider Gaussian tuning + multi-label output</span>
+<span class="keyword">let</span> <span class="keyword">mut</span> det = MarineDetector::<span class="function">with_bandwidth</span>(<span class="number">0.20</span>);
+
+<span class="keyword">while let</span> <span class="type">Some</span>(d) = det.<span class="function">step_multi</span>(freq) {
+    <span class="comment">// d.events may be [FinWhale, ShipNoise] simultaneously</span>
+    <span class="comment">// d.energies == [FIN, BLUE, SHIP, HUMP] snapshot</span>
+}</code></pre>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">Reproduce the full comparison locally: <code>cargo run --release --example marine_v02</code>.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Remaining Gap &mdash; 50 Hz</h3>
+          <p style="color:var(--text-secondary); font-size:var(--font-size-sm);">The 50 Hz window (between Fin=20 and Blue=80) is still reported as Ambient even at bandwidth 0.30 &mdash; the relative gap (80&ndash;20)/20 = 300% is too wide for any reasonable Gaussian to bridge. Species in this range (sei whale downsweeps 40&ndash;60 Hz) would need their own dedicated channel in a 5- or 6-channel bank.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Compares -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">How It <span>Compares</span></h2>
+        <p class="section-subtitle">Against classical DSP (Goertzel / matched filter), TinyML stacks (TensorFlow Lite Micro, Edge Impulse) and full-size marine CNNs. All TinyML numbers from vendor docs; all CNN numbers from peer-reviewed papers.</p>
+
+        <div class="section-card">
+          <h3 style="margin-block-end:var(--space-sm);">RAM, ROM &amp; Latency</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>System</th><th>RAM</th><th>Flash / ROM</th><th>Latency</th></tr></thead>
+              <tbody>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC03 v0.2</strong></td><td><strong>3.7 KB</strong></td><td>~20 KB</td><td><strong>49 ms</strong> (10 &micro;s compute)</td></tr>
+                <tr><td>TFLite Micro &mdash; <code>micro_speech</code></td><td>10 KB</td><td>22 KB</td><td>~1 s audio window</td></tr>
+                <tr><td>Edge Impulse audio &mdash; Cortex-M7 @ 216 MHz</td><td>19.6 KB</td><td>47.3 KB</td><td>54 ms + 1 s buffer</td></tr>
+                <tr><td>Edge Impulse audio &mdash; Cortex-M4F @ 80 MHz</td><td>19.6 KB</td><td>47.3 KB</td><td>225 ms + 1 s buffer</td></tr>
+                <tr><td>Typical TinyML audio CNN</td><td>20-100 KB</td><td>50-500 KB</td><td>10-100 ms</td></tr>
+                <tr><td>Humpback CNN (Allen 2021)</td><td>&gt;100 MB</td><td>&gt;100 MB</td><td>GPU / Jetson only</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">CricketBrain is ~3&times; smaller than TFLite Micro's smallest audio example and ~5&times; smaller than a typical Edge Impulse audio model.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Average Power at 1 Hz Decision Rate</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>System</th><th>Active power</th><th>Duty cycle</th><th>Average power</th></tr></thead>
+              <tbody>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain &mdash; STM32F0 @ 48 MHz</strong></td><td>~15 mW</td><td>0.001%</td><td style="color:var(--accent);"><strong>&lt; 0.5 &micro;W compute</strong></td></tr>
+                <tr><td>Edge Impulse &mdash; Cortex-M7 @ 216 MHz</td><td>~100 mW</td><td>5.4%</td><td>~5.4 mW</td></tr>
+                <tr><td>Edge Impulse &mdash; Cortex-M4F @ 80 MHz</td><td>~50 mW</td><td>22.5%</td><td>~11 mW</td></tr>
+                <tr><td>TFLite Micro &mdash; STM32F1 continuous</td><td>~30 mW</td><td>~100%</td><td>~30 mW</td></tr>
+                <tr><td>DeepAcoustics / ORCA-SPOT (RPi-class)</td><td>~5 W</td><td>~10%</td><td>~500 mW</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">Edge Impulse doesn't publish mW numbers directly; estimates use the documented latency &times; ST datasheet power curves. At sub-1 mW budgets a solar-charged smart buoy can afford CricketBrain but not Edge Impulse.</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">Training Data &amp; Accuracy Trade-off</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>System</th><th>Training data</th><th>Reported accuracy</th></tr></thead>
+              <tbody>
+                <tr style="background:color-mix(in srgb, var(--success) 10%, transparent);"><td><strong>CricketBrain UC03 v0.2</strong></td><td><strong>Zero</strong></td><td>90.0% (4 classes), d' = 6.18</td></tr>
+                <tr><td>Classical Goertzel / matched filter</td><td>Zero</td><td>~85-90% on clean fin-whale 20 Hz</td></tr>
+                <tr><td>Edge Impulse audio</td><td>~100-1,000 clips/class</td><td>typical 85-95%</td></tr>
+                <tr><td>TFLite Micro keyword</td><td>~1,000 clips/class</td><td>typical 90-95%</td></tr>
+                <tr><td>Humpback CNN (Allen 2021)</td><td>187,000 h labelled</td><td>AP 0.97, AUC 0.992</td></tr>
+                <tr><td>Custom mel-spectrogram CNN</td><td>Large corpus</td><td>98.92% (FN 0.75%)</td></tr>
+                <tr><td>Marine mammal DNN (Shiu 2020)</td><td>Large corpus</td><td>F1 0.87 over 32 species</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">On complex spectrograms (humpback song) CNNs beat CricketBrain on accuracy. On frequency-stable tonal signals (fin whale 20-Hz pulse, ship cavitation) the gap closes &mdash; and CricketBrain pulls ahead on every non-accuracy axis. Schall et al. (2024) note in their baleen-whale benchmark that deep-learning detectors "tend to be too computationally expensive to run on existing wildlife monitoring systems".</p>
+        </div>
+
+        <div class="section-card" style="margin-block-start:var(--space-lg);">
+          <h3 style="margin-block-end:var(--space-sm);">When to Pick Which</h3>
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Scenario</th><th>Recommendation</th></tr></thead>
+              <tbody>
+                <tr><td>Solar buoy, &lt; 1 mW budget, multi-year deployment</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>Known frequency-stable sources (fin whale, ship cavitation)</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>No labelled training data exists</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>Regulatory / auditable / explainable required</td><td style="color:var(--accent);"><strong>CricketBrain</strong></td></tr>
+                <tr><td>Power budget &gt; 10 mW, complex spectrogram classes</td><td>Edge Impulse / TFLite Micro</td></tr>
+                <tr><td>Post-hoc analysis of archived hydrophone data</td><td>PAMGuard / Jetson CNN</td></tr>
+                <tr><td>Research-grade accuracy (&gt; 95%) on 30+ species</td><td>Jetson / RPi CNN</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color:var(--text-muted); font-size:var(--font-size-xs); margin-block-start:var(--space-md);">Full sourced breakdown (vendor docs, peer-reviewed papers): <a href="https://github.com/BEKO2210/cricket-brain/blob/main/use_cases/03_marine_acoustic/docs/competitive_analysis.md" target="_blank" rel="noopener">docs/competitive_analysis.md</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dataset & License -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Dataset &amp; <span>License</span></h2>
+        <div class="section-card">
+          <div class="result-table">
+            <table class="comparison-table" role="table">
+              <thead><tr><th>Field</th><th>Value</th></tr></thead>
+              <tbody>
+                <tr><td>Dataset</td><td>MBARI MARS Cabled Observatory Hydrophone</td></tr>
+                <tr><td>License</td><td>CC BY 4.0</td></tr>
+                <tr><td>URL</td><td><a href="https://www.mbari.org/technology/mars/" target="_blank" rel="noopener">mbari.org/technology/mars/</a></td></tr>
+                <tr><td>Location</td><td>Monterey Bay, CA &mdash; 891 m depth</td></tr>
+                <tr><td>Sampling</td><td>256 kHz broadband, 2 kHz decimated for baleen-whale work</td></tr>
+                <tr><td>Hosting</td><td>AWS Open Data Sponsorship (<code>s3://pacific-sound-2khz/</code>)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="license-note" style="margin-block-start:var(--space-lg);">
+            <strong>License:</strong> CricketBrain source is <strong>AGPL-3.0</strong>.
+            Commercial use requires paid license (<a href="https://github.com/BEKO2210/cricket-brain/blob/main/COMMERCIAL.md" target="_blank" rel="noopener">details</a>).
+            MBARI MARS data is <strong>CC BY 4.0</strong> &mdash; attribution required.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section class="section">
+      <div class="content-wrap">
+        <h2 class="section-title">Quick <span>Start</span></h2>
+        <div style="max-inline-size:720px; margin-inline:auto;">
+          <div class="code-block">
+            <div class="code-block-header"><span>Terminal</span><button class="copy-btn" type="button" aria-label="Copy">Copy</button></div>
+            <pre><code><span class="command">cd</span> use_cases/03_marine_acoustic
+<span class="command">cargo run</span> <span class="flag">--release</span>                                   <span class="comment"># Synthetic demo</span>
+<span class="command">cargo run</span> <span class="flag">--release --</span> --ship-transit                    <span class="comment"># Cargo-ship transit</span>
+<span class="command">cargo run</span> <span class="flag">--release --</span> --csv data/processed/sample_marine.csv <span class="comment"># CSV mode</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> marine_sdt                <span class="comment"># SDT benchmark</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> marine_stress             <span class="comment"># Stress test</span>
+<span class="command">cargo run</span> <span class="flag">--release --example</span> marine_v02                <span class="comment"># v0.1 vs v0.2 comparison</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-compact">
+      <div class="footer-links">
+        <a href="../index.html">Home</a>
+        <a href="cardiac.html">Cardiac</a>
+        <a href="bearings.html">Bearings</a>
+        <a href="grid.html">Grid</a>
+        <a href="whitepaper.html">Whitepaper</a>
+        <a href="https://github.com/BEKO2210/cricket-brain" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <div class="footer-bottom"><span>&copy; 2026 Belkis Aslani</span></div>
+    </div>
+  </footer>
+  <script src="../js/app.js?v=3.0.0"></script>
+</body>
+</html>

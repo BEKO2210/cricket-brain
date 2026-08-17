@@ -1,0 +1,18 @@
+# generated_at: 2026-04-25T12:39:21Z
+# git_commit: 24f0948
+# command: target/release/examples/cardiac_stress_sweep --seed 42 --beats-per-class 20 --write
+# dataset_type: synthetic
+# dataset_name: uc01_synth_v0.2_seed42_bpc20
+# synthetic_generator_version: 0.2.0
+# seed: 42
+# sample_rate_hz: 1000
+# window_size_ms: 1
+# limitations: Synthetic ECG only — no real-patient validation yet. | Frequency-encoded inputs; not a clinical waveform analyser. | Rate-regime triage only; no morphology, no AF, no VT, no ST analysis. | Not a medical device. Research / embedded prototype only.
+dimension,parameter,value,total,correct,accuracy,macro_f1,weighted_f1,balanced_accuracy,recall_Normal,recall_Tachy,recall_Brady,recall_Irregular,precision_Normal,precision_Tachy,precision_Brady,precision_Irregular
+baseline,clean,0,70,57,0.814286,0.823329,0.818281,0.819444,1.000000,0.666667,0.611111,1.000000,1.000000,1.000000,1.000000,0.580645
+hrv,rr_jitter,0,70,57,0.814286,0.823329,0.818281,0.819444,1.000000,0.666667,0.611111,1.000000,1.000000,1.000000,1.000000,0.580645
+hrv,rr_jitter,0.02,70,58,0.828571,0.837500,0.832857,0.833333,1.000000,0.666667,0.666667,1.000000,1.000000,1.000000,1.000000,0.600000
+hrv,rr_jitter,0.05,70,55,0.785714,0.793137,0.787227,0.791667,1.000000,0.666667,0.500000,1.000000,1.000000,1.000000,1.000000,0.545455
+hrv,rr_jitter,0.1,70,52,0.742857,0.746322,0.739074,0.750000,1.000000,0.611111,0.388889,1.000000,1.000000,1.000000,1.000000,0.500000
+hrv,rr_jitter,0.2,70,31,0.442857,0.397744,0.388537,0.446181,0.562500,0.166667,0.055556,1.000000,1.000000,1.000000,1.000000,0.315789
+hrv,rr_jitter,0.35,70,21,0.300000,0.184830,0.181088,0.296875,0.187500,0.000000,0.000000,1.000000,1.000000,0.000000,0.000000,0.268657

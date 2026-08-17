@@ -18,9 +18,14 @@ use cricket_brain_cardiac::ecg_signal;
 // Simple deterministic RNG
 struct Rng(u64);
 impl Rng {
-    fn new(seed: u64) -> Self { Self(seed.max(1)) }
+    fn new(seed: u64) -> Self {
+        Self(seed.max(1))
+    }
     fn next(&mut self) -> f32 {
-        self.0 = self.0.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        self.0 = self
+            .0
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         (self.0 >> 40) as f32 / (1u64 << 24) as f32
     }
 }
@@ -33,18 +38,30 @@ fn make_cycle_with_rr(rr_ms: usize) -> ecg_signal::EcgCycle {
     let gap = rr_ms.saturating_sub(44); // 44ms = P+gaps+QRS+gaps+T
     ecg_signal::EcgCycle {
         segments: vec![
-            (P_FREQ, 12), (0.0, 4), (QRS_FREQ, 10), (0.0, 4), (T_FREQ, 14), (0.0, gap),
+            (P_FREQ, 12),
+            (0.0, 4),
+            (QRS_FREQ, 10),
+            (0.0, 4),
+            (T_FREQ, 14),
+            (0.0, gap),
         ],
     }
 }
 
 fn expected_class(bpm: f32) -> RhythmClass {
-    if bpm > 100.0 { RhythmClass::Tachycardia }
-    else if bpm < 60.0 { RhythmClass::Bradycardia }
-    else { RhythmClass::NormalSinus }
+    if bpm > 100.0 {
+        RhythmClass::Tachycardia
+    } else if bpm < 60.0 {
+        RhythmClass::Bradycardia
+    } else {
+        RhythmClass::NormalSinus
+    }
 }
 
-fn classify_cycles(det: &mut CardiacDetector, cycles: &[ecg_signal::EcgCycle]) -> Vec<(RhythmClass, f32)> {
+fn classify_cycles(
+    det: &mut CardiacDetector,
+    cycles: &[ecg_signal::EcgCycle],
+) -> Vec<(RhythmClass, f32)> {
     det.reset();
     let mut results = Vec::new();
     for cycle in cycles {
@@ -76,7 +93,10 @@ fn main() {
     print_header("A) Noisy ECG (random frequency spikes during QRS)");
 
     let noise_levels = [0.0, 0.1, 0.2, 0.3, 0.5, 0.7];
-    println!("  {:>10} {:>10} {:>8} {:>10}", "Noise%", "Correct", "Total", "Accuracy");
+    println!(
+        "  {:>10} {:>10} {:>8} {:>10}",
+        "Noise%", "Correct", "Total", "Accuracy"
+    );
     println!("  {:─>10} {:─>10} {:─>8} {:─>10}", "", "", "", "");
 
     for &noise_pct in &noise_levels {
@@ -106,16 +126,36 @@ fn main() {
             }
         }
 
-        let acc = if total > 0 { correct as f32 / total as f32 * 100.0 } else { 0.0 };
-        let verdict = if acc > 90.0 { "OK" } else if acc > 50.0 { "DEGRADED" } else { "FAILS" };
-        println!("  {:>9.0}% {:>10} {:>8} {:>8.1}%  {}", noise_pct * 100.0, correct, total, acc, verdict);
+        let acc = if total > 0 {
+            correct as f32 / total as f32 * 100.0
+        } else {
+            0.0
+        };
+        let verdict = if acc > 90.0 {
+            "OK"
+        } else if acc > 50.0 {
+            "DEGRADED"
+        } else {
+            "FAILS"
+        };
+        println!(
+            "  {:>9.0}% {:>10} {:>8} {:>8.1}%  {}",
+            noise_pct * 100.0,
+            correct,
+            total,
+            acc,
+            verdict
+        );
     }
 
     // A2) Same test WITH preprocessor
     print_header("A2) Noisy ECG WITH Preprocessor (temporal consistency filter)");
 
     let mut det_pp = CardiacDetector::with_preprocessor(true);
-    println!("  {:>10} {:>10} {:>8} {:>10}", "Noise%", "Correct", "Total", "Accuracy");
+    println!(
+        "  {:>10} {:>10} {:>8} {:>10}",
+        "Noise%", "Correct", "Total", "Accuracy"
+    );
     println!("  {:─>10} {:─>10} {:─>8} {:─>10}", "", "", "", "");
 
     for &noise_pct in &noise_levels {
@@ -143,9 +183,26 @@ fn main() {
             }
         }
 
-        let acc = if total > 0 { correct as f32 / total as f32 * 100.0 } else { 0.0 };
-        let verdict = if acc > 90.0 { "OK" } else if acc > 50.0 { "DEGRADED" } else { "FAILS" };
-        println!("  {:>9.0}% {:>10} {:>8} {:>8.1}%  {}", noise_pct * 100.0, correct, total, acc, verdict);
+        let acc = if total > 0 {
+            correct as f32 / total as f32 * 100.0
+        } else {
+            0.0
+        };
+        let verdict = if acc > 90.0 {
+            "OK"
+        } else if acc > 50.0 {
+            "DEGRADED"
+        } else {
+            "FAILS"
+        };
+        println!(
+            "  {:>9.0}% {:>10} {:>8} {:>8.1}%  {}",
+            noise_pct * 100.0,
+            correct,
+            total,
+            acc,
+            verdict
+        );
     }
 
     // ===================================================================
@@ -154,12 +211,20 @@ fn main() {
     print_header("B) Extreme Heart Rates (30–250 BPM)");
 
     let bpm_rates = [30, 40, 50, 60, 80, 100, 120, 150, 200, 250];
-    println!("  {:>6} {:>8} {:>12} {:>12} {:>10}", "BPM", "RR(ms)", "Expected", "Detected", "Match?");
-    println!("  {:─>6} {:─>8} {:─>12} {:─>12} {:─>10}", "", "", "", "", "");
+    println!(
+        "  {:>6} {:>8} {:>12} {:>12} {:>10}",
+        "BPM", "RR(ms)", "Expected", "Detected", "Match?"
+    );
+    println!(
+        "  {:─>6} {:─>8} {:─>12} {:─>12} {:─>10}",
+        "", "", "", "", ""
+    );
 
     for &bpm in &bpm_rates {
         let rr = 60000 / bpm;
-        if rr < 50 { continue; } // Can't fit P-QRS-T in < 50ms
+        if rr < 50 {
+            continue;
+        } // Can't fit P-QRS-T in < 50ms
 
         let cycle = make_cycle_with_rr(rr);
         let cycles: Vec<_> = (0..12).map(|_| cycle.clone()).collect();
@@ -175,7 +240,10 @@ fn main() {
         };
 
         let verdict = if matches { "YES" } else { "NO" };
-        println!("  {:>6} {:>8} {:>12} {:>12} {:>10}", bpm, rr, expected, detected_str, verdict);
+        println!(
+            "  {:>6} {:>8} {:>12} {:>12} {:>10}",
+            bpm, rr, expected, detected_str, verdict
+        );
     }
 
     // ===================================================================
@@ -195,10 +263,22 @@ fn main() {
     }
 
     let results = classify_cycles(&mut det, &cycles);
-    let n_normal = results.iter().filter(|(c, _)| *c == RhythmClass::NormalSinus).count();
-    let n_tachy = results.iter().filter(|(c, _)| *c == RhythmClass::Tachycardia).count();
-    let n_irreg = results.iter().filter(|(c, _)| *c == RhythmClass::Irregular).count();
-    let n_brady = results.iter().filter(|(c, _)| *c == RhythmClass::Bradycardia).count();
+    let n_normal = results
+        .iter()
+        .filter(|(c, _)| *c == RhythmClass::NormalSinus)
+        .count();
+    let n_tachy = results
+        .iter()
+        .filter(|(c, _)| *c == RhythmClass::Tachycardia)
+        .count();
+    let n_irreg = results
+        .iter()
+        .filter(|(c, _)| *c == RhythmClass::Irregular)
+        .count();
+    let n_brady = results
+        .iter()
+        .filter(|(c, _)| *c == RhythmClass::Bradycardia)
+        .count();
 
     println!("  30 beats (alternating 3×Normal, 3×Tachy):");
     println!("    Normal: {n_normal}, Tachy: {n_tachy}, Irregular: {n_irreg}, Brady: {n_brady}");
@@ -215,8 +295,12 @@ fn main() {
     // ===================================================================
     print_header("D) Near-Boundary Rates (59/61/99/101 BPM)");
 
-    let boundary_bpms = [(59, "59 BPM (barely Brady)"), (61, "61 BPM (barely Normal)"),
-                          (99, "99 BPM (barely Normal)"), (101, "101 BPM (barely Tachy)")];
+    let boundary_bpms = [
+        (59, "59 BPM (barely Brady)"),
+        (61, "61 BPM (barely Normal)"),
+        (99, "99 BPM (barely Normal)"),
+        (101, "101 BPM (barely Tachy)"),
+    ];
 
     for (bpm, label) in &boundary_bpms {
         let rr = 60000 / bpm;
@@ -230,9 +314,11 @@ fn main() {
         let detected_bpm = results.last().map(|(_, b)| *b).unwrap_or(0.0);
 
         println!("  {label}:");
-        println!("    Expected: {expected} | Detected: {} (BPM={detected_bpm:.0}) | Match: {}",
-                 last.map_or("None".to_string(), |c| c.to_string()),
-                 if matches { "YES" } else { "NO" });
+        println!(
+            "    Expected: {expected} | Detected: {} (BPM={detected_bpm:.0}) | Match: {}",
+            last.map_or("None".to_string(), |c| c.to_string()),
+            if matches { "YES" } else { "NO" }
+        );
     }
 
     // ===================================================================
@@ -248,11 +334,17 @@ fn main() {
     }
 
     let results = classify_cycles(&mut det, &cycles);
-    let n_irreg = results.iter().filter(|(c, _)| *c == RhythmClass::Irregular).count();
+    let n_irreg = results
+        .iter()
+        .filter(|(c, _)| *c == RhythmClass::Irregular)
+        .count();
     let pct_irreg = n_irreg as f32 / results.len().max(1) as f32 * 100.0;
 
     println!("  30 beats with random RR (300–1200ms):");
-    println!("    Classified as Irregular: {n_irreg}/{} ({pct_irreg:.0}%)", results.len());
+    println!(
+        "    Classified as Irregular: {n_irreg}/{} ({pct_irreg:.0}%)",
+        results.len()
+    );
     if pct_irreg > 60.0 {
         println!("    VERDICT: Correctly identifies irregular rhythm");
     } else {
