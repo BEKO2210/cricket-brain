@@ -71,7 +71,7 @@ let outputs = bank.step(input_freq);
 | 7 | DONE | 2026-04-10 | website/pages/bearings.html, nav dropdown+card linked |
 | 8 | DONE | 2026-04-10 | Full README with real results, docs/api.md reference |
 | 9 | DONE | 2026-04-10 | CI workflow uc02-bearings.yml, all steps verified locally |
-| 10 | Metrics finalization | PENDING |
+| 10 | DONE | 2026-04-10 | metrics.json updated with all measured values |
 
 ---
 
